@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "970897771269",
+    "project_id": "serviexpressapp-7e391",
+    "storage_bucket": "serviexpressapp-7e391.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970897771269:android:4ff45ddf3f111dccd3856c",
+        "android_client_info": {
+          "package_name": "com.example.serviexpress_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABuitphBiUV8ZPEKXfM7OQZmwEHjTCvX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
