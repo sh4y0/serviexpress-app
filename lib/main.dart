@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:serviexpress_app/presentation/widgets/login.dart';
 import 'firebase_options.dart';
 
 void main() {
@@ -13,6 +14,6 @@ class ServiExpressApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: 'ServiExpress', theme: ThemeData());
+    return const MaterialApp(title: 'ServiExpress', home: Scaffold(body: Login(),),);
   }
 }
