@@ -140,11 +140,11 @@ class _SignUpState extends State<SignUp> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  socialButton("assets/icons/ic_facebook.svg"),
+                  Expanded(child: socialButton("assets/icons/ic_facebook.svg")),
                   const SizedBox(width: 16),
-                  socialButton("assets/icons/ic_google.svg"),
+                  Expanded(child: socialButton("assets/icons/ic_google.svg")),
                   const SizedBox(width: 16),
-                  socialButton("assets/icons/ic_apple.svg"),
+                  Expanded(child: socialButton("assets/icons/ic_apple.svg")),
                 ],
               ),
               const SizedBox(height: 20),
