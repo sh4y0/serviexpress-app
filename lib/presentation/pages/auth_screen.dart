@@ -1,21 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
+import 'package:serviexpress_app/core/utils/loading_screen.dart';
+import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/data/repositories/auth_repository.dart';
+import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/verification.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  State<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool isLogin = true;
   final _formLoginKey = GlobalKey<FormState>();
   final _formSignupKey = GlobalKey<FormState>();
   bool isEmployer = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +53,8 @@ class _AuthScreenState extends State<AuthScreen> {
                     isLogin
                         ? CrossFadeState.showFirst
                         : CrossFadeState.showSecond,
-                firstChild: _buildLoginForm(),
-                secondChild: _buildSignupForm(),
+                firstChild: _buildLoginForm(ref),
+                secondChild: _buildSignupForm(ref),
                 duration: const Duration(milliseconds: 500),
                 firstCurve: Curves.easeOutQuart,
                 secondCurve: Curves.easeInQuart,
@@ -135,7 +151,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,11 +174,13 @@ class _AuthScreenState extends State<AuthScreen> {
             key: const ValueKey('loginForm'),
             children: [
               _buildTextField(
+                controller: _emailController,
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
               const SizedBox(height: 20),
               _buildTextField(
+                controller: _passwordController,
                 hintText: "Constraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
                 obscureText: true,
@@ -191,13 +209,42 @@ class _AuthScreenState extends State<AuthScreen> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (c, a, s) => const Verification(),
-                      ),
-                    );
+                  onPressed: () async {
+                    final email = _emailController.text.trim();
+                    final password = _passwordController.text.trim();
+
+                    if (email.isEmpty || password.isEmpty) {
+                      Alerts.instance.showErrorAlert(
+                        context,
+                        "Por favor completa todos los campos.",
+                      );
+                      return;
+                    }
+                    LoadingScreen.show(context);
+                    await ref
+                        .read(authViewModelProvider.notifier)
+                        .loginUser(email, password);
+
+                    final result = ref.read(authViewModelProvider);
+
+                    switch (result) {
+                      case Idle():
+                        LoadingScreen.hide();
+                      case Loading():
+                      case Success():
+                        LoadingScreen.hide();
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (c, a, s) => const Verification(),
+                          ),
+                        );
+                        break;
+                      case Failure(:final error):
+                        LoadingScreen.hide();
+                        Alerts.instance.showErrorAlert(context, error.message);
+                        break;
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
@@ -275,7 +322,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildSignupForm() {
+  Widget _buildSignupForm(WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -433,8 +480,10 @@ class _AuthScreenState extends State<AuthScreen> {
     required String svgIconPath,
     bool obscureText = false,
     Widget? suffixIcon,
+    TextEditingController? controller,
   }) {
     return TextFormField(
+      controller: controller,
       obscureText: obscureText,
       cursorColor: AppColor.colorInput,
       style: const TextStyle(color: AppColor.textInput),
