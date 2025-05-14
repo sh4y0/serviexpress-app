@@ -55,7 +55,10 @@ class Verification extends StatelessWidget {
                 ),
                 child: Center(
                   child: SvgPicture.asset(
-                    color: Colors.white,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
                     "assets/icons/ic_verification.svg",
                     width: 60,
                     height: 60,
