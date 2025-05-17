@@ -34,6 +34,31 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<ResultState>(authViewModelProvider, (previous, next) {
+      switch (next) {
+        case Idle():
+          LoadingScreen.hide();
+          break;
+        case Loading():
+          LoadingScreen.show(context);
+          break;
+        case Success():
+          LoadingScreen.hide();
+          if (mounted) {
+            Navigator.push(
+              context,
+              PageRouteBuilder(pageBuilder: (c, a, s) => const Verification()),
+            );
+          }
+          break;
+        case Failure(:final error):
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showErrorAlert(context, error.message);
+          }
+          break;
+      }
+    });
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
@@ -219,40 +244,10 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                       );
                       return;
                     }
-                    LoadingScreen.show(context);
+
                     await ref
                         .read(authViewModelProvider.notifier)
                         .loginUser(email, password);
-
-                    final result = ref.read(authViewModelProvider);
-
-                    switch (result) {
-                      case Idle():
-                        LoadingScreen.hide();
-                      case Loading():
-                      case Success():
-                        LoadingScreen.hide();
-
-                        if (mounted) {
-                          Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder: (c, a, s) => const Verification(),
-                            ),
-                          );
-                        }
-
-                        break;
-                      case Failure(:final error):
-                        LoadingScreen.hide();
-                        if (mounted) {
-                          Alerts.instance.showErrorAlert(
-                            context,
-                            error.message,
-                          );
-                        }
-                        break;
-                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
