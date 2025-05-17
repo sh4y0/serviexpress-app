@@ -1,4 +1,4 @@
-import 'package:serviexpress_app/core/utils/error_state.dart';
+import 'package:serviexpress_app/core/exceptions/error_state.dart';
 
 sealed class ResultState<T> {
   const ResultState();

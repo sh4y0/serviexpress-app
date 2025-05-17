@@ -14,13 +14,13 @@ class LoadingScreen {
 
     _overlayEntry = OverlayEntry(
       builder:
-          (_) => Stack(
+          (context) => const Stack(
             children: [
               ModalBarrier(
                 dismissible: false,
-                color: Colors.black.withOpacity(0.5),
+                color: Color.fromRGBO(0, 0, 0, 0.5),
               ),
-              const Center(
+              Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
