@@ -7,13 +7,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:serviexpress_app/main.dart';
+import 'package:serviexpress_app/presentation/pages/serviexpress.dart';
 
 void main() {
   testWidgets('ServiExpressApp has title', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ServiExpressApp());
+    await tester.pumpWidget(const Serviexpress());
 
     // Verify that our app has a title.
     expect(find.text('ServiExpress'), findsOneWidget);
@@ -21,7 +20,7 @@ void main() {
 
   testWidgets('ServiExpressApp has theme', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const ServiExpressApp());
+    await tester.pumpWidget(const Serviexpress());
 
     // Verify that our app has a theme.
     expect(find.byType(ThemeData), findsOneWidget);
