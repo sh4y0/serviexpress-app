@@ -43,14 +43,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 firstCurve: Curves.easeOutQuart,
                 secondCurve: Curves.easeInQuart,
                 sizeCurve: Curves.easeInOutCubic,
-                // layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
-                //   return Stack(
-                //     children: [
-                //       Positioned(key: bottomKey, child: bottomChild),
-                //       Positioned(key: topKey, child: topChild),
-                //     ],
-                //   );
-                // },
+                layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
+                  return Stack(
+                    children: [
+                      Positioned(key: bottomKey, child: bottomChild),
+                      Positioned(key: topKey, child: topChild),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -96,10 +96,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: ButtonStyle(
                     overlayColor: WidgetStateProperty.all(Colors.transparent),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Login",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isLogin ? Colors.white : AppColor.textDeselect,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
@@ -118,10 +118,10 @@ class _AuthScreenState extends State<AuthScreen> {
                   style: ButtonStyle(
                     overlayColor: WidgetStateProperty.all(Colors.transparent),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Sign Up",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isLogin ? AppColor.textDeselect : Colors.white,
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
