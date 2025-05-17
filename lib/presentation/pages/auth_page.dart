@@ -9,14 +9,14 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
 
-class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({super.key});
+class AuthPage extends ConsumerStatefulWidget {
+  const AuthPage({super.key});
 
   @override
-  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+  ConsumerState<AuthPage> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthScreen> {
+class _AuthScreenState extends ConsumerState<AuthPage> {
   bool isLogin = true;
   final _formLoginKey = GlobalKey<FormState>();
   final _formSignupKey = GlobalKey<FormState>();
