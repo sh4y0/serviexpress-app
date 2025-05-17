@@ -23,7 +23,7 @@ class Serviexpress extends StatelessWidget {
             );
           default:
             return CupertinoPageRoute(
-              builder: (context) => const AuthScreen(),
+              builder: (context) => const AuthPage(),
             );
         }
       },
