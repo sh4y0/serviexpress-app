@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
-import 'package:serviexpress_app/core/utils/error_state.dart';
-import 'package:serviexpress_app/core/utils/error_mapper.dart';
+import 'package:serviexpress_app/core/exceptions/error_state.dart';
+import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 
 class AuthRepository {
   AuthRepository._privateConstructor();

@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:serviexpress_app/core/utils/error_state.dart';
+import 'package:serviexpress_app/core/exceptions/error_state.dart';
 
 class ErrorMapper {
   static ErrorState map(dynamic error) {

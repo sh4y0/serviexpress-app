@@ -6,9 +6,8 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
-import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
-import 'package:serviexpress_app/presentation/widgets/verification.dart';
+import 'package:serviexpress_app/presentation/pages/verification.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -233,16 +232,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       case Loading():
                       case Success():
                         LoadingScreen.hide();
-                        Navigator.push(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder: (c, a, s) => const Verification(),
-                          ),
-                        );
+
+                        if (mounted) {
+                          Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                              pageBuilder: (c, a, s) => const Verification(),
+                            ),
+                          );
+                        }
+
                         break;
                       case Failure(:final error):
                         LoadingScreen.hide();
-                        Alerts.instance.showErrorAlert(context, error.message);
+                        if (mounted) {
+                          Alerts.instance.showErrorAlert(
+                            context,
+                            error.message,
+                          );
+                        }
                         break;
                     }
                   },
