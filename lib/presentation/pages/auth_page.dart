@@ -353,6 +353,11 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               ),
               const SizedBox(height: 20),
               _buildTextField(
+                hintText: "DNI",
+                svgIconPath: "assets/icons/ic_email.svg",
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(
                 hintText: "Correo electronico",
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
