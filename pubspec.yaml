@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.1.0
   animated_toggle_switch: ^0.8.5
+  geolocator: ^10.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -41,6 +42,7 @@ dependencies:
   cloud_firestore: ^5.6.7
   firebase_storage: ^12.4.5
   flutter_riverpod: ^2.6.1
+  google_maps_flutter: ^2.12.2
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/fonts/
+    - assets/map_styles.json
 
   fonts:
     - family: DMSans
