@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
-import 'package:serviexpress_app/presentation/pages/verification.dart';
+import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -18,12 +19,22 @@ class AuthPage extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthPage> {
   bool isLogin = true;
+  bool visibilityPasswordIconLogin = true;
+  bool visibilityPasswordIconSignup = true;
   final _formLoginKey = GlobalKey<FormState>();
   final _formSignupKey = GlobalKey<FormState>();
   bool isEmployer = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  late Future<void> _preloadFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadFuture = MapStyleLoader.loadStyle();
+  }
 
   @override
   void dispose() {
@@ -182,11 +193,18 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 controller: _passwordController,
                 hintText: "Constraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: true,
+                obscureText: visibilityPasswordIconLogin,
                 suffixIcon: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.visibility_off,
+                  onPressed: () {
+                    setState(() {
+                      visibilityPasswordIconLogin =
+                          !visibilityPasswordIconLogin;
+                    });
+                  },
+                  icon: Icon(
+                    visibilityPasswordIconLogin
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: AppColor.textInput,
                   ),
                 ),
@@ -230,16 +248,23 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                       case Idle():
                         LoadingScreen.hide();
                       case Loading():
+                      await _preloadFuture;
                       case Success():
                         LoadingScreen.hide();
 
+                        
                         if (mounted) {
-                          Navigator.push(
+                          Navigator.pushReplacementNamed(
                             context,
-                            PageRouteBuilder(
-                              pageBuilder: (c, a, s) => const Verification(),
-                            ),
+                            AppRoutes.home,
+                            arguments: MapStyleLoader.cachedStyle
                           );
+                          // Navigator.push(
+                          //   context,
+                          //   PageRouteBuilder(
+                          //     pageBuilder: (c, a, s) => const Verification(),
+                          //   ),
+                          // );
                         }
 
                         break;
@@ -365,11 +390,18 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               _buildTextField(
                 hintText: "Contraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: true,
+                obscureText: visibilityPasswordIconSignup,
                 suffixIcon: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.visibility_off,
+                  onPressed: () {
+                    setState(() {
+                      visibilityPasswordIconSignup =
+                          !visibilityPasswordIconSignup;
+                    });
+                  },
+                  icon: Icon(
+                    visibilityPasswordIconSignup
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: AppColor.textInput,
                   ),
                 ),

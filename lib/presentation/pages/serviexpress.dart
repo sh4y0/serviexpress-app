@@ -18,8 +18,9 @@ class Serviexpress extends StatelessWidget {
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case AppRoutes.home:
+            final mapStyle = settings.arguments as String;
             return CupertinoPageRoute(
-              builder: (context) => const HomePage(),
+              builder: (context) => HomePage(mapStyle: mapStyle),
             );
           default:
             return CupertinoPageRoute(
