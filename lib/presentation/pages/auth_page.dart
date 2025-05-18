@@ -18,6 +18,8 @@ class AuthPage extends ConsumerStatefulWidget {
 
 class _AuthScreenState extends ConsumerState<AuthPage> {
   bool isLogin = true;
+  bool visibilityPasswordIconLogin = true;
+  bool visibilityPasswordIconSignup = true;
   final _formLoginKey = GlobalKey<FormState>();
   final _formSignupKey = GlobalKey<FormState>();
   bool isEmployer = false;
@@ -207,11 +209,18 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 controller: _passwordController,
                 hintText: "Constraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: true,
+                obscureText: visibilityPasswordIconLogin,
                 suffixIcon: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.visibility_off,
+                  onPressed: () {
+                    setState(() {
+                      visibilityPasswordIconLogin =
+                          !visibilityPasswordIconLogin;
+                    });
+                  },
+                  icon: Icon(
+                    visibilityPasswordIconLogin
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: AppColor.textInput,
                   ),
                 ),
@@ -365,11 +374,18 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               _buildTextField(
                 hintText: "Contraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: true,
+                obscureText: visibilityPasswordIconSignup,
                 suffixIcon: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.visibility_off,
+                  onPressed: () {
+                    setState(() {
+                      visibilityPasswordIconSignup =
+                          !visibilityPasswordIconSignup;
+                    });
+                  },
+                  icon: Icon(
+                    visibilityPasswordIconSignup
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                     color: AppColor.textInput,
                   ),
                 ),
