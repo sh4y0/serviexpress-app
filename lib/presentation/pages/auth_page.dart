@@ -97,7 +97,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           if (mounted) {
             Alerts.instance.showSuccessAlert(
               context,
-              "Registro exitoso",
+              "Usted se ha registrado exitosamente",
               onOk: () {
                 Navigator.push(
                   context,
