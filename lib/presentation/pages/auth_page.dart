@@ -8,6 +8,7 @@ import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
+import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -27,10 +28,23 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final TextEditingController _usuarioControllerRegister =
+      TextEditingController();
+  final TextEditingController _dniControllerRegister = TextEditingController();
+  final TextEditingController _emailControllerRegister =
+      TextEditingController();
+  final TextEditingController _passwordControllerRegister =
+      TextEditingController();
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+
+    _usuarioControllerRegister.dispose();
+    _dniControllerRegister.dispose();
+    _emailControllerRegister.dispose();
+    _passwordControllerRegister.dispose();
     super.dispose();
   }
 
@@ -47,9 +61,17 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         case Success():
           LoadingScreen.hide();
           if (mounted) {
-            Navigator.push(
+            Alerts.instance.showSuccessAlert(
               context,
-              PageRouteBuilder(pageBuilder: (c, a, s) => const Verification()),
+              "Inicio de sesión exitoso",
+              onOk: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a, s) => const Verification(),
+                  ),
+                );
+              },
             );
           }
           break;
@@ -61,6 +83,41 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           break;
       }
     });
+
+    ref.listen<ResultState>(registerViewModelProvider, (previous, next) {
+      switch (next) {
+        case Idle():
+          LoadingScreen.hide();
+          break;
+        case Loading():
+          LoadingScreen.show(context);
+          break;
+        case Success():
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showSuccessAlert(
+              context,
+              "Registro exitoso",
+              onOk: () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (c, a, s) => const Verification(),
+                  ),
+                );
+              },
+            );
+          }
+          break;
+        case Failure(:final error):
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showErrorAlert(context, error.message);
+          }
+          break;
+      }
+    });
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
@@ -357,21 +414,25 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
             key: const ValueKey('signupForm'),
             children: [
               _buildTextField(
+                controller: _usuarioControllerRegister,
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
               const SizedBox(height: 20),
               _buildTextField(
+                controller: _dniControllerRegister,
                 hintText: "DNI",
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 20),
               _buildTextField(
+                controller: _emailControllerRegister,
                 hintText: "Correo electronico",
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 20),
               _buildTextField(
+                controller: _passwordControllerRegister,
                 hintText: "Contraseña",
                 svgIconPath: "assets/icons/ic_pass.svg",
                 obscureText: visibilityPasswordIconSignup,
@@ -422,7 +483,27 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    final usuario = _usuarioControllerRegister.text.trim();
+                    final dni = _dniControllerRegister.text.trim();
+                    final email = _emailControllerRegister.text.trim();
+                    final password = _passwordControllerRegister.text.trim();
+
+                    if (usuario.isEmpty ||
+                        dni.isEmpty ||
+                        email.isEmpty ||
+                        password.isEmpty) {
+                      Alerts.instance.showErrorAlert(
+                        context,
+                        "Por favor completa todos los campos.",
+                      );
+                      return;
+                    }
+
+                    ref
+                        .read(registerViewModelProvider.notifier)
+                        .registerUser(email, password, dni, usuario);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
                     shape: RoundedRectangleBorder(
