@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:serviexpress_app/presentation/widgets/login.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:serviexpress_app/data/service/remote_config_service.dart';
+import 'package:serviexpress_app/presentation/pages/serviexpress.dart';
 import 'firebase_options.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ServiExpressApp());
-}
-
-class ServiExpressApp extends StatelessWidget {
-  const ServiExpressApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(title: 'ServiExpress', home: Scaffold(body: Login(),),);
-  }
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await RemoteConfigService.instance.initialize();
+  runApp(const ProviderScope(child: Serviexpress()));
 }
