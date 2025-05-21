@@ -2,13 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
-import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
+import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+
+class SvgCache {
+  static final Map<String, SvgPicture> _cache = {};
+
+  static SvgPicture getIconSvg(
+    String assetName, {
+    Color color = AppColor.textInput,
+  }) {
+    final key = '$assetName-$color';
+    if (!_cache.containsKey(key)) {
+      _cache[key] = SvgPicture.asset(
+        assetName,
+        width: 26,
+        height: 26,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      );
+    }
+    return _cache[key]!;
+  }
+}
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -36,6 +57,33 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
   final TextEditingController _passwordControllerRegister =
       TextEditingController();
 
+  late BoxDecoration userContainerDecoration;
+  late BoxDecoration passwordContainerDecoration;
+  bool isTextFormFieldClicked = false;
+
+  late Future<void> _preloadFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
+  }
+
+  Future<void> _precacheSvgs() async {
+    final svgPaths = [
+      "assets/icons/ic_person.svg",
+      "assets/icons/ic_pass.svg",
+      "assets/icons/ic_email.svg",
+      "assets/icons/ic_facebook.svg",
+      "assets/icons/ic_google.svg",
+      "assets/icons/ic_apple.svg",
+    ];
+
+    for (final path in svgPaths) {
+      SvgCache.getIconSvg(path);
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -56,6 +104,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           break;
         case Loading():
+          _preloadFuture;
           LoadingScreen.show(context);
           break;
         case Success():
@@ -65,12 +114,13 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               context,
               "Inicio de sesión exitoso",
               onOk: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a, s) => const Verification(),
-                  ),
-                );
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.home,
+                    arguments: MapStyleLoader.cachedStyle,
+                  );
+                }
               },
             );
           }
@@ -90,6 +140,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           break;
         case Loading():
+          _preloadFuture;
           LoadingScreen.show(context);
           break;
         case Success():
@@ -99,12 +150,13 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               context,
               "Usted se ha registrado exitosamente",
               onOk: () {
-                Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (c, a, s) => const Verification(),
-                  ),
-                );
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.home,
+                    arguments: MapStyleLoader.cachedStyle,
+                  );
+                }
               },
             );
           }
@@ -127,10 +179,8 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
           child: Column(
-            //crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAnimatedSwitcher(),
-              const SizedBox(height: 35),
+              const SizedBox(height: 20),
               AnimatedCrossFade(
                 crossFadeState:
                     isLogin
@@ -154,82 +204,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAnimatedSwitcher() {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        color: AppColor.loginDeselect,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      padding: const EdgeInsets.all(6),
-      child: Stack(
-        children: [
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            alignment: isLogin ? Alignment.centerLeft : Alignment.centerRight,
-            child: Container(
-              width: (MediaQuery.of(context).size.width - 60) / 2,
-              decoration: BoxDecoration(
-                color: AppColor.loginSelect,
-                borderRadius: BorderRadius.circular(25),
-              ),
-            ),
-          ),
-
-          Row(
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    if (!isLogin) {
-                      setState(() {
-                        isLogin = true;
-                      });
-                    }
-                  },
-                  style: ButtonStyle(
-                    overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  ),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      color: isLogin ? Colors.white : AppColor.textDeselect,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    if (isLogin) {
-                      setState(() {
-                        isLogin = false;
-                      });
-                    }
-                  },
-                  style: ButtonStyle(
-                    overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  ),
-                  child: Text(
-                    "Sign Up",
-                    style: TextStyle(
-                      color: isLogin ? AppColor.textDeselect : Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
@@ -261,10 +235,10 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               _buildTextField(
                 controller: _passwordController,
-                hintText: "Constraseña",
+                hintText: "Contraseña*",
                 svgIconPath: "assets/icons/ic_pass.svg",
                 obscureText: visibilityPasswordIconLogin,
                 suffixIcon: IconButton(
@@ -278,7 +252,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                     visibilityPasswordIconLogin
                         ? Icons.visibility_off
                         : Icons.visibility,
-                    color: AppColor.textInput,
                   ),
                 ),
               ),
@@ -447,7 +420,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                     visibilityPasswordIconSignup
                         ? Icons.visibility_off
                         : Icons.visibility,
-                    color: AppColor.textInput,
                   ),
                 ),
               ),
@@ -588,38 +560,37 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
     TextEditingController? controller,
   }) {
     return TextFormField(
+      onTap: () {
+        setState(() {
+          isTextFormFieldClicked = !isTextFormFieldClicked;
+        });
+      },
       controller: controller,
       obscureText: obscureText,
       cursorColor: AppColor.colorInput,
       style: const TextStyle(color: AppColor.textInput),
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 22,
+          vertical: 18,
           horizontal: 18,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColor.textInput, width: 2),
+          borderSide: const BorderSide(color: AppColor.textInput, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColor.colorInput, width: 2),
+          borderSide: const BorderSide(color: AppColor.colorInput, width: 1),
         ),
         hintText: hintText,
         hintStyle: const TextStyle(color: AppColor.textInput),
         prefixIcon: Padding(
           padding: const EdgeInsets.all(14),
-          child: SvgPicture.asset(
-            svgIconPath,
-            width: 26,
-            height: 26,
-            colorFilter: const ColorFilter.mode(
-              AppColor.textInput,
-              BlendMode.srcIn,
-            ),
-          ),
+          child: SvgCache.getIconSvg(svgIconPath),
         ),
         suffixIcon: suffixIcon,
+        suffixIconColor:
+            isTextFormFieldClicked ? AppColor.colorInput : AppColor.textInput,
       ),
     );
   }
@@ -637,7 +608,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
-        child: SvgPicture.asset(svgPath, width: 26, height: 26),
+        child: SvgCache.getIconSvg(svgPath, color: const Color(0Xffc0c0c0)),
       ),
     );
   }
