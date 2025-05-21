@@ -8,6 +8,8 @@ class AppColor {
       Color(0xFF141830),
       Color(0xFF171A33),
       Color(0xFF15182D),
+      // Color(0xFF0F0F25),
+      // Color(0xFF1A1A40),
     ],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -16,6 +18,8 @@ class AppColor {
   //Color Nav Button Login
   static const Color loginDeselect = Color(0xFF161A50);
   static const Color loginSelect = Color(0xFF252FAE);
+
+  static const Color textDeselect = Color(0xFF828F9C);
 
   //Color Text Welcome
   static const Color textWelcome = Color(0xFF828F9C);
@@ -28,7 +32,7 @@ class AppColor {
   static const Color btnColor = Color(0xFF4A66FF);
 
   //Color de fondo de verificacion
-  static const Color bgVerification = Color(0xFF101328);
+  static const Color bgVerification = Color.fromARGB(255, 1, 1, 2);
   static const Color bgCard = Color(0xFF161A50);
   static const Color bgCircle = Color(0xFF2AB749);
 
