@@ -1,17 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
+import 'package:serviexpress_app/core/utils/loading_screen.dart';
+import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/message_model.dart';
+import 'package:serviexpress_app/presentation/viewmodels/chat_view_model.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  State<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  String? userId;
+  final clienteId = "0eGwG6nvcTfneiTvVSSBI3G9HV53";
+  bool _errorShown = false;
+
+  late final String chatUid;
+
+  final TextEditingController _messageController = TextEditingController();
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getUserId();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _messageController.dispose();
+    _scrollController.dispose();
+  }
+
+  String getSortedChatUid(String uid1, String uid2) {
+    final sorted = [uid1, uid2]..sort();
+    return '${sorted[0]}_${sorted[1]}';
+  }
+
+  Future<void> _getUserId() async {
+    try {
+      LoadingScreen.show(context);
+
+      final id = await UserPreferences.getUserId();
+
+      LoadingScreen.hide();
+
+      setState(() {
+        userId = id;
+      });
+
+      if (id == null && !_errorShown) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_errorShown) {
+            _errorShown = true;
+            Alerts.instance.showErrorAlert(
+              context,
+              "No se pudo obtener el ID del usuario.",
+            );
+          }
+        });
+      }
+    } catch (e) {
+      LoadingScreen.hide();
+      setState(() {});
+      if (!_errorShown) {
+        _errorShown = true;
+        Alerts.instance.showErrorAlert(
+          context,
+          "Ocurrió un error al obtener el ID: $e",
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final getMessages = ref.watch(
+      chatMessagesProvider(getSortedChatUid(userId!, clienteId)),
+    );
+
+    ref.listen<ResultState>(chatViewModelProvider, (previous, next) {
+      switch (next) {
+        case Idle():
+          LoadingScreen.hide();
+          break;
+        case Loading():
+          break;
+        case Success():
+          LoadingScreen.hide();
+          _messageController.clear();
+          break;
+        case Failure(:final error):
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showErrorAlert(context, error.message);
+          }
+          break;
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColor.bgChat,
       appBar: AppBar(
@@ -45,7 +142,42 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             const SizedBox(height: 10),
             Expanded(
-              child: ListView(
+              child: getMessages.when(
+                data: (messages) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.animateTo(
+                        _scrollController.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isUser = message.senderId == userId;
+                      return isUser
+                          ? _userMessage(message.content)
+                          : _clientMessage(message.content);
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) {
+                  return const Center(
+                    child: Text(
+                      "Error al cargar los mensajes",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                },
+              ),
+
+              /*child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _userMessage("Hi"),
@@ -99,7 +231,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ],
-              ),
+              ),*/
             ),
             const SizedBox(height: 15),
 
@@ -125,6 +257,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: _messageController,
                       maxLines: null,
                       minLines: 1,
                       style: const TextStyle(color: AppColor.txtMsg),
@@ -156,7 +289,27 @@ class _ChatScreenState extends State<ChatScreen> {
                               ),
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                final message = _messageController.text;
+                                if (message.isEmpty) {
+                                  Alerts.instance.showErrorAlert(
+                                    context,
+                                    "Escribe un mensaje.",
+                                  );
+                                  return;
+                                }
+
+                                final messageModel = MessageModel(
+                                  senderId: userId!,
+                                  receiverId: clienteId,
+                                  content: message,
+                                  timestamp: DateTime.now(),
+                                );
+
+                                await ref
+                                    .read(chatViewModelProvider.notifier)
+                                    .sendMessage(messageModel);
+                              },
                               icon: SvgPicture.asset(
                                 "assets/icons/ic_enviar.svg",
                                 width: 30,
