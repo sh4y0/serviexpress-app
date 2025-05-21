@@ -36,6 +36,11 @@ class Serviexpress extends StatelessWidget {
                 );
             }
           },
+      //   getPages: [
+      //     GetPage(name: "/", page: () => const StartPage()),
+      //     GetPage(name: "/login", page: () => const AuthPage()),
+      //     //GetPage(name: "/signUp", page: () => const SignUp()),
+      // ],
         );
       },
     );
