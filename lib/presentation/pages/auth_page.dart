@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +8,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -98,7 +100,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<ResultState>(authViewModelProvider, (previous, next) {
+    ref.listen<ResultState>(authViewModelProvider, (previous, next) async {
       switch (next) {
         case Idle():
           LoadingScreen.hide();
@@ -107,18 +109,21 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           _preloadFuture;
           LoadingScreen.show(context);
           break;
-        case Success():
+        case Success(:final data):
           LoadingScreen.hide();
-          if (mounted) {
+          if (mounted && data is User) {
+            await UserPreferences.saveUserId(data.uid);
             Alerts.instance.showSuccessAlert(
               context,
               "Inicio de sesión exitoso",
-              onOk: () {
+              onOk: () async {
                 if (mounted) {
                   Navigator.pushReplacementNamed(
                     context,
-                    AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,
+                    AppRoutes.chat,
+
+                    /*AppRoutes.home,
+                    arguments: MapStyleLoader.cachedStyle,*/
                   );
                 }
               },
