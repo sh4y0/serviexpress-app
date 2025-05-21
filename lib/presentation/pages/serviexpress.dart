@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
@@ -23,16 +22,16 @@ class Serviexpress extends StatelessWidget {
             switch (settings.name) {
               case AppRoutes.home:
                 final mapStyle = settings.arguments as String;
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
                 );
 
               case AppRoutes.chat:
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const ChatScreen(),
                 );
               default:
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const AuthPage(),
                 );
             }
