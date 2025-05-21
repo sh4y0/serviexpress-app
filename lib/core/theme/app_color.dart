@@ -40,8 +40,18 @@ class AppColor {
   static const Color bgMsgUser = Color(0xFF263089);
   static const Color bgMsgClient = Color(0xFF161A50);
 
-  //Color propuesta
+  //Color propuesta del chat
   static const Color bgProp = Color(0xFF00074A);
+
+  //Color pantaña propuesta
+  static const Color bgPropuesta = Color(0xFF101328);
+  static const Color bgState = Color(0xFFFFFCD4);
+  static const Color txtState = Color(0xFFBEB00E);
+  static const Color txtBooking = Color(0xFFCED1DD);
+  static const Color txtId = Color(0xFFC2D7FF);
+  static const Color txtPrice = Color(0xFF9CBBFF);
+  static const Color bgDivider = Color(0xFF30374E);
+  static const Color txtPropuesta = Color(0xFFDFE3EA);
 
   //Color fondo para escribir mensaje
   static const Color bgContendeor = Color(0xFF101328);
