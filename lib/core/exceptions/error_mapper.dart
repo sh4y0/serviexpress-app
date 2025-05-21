@@ -18,6 +18,10 @@ class ErrorMapper {
 
   static ErrorState _mapAuthError(FirebaseAuthException error) {
     switch (error.code) {
+      case 'invalid-credential':
+        return const InvalidCredentials(
+          "Las credenciales que ingresó son incorrectas",
+        );
       case 'invalid-email':
         return const InvalidCredentials("Correo inválido.");
       case 'email-already-in-use':

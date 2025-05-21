@@ -4,7 +4,7 @@
     
     <application
     
-        android:label="serviexpress_app"
+        android:label="ServiExpress"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
