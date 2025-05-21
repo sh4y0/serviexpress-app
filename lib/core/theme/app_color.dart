@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 
 class AppColor {
+  //backgroud home
+  static const LinearGradient bgGradient = LinearGradient(
+    colors: [
+      Color(0xFF0A0D1C),
+      Color(0xFF192255),
+      Color(0xFF192255),
+      Color(0xFF0E102C),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  //Color Boarding home
+  static const Color bgOnBoar = Color(0xFF0C0F1E);
+  static const Color bgAll = Color(0xFF3645F5);
+  static const Color txtDesc = Color(0xFF828F9C);
+
+  //Color animacion
+  static const Color activeDot = Color(0xFF3645F5);
+  static const Color dotColor = Color(0xFF7594FF);
+
   //backgroud
   static const LinearGradient backgroudGradient = LinearGradient(
     colors: [
