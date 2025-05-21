@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: currentPosition,
-            zoom: 17.0,
+            zoom: 14.0,
             bearing: 0.0,
             tilt: 0.0,
           ),
@@ -221,7 +221,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     onMapCreated: _onMapCreated,
                     initialCameraPosition: const CameraPosition(
                       target: _center,
-                      zoom: 15.0,
+                      zoom: 20.0,
                     ),
                     circles: circles,
                     markers: markers,

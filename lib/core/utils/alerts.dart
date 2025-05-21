@@ -4,17 +4,22 @@ class Alerts {
   Alerts._privateConstructor();
   static final Alerts instance = Alerts._privateConstructor();
 
-  void showSuccessAlert(BuildContext context, String message) {
-    _showAnimatedDialog(
+  Future<void> showSuccessAlert(
+    BuildContext context,
+    String message, {
+    VoidCallback? onOk,
+  }) async {
+    return _showAnimatedDialog(
       context,
       title: "Éxito",
       message: message,
       isError: false,
+      onOk: onOk,
     );
   }
 
-  void showErrorAlert(BuildContext context, String message) {
-    _showAnimatedDialog(
+  Future<void> showErrorAlert(BuildContext context, String message) async {
+    return _showAnimatedDialog(
       context,
       title: "Error",
       message: message,
@@ -22,13 +27,14 @@ class Alerts {
     );
   }
 
-  void _showAnimatedDialog(
+  Future<void> _showAnimatedDialog(
     BuildContext context, {
     required String title,
     required String message,
     required bool isError,
+    VoidCallback? onOk,
   }) {
-    showGeneralDialog(
+    return showGeneralDialog(
       context: context,
       barrierLabel: "Alerta",
       barrierDismissible: true,
@@ -45,37 +51,61 @@ class Alerts {
             opacity: animation.value,
             child: AlertDialog(
               backgroundColor: const Color(0xFF101328),
-              title: Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: Text(
-                message,
-                style: const TextStyle(color: Colors.white70),
-              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              actions: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: const Color(0xFF4A66FF),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+              elevation: 20,
+              shadowColor: Colors.black54,
+              contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isError ? Icons.error_outline : Icons.check_circle_outline,
+                    color: isError ? Colors.redAccent : const Color(0xFF4A66FF),
+                    size: 60,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    message,
+                    style: const TextStyle(color: Colors.white70, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: 120,
+                    height: 40,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFF4A66FF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        shadowColor: Colors.black45,
+                        elevation: 5,
+                      ),
+                      child: Text(isError ? "Cerrar" : "OK"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        if (!isError && onOk != null) {
+                          onOk();
+                        }
+                      },
                     ),
                   ),
-                  child: Text(isError ? "Cerrar" : "OK"),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
