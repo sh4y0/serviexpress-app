@@ -18,16 +18,18 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   String? userId;
-  final clienteId = "ZlnQlK6kicZZBPMVdSso1XQPUfD2";
+  final clienteId = "0eGwG6nvcTfneiTvVSSBI3G9HV53";
   bool _errorShown = false;
 
   late final String chatUid;
 
   final TextEditingController _messageController = TextEditingController();
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getUserId();
     });
@@ -37,6 +39,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     super.dispose();
     _messageController.dispose();
+    _scrollController.dispose();
   }
 
   String getSortedChatUid(String uid1, String uid2) {
@@ -92,7 +95,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           LoadingScreen.hide();
           break;
         case Loading():
-          LoadingScreen.show(context);
           break;
         case Success():
           LoadingScreen.hide();
@@ -142,7 +144,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             Expanded(
               child: getMessages.when(
                 data: (messages) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.animateTo(
+                        _scrollController.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
                   return ListView.builder(
+                    controller: _scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
