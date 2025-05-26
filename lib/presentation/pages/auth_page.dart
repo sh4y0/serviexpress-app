@@ -11,6 +11,7 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
+import 'package:serviexpress_app/presentation/widgets/login_sign_up_switcher.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class SvgCache {
@@ -59,7 +60,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
   final TextEditingController _passwordControllerRegister =
       TextEditingController();
 
-  late BoxDecoration userContainerDecoration;
   late BoxDecoration passwordContainerDecoration;
   bool isTextFormFieldClicked = false;
 
@@ -79,6 +79,8 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
       "assets/icons/ic_facebook.svg",
       "assets/icons/ic_google.svg",
       "assets/icons/ic_apple.svg",
+      "assets/icons/ic_message_form.svg"
+          "assets/icons/ic_camera.svg",
     ];
 
     for (final path in svgPaths) {
@@ -118,12 +120,11 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               "Inicio de sesión exitoso",
               onOk: () async {
                 if (mounted) {
-                  Navigator.pushReplacementNamed(
+                  Navigator.pushNamedAndRemoveUntil(
                     context,
-                    AppRoutes.chat,
-
-                    /*AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,*/
+                    AppRoutes.home,
+                    (Route<dynamic> route) => false,
+                    arguments: MapStyleLoader.cachedStyle,
                   );
                 }
               },
@@ -151,19 +152,19 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         case Success():
           LoadingScreen.hide();
           if (mounted) {
-            Alerts.instance.showSuccessAlert(
-              context,
-              "Usted se ha registrado exitosamente",
-              onOk: () {
-                if (mounted) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,
-                  );
-                }
-              },
-            );
+            Navigator.pushReplacementNamed(context, AppRoutes.verified);
+            // Alerts.instance.showSuccessAlert(
+            //   context,
+            //   "Usted se ha registrado exitosamente",
+            //   onOk: () {
+            //     if (mounted) {
+            //       Navigator.pushReplacementNamed(
+            //         context,
+            //         AppRoutes.verified,
+            //       );
+            //     }
+            //   },
+            // );
           }
           break;
         case Failure(:final error):
@@ -185,6 +186,20 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
           child: Column(
             children: [
+              // LoginSignUpSwitcher(
+              //   isLoginSelected: isLogin,
+              //   onLoginTap: () {},
+              //   onSignUpTap: () {
+              //     Navigator.pushReplacement(
+              //       context,
+              //       PageRouteBuilder(
+              //         pageBuilder: (c, a, s) => const SignUp(),
+              //         transitionDuration: Duration.zero,
+              //         reverseTransitionDuration: Duration.zero,
+              //       ),
+              //     );
+              //   },
+              // ),
               const SizedBox(height: 20),
               AnimatedCrossFade(
                 crossFadeState:
@@ -278,6 +293,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 height: 60,
                 child: ElevatedButton(
                   onPressed: () async {
+                    FocusManager.instance.primaryFocus?.unfocus();
                     final email = _emailController.text.trim();
                     final password = _passwordController.text.trim();
 
@@ -396,12 +412,12 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                controller: _dniControllerRegister,
-                hintText: "DNI",
-                svgIconPath: "assets/icons/ic_email.svg",
-              ),
+              // const SizedBox(height: 20),
+              // _buildTextField(
+              //   controller: _dniControllerRegister,
+              //   hintText: "DNI",
+              //   svgIconPath: "assets/icons/ic_email.svg",
+              // ),
               const SizedBox(height: 20),
               _buildTextField(
                 controller: _emailControllerRegister,
@@ -428,33 +444,33 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 24,
-                    child: Checkbox(
-                      value: isEmployer,
-                      onChanged: (value) {
-                        setState(() {
-                          isEmployer = value ?? false;
-                        });
-                      },
-                      checkColor: Colors.white,
-                      activeColor: AppColor.colorInput,
-                      side: const BorderSide(
-                        color: AppColor.colorInput,
-                        width: 1.8,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  const Text(
-                    "Soy empleador",
-                    style: TextStyle(color: Colors.white, fontSize: 15),
-                  ),
-                ],
-              ),
+              // const SizedBox(height: 8),
+              // Row(
+              //   children: [
+              //     SizedBox(
+              //       width: 24,
+              //       child: Checkbox(
+              //         value: isEmployer,
+              //         onChanged: (value) {
+              //           setState(() {
+              //             isEmployer = value ?? false;
+              //           });
+              //         },
+              //         checkColor: Colors.white,
+              //         activeColor: AppColor.colorInput,
+              //         side: const BorderSide(
+              //           color: AppColor.colorInput,
+              //           width: 1.8,
+              //         ),
+              //       ),
+              //     ),
+              //     const SizedBox(width: 5),
+              //     const Text(
+              //       "Soy empleador",
+              //       style: TextStyle(color: Colors.white, fontSize: 15),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
