@@ -10,23 +10,25 @@ class AuthRepository {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<ResultState<User>> loginUser(String identifier,String password) async {
+  Future<ResultState<User>> loginUser(
+    String identifier,
+    String password,
+  ) async {
     try {
       String email;
 
       if (identifier.contains('@')) {
         email = identifier;
       } else {
-        final snap = await FirebaseFirestore.instance
+        final snap =
+            await FirebaseFirestore.instance
                 .collection("users")
                 .where("username", isEqualTo: identifier)
                 .limit(1)
                 .get();
 
         if (snap.docs.isEmpty) {
-          return const Failure(
-            UserNotFound("Nombre de usuario incorrecto."),
-          );
+          return const Failure(UserNotFound("Nombre de usuario incorrecto."));
         }
 
         email = snap.docs.first['email'];
@@ -52,6 +54,19 @@ class AuthRepository {
 
   Future<ResultState<String>> recoverPassword(String email) async {
     try {
+      final snapshot =
+          await FirebaseFirestore.instance
+              .collection("users")
+              .where("email", isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isEmpty) {
+        return const Failure(
+          UserNotFound("El correo electrónico no está registrado."),
+        );
+      }
+
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       return Success('Correo de recuperación enviado a $email');
     } catch (e) {
