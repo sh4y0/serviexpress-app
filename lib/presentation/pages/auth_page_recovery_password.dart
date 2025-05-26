@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
@@ -93,7 +94,6 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 30),
-
               ElevatedButton(
                 onPressed: () async {
                   FocusManager.instance.primaryFocus?.unfocus();
