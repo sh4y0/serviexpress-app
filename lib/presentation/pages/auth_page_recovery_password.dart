@@ -1,7 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
@@ -25,19 +24,22 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-        child:  SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-          child: Column(
-            children: [
-              _buildLoginForm(ref)
-
-            ],
+    return PopScope(
+      canPop: false, 
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+            child: Column(children: [_buildLoginForm(ref)]),
           ),
         ),
       ),
@@ -72,35 +74,34 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 30),
-
               ElevatedButton(
-                  onPressed: () async {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    final email = _emailController.text.trim();
-
-                    if (email.isEmpty) {
-                      Alerts.instance.showErrorAlert(
-                        context,
-                        "Por favor ingresa el correo electrónico.",
-                      );
-                      return;
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.btnColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    "Recuperar Contraseña",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
+                onPressed: () async {
+                  final email = _emailController.text.trim();
+                  if (email.isEmpty) {
+                    Alerts.instance.showErrorAlert(
+                      context,
+                      "Por favor ingresa el correo electrónico.",
+                    );
+                    return;
+                  } else {
+                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColor.btnColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
+                child: const Text(
+                  "Recuperar Contraseña",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -117,9 +118,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
   }) {
     return TextFormField(
       onTap: () {
-        setState(() {
-          
-        });
+        setState(() {});
       },
       controller: controller,
       obscureText: obscureText,
@@ -148,5 +147,4 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
       ),
     );
   }
-
 }
