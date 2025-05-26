@@ -25,7 +25,6 @@ class Serviexpress extends StatelessWidget {
           onGenerateRoute: (settings) {
             switch (settings.name) {
               case AppRoutes.login:
-                print('Yendo al login');
                 return CupertinoPageRoute(
                   builder: (context) => const AuthPage(),
                 );
