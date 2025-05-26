@@ -120,10 +120,9 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 if (mounted) {
                   Navigator.pushReplacementNamed(
                     context,
-                    AppRoutes.chat,
 
-                    /*AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,*/
+                    AppRoutes.home,
+                    arguments: MapStyleLoader.cachedStyle,
                   );
                 }
               },
@@ -266,9 +265,9 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 child: TextButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.recoveryPassword,
-                      );
+                      context,
+                      AppRoutes.recoveryPassword,
+                    );
                   },
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: const Text(
