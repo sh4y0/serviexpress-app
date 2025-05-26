@@ -1,55 +1,115 @@
 import 'package:flutter/material.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
-class DraggableSheet extends StatefulWidget {
-  final Widget? child;
-  const DraggableSheet({super.key, this.child});
+class DraggableSheetDetalleProveedor extends StatefulWidget {
+  final VoidCallback? onDismiss;
+  final double targetInitialSize;
+  final double minSheetSize;
+  final double maxSheetSize;
+  final List<double> snapPoints;
+  final Duration entryAnimationDuration;
+  final Curve entryAnimationCurve;
 
+  const DraggableSheetDetalleProveedor({
+    super.key,
+    this.onDismiss,
+    required this.targetInitialSize,
+    this.minSheetSize = 0.0,
+    this.maxSheetSize = 0.95,
+    required this.snapPoints,
+    this.entryAnimationDuration = const Duration(milliseconds: 200),
+    this.entryAnimationCurve = Curves.easeOutCubic,
+  });
   @override
-  State<DraggableSheet> createState() => _DraggableSheetState();
+  State<DraggableSheetDetalleProveedor> createState() => _DraggableSheetState();
 }
 
-class _DraggableSheetState extends State<DraggableSheet> {
-  final sheet = GlobalKey();
-  final controller = DraggableScrollableController();
+class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
+  final sheetKeyInDraggable = GlobalKey();
+  late DraggableScrollableController _internalController;
+  bool _isDismissing = false;
 
   @override
   void initState() {
     super.initState();
-    controller.addListener(onChanged);
+    _internalController = DraggableScrollableController();
+    _internalController.addListener(_onChanged);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _internalController.isAttached) {
+        _internalController.animateTo(
+          widget.targetInitialSize,
+          duration: widget.entryAnimationDuration,
+          curve: widget.entryAnimationCurve,
+        );
+      }
+    });
   }
 
-  void onChanged() {
-    final currentSize = controller.size;
-    if (currentSize <= 0.05) collapse();
+  @override
+  void dispose() {
+    _internalController.removeListener(_onChanged);
+    _internalController.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() {
+    if (!_internalController.isAttached) return;
+
+    final currentSize = _internalController.size;
+    if (!_isDismissing && currentSize <= widget.minSheetSize + 0.01) {
+      _isDismissing = true;
+      widget.onDismiss?.call();
+    } else if (currentSize > widget.minSheetSize + 0.01) {
+      _isDismissing = false;
+    }
   }
 
   void collapse() {
-    return animatedSheet(getSheet.snapSizes!.first);
+    final targetSnap = widget.snapPoints.firstWhere(
+      (s) => s > widget.minSheetSize,
+      orElse: () => widget.targetInitialSize,
+    );
+    _animatedSheet(targetSnap);
   }
 
   void anchor() {
-    return animatedSheet(getSheet.snapSizes!.last);
+    _animatedSheet(widget.snapPoints.last);
   }
 
   void expand() {
-    return animatedSheet(getSheet.maxChildSize);
+    _animatedSheet(widget.maxSheetSize);
   }
 
   void hide() {
-    return animatedSheet(getSheet.minChildSize);
+    if (_internalController.isAttached) {
+      _isDismissing = true;
+      _internalController
+          .animateTo(
+            widget.minSheetSize,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInCubic,
+          )
+          .whenComplete(() {
+            if (mounted &&
+                _internalController.size <= widget.minSheetSize + 0.01) {
+              widget.onDismiss?.call();
+            } else if (mounted) {
+              _isDismissing = false;
+            }
+          });
+    }
   }
 
-  void animatedSheet(double size) {
-    controller.animateTo(
-      size,
-      duration: const Duration(milliseconds: 50),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  DraggableScrollableSheet get getSheet {
-    return sheet.currentWidget as DraggableScrollableSheet;
+  void _animatedSheet(double size) {
+    if (_internalController.isAttached) {
+      _internalController.animateTo(
+        size,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -57,13 +117,14 @@ class _DraggableSheetState extends State<DraggableSheet> {
     return LayoutBuilder(
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
-          key: sheet,
-          initialChildSize: 0.03,
-          maxChildSize: 0.95,
-          minChildSize: 0,
+          key: sheetKeyInDraggable,
+          initialChildSize: widget.minSheetSize,
+          maxChildSize: widget.maxSheetSize,
+          minChildSize: widget.minSheetSize,
           expand: true,
           snap: true,
-          snapSizes: [60 / constraints.maxHeight, 0.65],
+          snapSizes: widget.snapPoints,
+          controller: _internalController,
           builder: (context, scrollController) {
             return DecoratedBox(
               decoration: const BoxDecoration(
@@ -87,12 +148,22 @@ class _DraggableSheetState extends State<DraggableSheet> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 46.5,
+                        vertical: 13,
                         horizontal: 26.5,
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 29.5),
+                            decoration: const BoxDecoration(                      
+                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                              color: Color.fromRGBO(117, 148, 255, 1),
+                              shape: BoxShape.rectangle,
+                            ),
+                            width: 154,
+                            height: 4,
+                            ),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -116,7 +187,7 @@ class _DraggableSheetState extends State<DraggableSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Fedor Kiryakov',
+                                      'Rodri Gutierrez',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
@@ -143,7 +214,7 @@ class _DraggableSheetState extends State<DraggableSheet> {
                                     ),
                                     SizedBox(height: 4),
                                     Text(
-                                      'Limpiador',
+                                      'Desarrollador Flutter',
                                       style: TextStyle(
                                         color: Colors.white70,
                                         fontSize: 12,
@@ -224,7 +295,7 @@ class _DraggableSheetState extends State<DraggableSheet> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Devon Lane',
+                                            'Allan Sagastegui',
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 14,
@@ -281,7 +352,9 @@ class _DraggableSheetState extends State<DraggableSheet> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pushNamed(context, AppRoutes.chat);
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF3645f5),
                                 padding: const EdgeInsets.symmetric(

@@ -245,7 +245,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    // ignore: deprecated_member_use
                     color: AppColor.bgShadow.withOpacity(0.3),
                     offset: const Offset(0, -4),
                     blurRadius: 6,
