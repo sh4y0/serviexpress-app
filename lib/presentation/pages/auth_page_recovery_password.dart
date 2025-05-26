@@ -52,15 +52,23 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
           Alerts.instance.showErrorAlert(context, error.message);
       }
     });
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-          child: Column(children: [_buildLoginForm(ref)]),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          Navigator.pushReplacementNamed(context, AppRoutes.login);
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+            child: Column(children: [_buildLoginForm(ref)]),
+          ),
         ),
       ),
     );
