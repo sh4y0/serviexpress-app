@@ -53,7 +53,7 @@ class AppColor {
   static const Color btnColor = Color(0xFF4A66FF);
 
   //Color de fondo de verificacion
-  static const Color bgVerification = Color.fromARGB(255, 1, 1, 2);
+  static const Color bgVerification = Color(0xFF101328);
   static const Color bgCard = Color(0xFF161A50);
   static const Color bgCircle = Color(0xFF2AB749);
 

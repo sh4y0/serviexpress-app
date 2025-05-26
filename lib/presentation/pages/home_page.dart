@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/data/models/category_model.dart';
-import 'package:serviexpress_app/data/models/data_mock.dart';
-import 'package:serviexpress_app/presentation/widgets/draggable_sheet.dart';
+import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
+import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 
 class HomePage extends StatefulWidget {
   final String mapStyle;
@@ -32,9 +30,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ValueNotifier<double> _circleRadiusNotifier = ValueNotifier<double>(40);
   final ValueNotifier<Set<Marker>> _markersNotifier =
       ValueNotifier<Set<Marker>>({});
-  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(0);
+  //final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(0);
 
   BitmapDescriptor? _locationMarkerIcon;
+
+  bool _isSheetVisibleSolicitarServicio = false;
+  bool _isSheetVisibleDetalleProveedor = false;
+
+  //Marker? _selectedMarkerData;
 
   @override
   void initState() {
@@ -205,21 +208,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _updateMarkers() {
     final currentPosition = _currentPositionNotifier.value;
     if (currentPosition != null) {
-      _markersNotifier.value = {
-        Marker(
-          markerId: const MarkerId('currentLocation'),
-          position: currentPosition,
-          icon: _locationMarkerIcon ?? BitmapDescriptor.defaultMarker,
-          anchor: const Offset(0.5, 0.5),
-          zIndex: 2,
-        ),
-      };
+      final newMarker = Marker(
+        markerId: const MarkerId('currentLocation'),
+        position: currentPosition,
+        icon: _locationMarkerIcon ?? BitmapDescriptor.defaultMarker,
+        anchor: const Offset(0.5, 0.5),
+        zIndex: 2,
+        onTap: () {
+          _showCustomSheet(
+            Marker(
+              markerId: const MarkerId('currentLocation'),
+              position: currentPosition,
+            ),
+          );
+        },
+      );
+      _markersNotifier.value = {newMarker};
+    } else {
+      _markersNotifier.value = {};
+    }
+  }
+
+  void _showCustomSheet(Marker tappedMarker) {
+    setState(() {
+      //_selectedMarkerData = tappedMarker;
+      _isSheetVisibleDetalleProveedor = true;
+    });
+  }
+
+  void _handleSheetDismissedDetalleProveedor() {
+    if (mounted) {
+      setState(() {
+        _isSheetVisibleDetalleProveedor = false;
+        //_selectedMarkerData = null;
+      });
+    }
+  }
+
+  void _requestService() {
+    setState(() {
+      _isSheetVisibleSolicitarServicio = true;
+      print(
+        '_isSheetVisibleSolicitarServicio $_isSheetVisibleSolicitarServicio',
+      );
+    });
+  }
+
+  void _handleSheetDismissedSolicitarServicio() {
+    if (mounted) {
+      setState(() {
+        _isSheetVisibleSolicitarServicio = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -244,78 +290,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     compassEnabled: false,
                     myLocationEnabled: false,
                     myLocationButtonEnabled: false,
+                    mapToolbarEnabled: false,
                   );
                 },
               );
             },
           ),
 
-          SafeArea(
-            child: Container(
-              height: 56,
-              margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 39),
-              child: ValueListenableBuilder<int>(
-                valueListenable: _selectedCategoryIndex,
-                builder: (context, selectedIndex, _) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      var category = CategoryModel.getCategories()[index];
-                      final bool isSelected = index == selectedIndex;
+          // SafeArea(
+          //   child: Container(
+          //     height: 56,
+          //     margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 39),
+          //     child: ValueListenableBuilder<int>(
+          //       valueListenable: _selectedCategoryIndex,
+          //       builder: (context, selectedIndex, _) {
+          //         return ListView.builder(
+          //           padding: const EdgeInsets.all(10),
+          //           scrollDirection: Axis.horizontal,
+          //           itemBuilder: (context, index) {
+          //             var category = CategoryModel.getCategories()[index];
+          //             //final bool isSelected = index == selectedIndex;
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: MaterialButton(
-                          padding: const EdgeInsets.all(10),
-                          height: 39,
-                          minWidth: 98,
-                          color:
-                              isSelected
-                                  ? const Color(0xFF3645f5)
-                                  : const Color(0xFF263089),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          onPressed: () {
-                            _selectedCategoryIndex.value = index;
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                category.iconPath,
-                                width: 20,
-                                height: 15,
-                                colorFilter: ColorFilter.mode(
-                                  isSelected
-                                      ? Colors.white
-                                      : AppColor.textInput,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                category.name,
-                                style: TextStyle(
-                                  color:
-                                      isSelected
-                                          ? Colors.white
-                                          : AppColor.textInput,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    itemCount: DataMock.mockData.length,
-                  );
-                },
+          //             return CategoryButton(
+          //               category: category,
+          //               index: index,
+          //               selectedCategoryIndexNotifier:
+          //                   _selectedCategoryIndex,
+          //             );
+          //           },
+          //           itemCount: DataMock.mockData.length,
+          //         );
+          //       },
+          //     ),
+          //   ),
+          // ),
+          Positioned(
+            bottom: 32,
+            left: 16,
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: FloatingActionButton(
+                heroTag: 'fabHomeLeft',
+                shape: const CircleBorder(),
+                backgroundColor: const Color(0xFF0c0c14),
+                onPressed: _requestService,
+                child: SvgPicture.asset(
+                  'assets/icons/ic_request_service.svg',
+                  width: 26,
+                  height: 26,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
               ),
             ),
           ),
+
           Positioned(
             bottom: 32,
             right: 16,
@@ -323,6 +355,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               width: 60,
               height: 60,
               child: FloatingActionButton(
+                heroTag: 'fabHomeRight',
                 shape: const CircleBorder(),
                 backgroundColor: const Color(0xFF0c0c14),
                 onPressed: _toggleZoom,
@@ -338,7 +371,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
           ),
-          const DraggableSheet(child: SizedBox(height: 100)),
+          if (_isSheetVisibleSolicitarServicio)
+            Positioned.fill(
+              child: DraggableSheetSolicitarServicio(
+                targetInitialSize: 0.5,
+                minSheetSize: 0.0,
+                maxSheetSize: 0.95,
+                snapPoints: const [0.0, 0.5, 0.95],
+                onDismiss: _handleSheetDismissedSolicitarServicio,
+              ),
+            ),
+
+          if (_isSheetVisibleDetalleProveedor)
+            Positioned.fill(
+              child: DraggableSheetDetalleProveedor(
+                targetInitialSize: 0.65,
+                minSheetSize: 0.0,
+                maxSheetSize: 0.95,
+                snapPoints: const [0.0, 0.65, 0.95],
+                onDismiss: _handleSheetDismissedDetalleProveedor,
+              ),
+            ),
         ],
       ),
       // floatingActionButton: SizedBox(
@@ -368,8 +421,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _locationCircleNotifier.dispose();
     _circleRadiusNotifier.dispose();
     _markersNotifier.dispose();
-    _selectedCategoryIndex.dispose();
-    mapController.dispose();
+    //_selectedCategoryIndex.dispose();
+    //mapController.dispose();
     super.dispose();
   }
 }

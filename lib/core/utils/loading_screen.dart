@@ -11,7 +11,6 @@ class LoadingScreen {
     if (_overlayEntry != null) return;
 
     final overlay = Overlay.of(context, rootOverlay: true);
-    if (overlay == null) return;
 
     _overlayEntry = OverlayEntry(
       builder:

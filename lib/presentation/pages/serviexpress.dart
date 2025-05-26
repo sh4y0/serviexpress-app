@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/pages/chat_page.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
+import 'package:serviexpress_app/presentation/pages/start_page.dart';
+import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:sizer/sizer.dart';
 
 class Serviexpress extends StatelessWidget {
@@ -20,27 +23,39 @@ class Serviexpress extends StatelessWidget {
 
           onGenerateRoute: (settings) {
             switch (settings.name) {
+              case AppRoutes.login:
+                return CupertinoPageRoute(
+                  builder: (context) => const AuthPage(),
+                );
               case AppRoutes.home:
                 final mapStyle = settings.arguments as String;
-                return MaterialPageRoute(
+                return CupertinoPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
                 );
-
+              case AppRoutes.verified:
+                return CupertinoPageRoute(
+                  builder: (context) => const Verification(),
+                );
               case AppRoutes.chat:
-                return MaterialPageRoute(
+                return CupertinoPageRoute(
                   builder: (context) => const ChatScreen(),
                 );
               default:
-                return MaterialPageRoute(
-                  builder: (context) => const AuthPage(),
+                return CupertinoPageRoute(
+                  builder: (context) => const StartPage(),
                 );
+              //  default:
+              //   return CupertinoPageRoute(
+              //     builder: (context) => const AuthPage(),
+              //   );
+            
             }
           },
-      //   getPages: [
-      //     GetPage(name: "/", page: () => const StartPage()),
-      //     GetPage(name: "/login", page: () => const AuthPage()),
-      //     //GetPage(name: "/signUp", page: () => const SignUp()),
-      // ],
+          //   getPages: [
+          //     GetPage(name: "/", page: () => const StartPage()),
+          //     GetPage(name: "/login", page: () => const AuthPage()),
+          //     //GetPage(name: "/signUp", page: () => const SignUp()),
+          // ],
         );
       },
     );

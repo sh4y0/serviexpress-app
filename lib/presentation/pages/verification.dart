@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class Verification extends StatelessWidget {
@@ -74,7 +75,13 @@ class Verification extends StatelessWidget {
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.login,
+                    //arguments: MapStyleLoader.cachedStyle,
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColor.btnColor,
                   shape: RoundedRectangleBorder(
@@ -82,7 +89,7 @@ class Verification extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Comenzar",
+                  "Iniciar Sesión",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 17,
@@ -93,7 +100,7 @@ class Verification extends StatelessWidget {
             ),
           ),
         ],
-      ),      
+      ),
     );
   }
 }
