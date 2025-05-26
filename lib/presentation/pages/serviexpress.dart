@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/pages/auth_page_recovery_password.dart';
 import 'package:serviexpress_app/presentation/pages/chat_page.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
@@ -31,6 +32,10 @@ class Serviexpress extends StatelessWidget {
                 final mapStyle = settings.arguments as String;
                 return CupertinoPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
+                );
+              case AppRoutes.recoveryPassword:
+                return CupertinoPageRoute(
+                  builder: (context) => const AuthPageRecoveryPassword(),
                 );
               case AppRoutes.verified:
                 return CupertinoPageRoute(
