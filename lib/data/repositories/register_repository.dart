@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/datasources/reniec_api.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
@@ -54,6 +55,8 @@ class RegisterRepository {
       final String nombreCompleto =
           "$nombres $apellidoPaterno $apellidoMaterno";
 
+      String rolSaved = await UserPreferences.getRoleName() ?? '';
+
       final UserModel userModel = UserModel(
         uid: uid,
         username: username,
@@ -65,6 +68,9 @@ class RegisterRepository {
         apellidoMaterno: apellidoMaterno,
         nombreCompleto: nombreCompleto,
         createdAt: DateTime.now(),
+        rol: rolSaved,
+        especialidad: "",
+        descripcion: "",
       );
 
       await _firestore.collection('users').doc(uid).set(userModel.toJson());

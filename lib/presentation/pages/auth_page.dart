@@ -334,11 +334,25 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: socialButton("assets/icons/ic_facebook.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_facebook.svg", () {
+                      // Login con Facebook
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_google.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_google.svg", () async {
+                      await ref
+                          .read(authViewModelProvider.notifier)
+                          .loginWithGoogle();
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_apple.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_apple.svg", () {
+                      // Login con Apple
+                    }),
+                  ),
                 ],
               ),
               const SizedBox(height: 25),
@@ -522,11 +536,25 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: socialButton("assets/icons/ic_facebook.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_facebook.svg", () {
+                      // Login con Facebook
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_google.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_google.svg", () async {
+                      await ref
+                          .read(authViewModelProvider.notifier)
+                          .loginWithGoogle();
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_apple.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_apple.svg", () {
+                      // Login con Apple
+                    }),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -604,12 +632,12 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
     );
   }
 
-  Widget socialButton(String svgPath) {
+  Widget socialButton(String svgPath, VoidCallback onPressed) {
     return SizedBox(
       width: 100,
       height: 58,
       child: OutlinedButton(
-        onPressed: () {},
+        onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColor.textWelcome, width: 1.5),
           shape: RoundedRectangleBorder(
