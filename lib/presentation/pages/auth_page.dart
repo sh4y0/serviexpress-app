@@ -9,6 +9,7 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -113,6 +114,20 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is User) {
             await UserPreferences.saveUserId(data.uid);
+
+            final isDniEmpty = await UserRepository.instance.isDniEmpty(
+              data.uid,
+            );
+
+            if (isDniEmpty) {
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.completeProfile,
+                arguments: data,
+              );
+              return;
+            }
+
             Alerts.instance.showSuccessAlert(
               context,
               "Inicio de sesión exitoso",
@@ -335,9 +350,14 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Expanded(
-                    child: socialButton("assets/icons/ic_facebook.svg", () {
-                      // Login con Facebook
-                    }),
+                    child: socialButton(
+                      "assets/icons/ic_facebook.svg",
+                      () async {
+                        await ref
+                            .read(authViewModelProvider.notifier)
+                            .loginWithFacebook();
+                      },
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -416,12 +436,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               ),
               const SizedBox(height: 20),
               _buildTextField(
-                controller: _dniControllerRegister,
-                hintText: "DNI",
-                svgIconPath: "assets/icons/ic_email.svg",
-              ),
-              const SizedBox(height: 20),
-              _buildTextField(
                 controller: _emailControllerRegister,
                 hintText: "Correo electronico",
                 svgIconPath: "assets/icons/ic_email.svg",
@@ -497,7 +511,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
 
                     ref
                         .read(registerViewModelProvider.notifier)
-                        .registerUser(email, password, dni, usuario);
+                        .registerUser(email, password, usuario);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
@@ -537,9 +551,14 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Expanded(
-                    child: socialButton("assets/icons/ic_facebook.svg", () {
-                      // Login con Facebook
-                    }),
+                    child: socialButton(
+                      "assets/icons/ic_facebook.svg",
+                      () async {
+                        await ref
+                            .read(authViewModelProvider.notifier)
+                            .loginWithFacebook();
+                      },
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(

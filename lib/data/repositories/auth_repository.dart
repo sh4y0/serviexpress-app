@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
@@ -89,8 +90,6 @@ class AuthRepository {
 
       String rolSaved = await UserPreferences.getRoleName() ?? '';
 
-      print("ROLESAVED: $rolSaved");
-
       final DocumentSnapshot doc = await docRef.get();
       if (!doc.exists) {
         final newUser = UserModel(
@@ -119,6 +118,78 @@ class AuthRepository {
     } catch (e) {
       return const Failure(
         UnknownError("Error inesperado en login con Google."),
+      );
+    }
+  }
+
+  Future<ResultState<User>> loginWithFacebook() async {
+    try {
+      await FacebookAuth.instance.logOut();
+
+      final LoginResult loginResult = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
+      );
+
+      if (loginResult.status != LoginStatus.success) {
+        return const Failure(
+          UserNotFound("Inicio de sesión cancelado o fallido."),
+        );
+      }
+
+      final accessToken = loginResult.accessToken;
+      if (accessToken == null) {
+        return const Failure(UserNotFound("No se obtuvo token de Facebook."));
+      }
+
+      final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
+
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        facebookAuthCredential,
+      );
+      final User? user = userCredential.user;
+
+      if (user == null) {
+        return const Failure(
+          UnknownError("No se pudo autenticar con Facebook."),
+        );
+      }
+
+      final DocumentReference docRef = _firestore
+          .collection('users')
+          .doc(user.uid);
+      String rolSaved = await UserPreferences.getRoleName() ?? '';
+
+      final DocumentSnapshot doc = await docRef.get();
+      if (!doc.exists) {
+        final userData = await FacebookAuth.instance.getUserData();
+
+        final newUser = UserModel(
+          uid: user.uid,
+          email: user.email ?? '',
+          username: _buildUsername(userData['name']),
+          dni: '',
+          telefono: '',
+          nombres: userData['name'] ?? '',
+          apellidoPaterno: '',
+          apellidoMaterno: '',
+          nombreCompleto: userData['name'] ?? '',
+          createdAt: DateTime.now(),
+          rol: rolSaved,
+          especialidad: "",
+          descripcion: "",
+        );
+
+        await docRef.set(newUser.toJson());
+        return Success(user);
+      }
+
+      return Success(user);
+    } on FirebaseAuthException catch (e) {
+      return Failure(ErrorMapper.map(e));
+    } catch (e) {
+      return const Failure(
+        UnknownError("Error inesperado en login con Facebook."),
       );
     }
   }

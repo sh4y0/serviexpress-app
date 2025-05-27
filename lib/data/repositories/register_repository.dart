@@ -4,7 +4,6 @@ import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
-import 'package:serviexpress_app/data/datasources/reniec_api.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
 class RegisterRepository {
@@ -18,15 +17,9 @@ class RegisterRepository {
   Future<ResultState<UserModel>> registerUser(
     String email,
     String password,
-    String dni,
     String username,
   ) async {
     try {
-      final bool dniExists = await _isDniAlreadyRegistered(dni);
-      if (dniExists) {
-        return const Failure(UnknownError("El DNI ya está registrado."));
-      }
-
       final UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -40,33 +33,18 @@ class RegisterRepository {
 
       final String uid = user.uid;
 
-      final dniResult = await ReniecApi.instance.searchByDNI(dni);
-
-      if (dniResult is! Success) {
-        return const Failure(
-          UnknownError("No se pudo obtener los datos del DNI."),
-        );
-      }
-
-      final Map<String, dynamic> dniData = (dniResult as Success).data;
-      final String nombres = dniData['nombres'] ?? '';
-      final String apellidoPaterno = dniData['apellidoPaterno'] ?? '';
-      final String apellidoMaterno = dniData['apellidoMaterno'] ?? '';
-      final String nombreCompleto =
-          "$nombres $apellidoPaterno $apellidoMaterno";
-
       String rolSaved = await UserPreferences.getRoleName() ?? '';
 
       final UserModel userModel = UserModel(
         uid: uid,
         username: username,
         email: email,
-        dni: dni,
         telefono: '',
-        nombres: nombres,
-        apellidoPaterno: apellidoPaterno,
-        apellidoMaterno: apellidoMaterno,
-        nombreCompleto: nombreCompleto,
+        nombres: '',
+        dni: '',
+        apellidoPaterno: '',
+        apellidoMaterno: '',
+        nombreCompleto: '',
         createdAt: DateTime.now(),
         rol: rolSaved,
         especialidad: "",
@@ -80,16 +58,5 @@ class RegisterRepository {
     } catch (e) {
       return Failure(UnknownError("Error al registrar: ${e.toString()}"));
     }
-  }
-
-  Future<bool> _isDniAlreadyRegistered(String dni) async {
-    final query =
-        await _firestore
-            .collection('users')
-            .where('dni', isEqualTo: dni)
-            .limit(1)
-            .get();
-
-    return query.docs.isNotEmpty;
   }
 }
