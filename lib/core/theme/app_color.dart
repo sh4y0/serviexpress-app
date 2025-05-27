@@ -83,4 +83,7 @@ class AppColor {
   static const Color bgShadow = Color(0xFF262B56);
   static const Color bgLabel = Color(0xFF141830);
   static const Color txtMsg = Color(0xFF686C8F);
+
+  //Color show 
+  static const Color btnOpen = Color(0xFFC2D7FF);
 }
