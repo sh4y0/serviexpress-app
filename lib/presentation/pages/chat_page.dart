@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
@@ -114,7 +115,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         backgroundColor: AppColor.bgChat,
         leading: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context, AppRoutes.login);
+          },
           icon: Transform.translate(
             offset: const Offset(4, 0),
             child: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -245,7 +248,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColor.bgShadow.withOpacity(0.3),
+                    color: AppColor.bgShadow.withAlpha((0.3 * 255).toInt()),
                     offset: const Offset(0, -4),
                     blurRadius: 6,
                     spreadRadius: 0.1,

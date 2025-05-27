@@ -118,6 +118,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               "Inicio de sesión exitoso",
               onOk: () async {
                 if (mounted) {
+                  FocusManager.instance.primaryFocus?.unfocus();
                   Navigator.pushReplacementNamed(
                     context,
 
@@ -184,7 +185,9 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              _buildAnimatedSwitcher(),
+              const SizedBox(height: 35),
+              //const SizedBox(height: 20),
               AnimatedCrossFade(
                 crossFadeState:
                     isLogin
@@ -207,6 +210,86 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnimatedSwitcher() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonWidth = (screenWidth - 60) / 2;
+    
+    return RepaintBoundary(
+      child: Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: AppColor.loginDeselect,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        padding: const EdgeInsets.all(6),
+        child: Stack(
+          children: [
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+              alignment: isLogin ? Alignment.centerLeft : Alignment.centerRight,
+              child: Container(
+                width: buttonWidth,
+                decoration: BoxDecoration(
+                  color: AppColor.loginSelect,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      if (!isLogin) {
+                        setState(() {
+                          isLogin = true;
+                        });
+                      }
+                    },
+                    style: ButtonStyle(
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
+                    child: Text(
+                      "Login",
+                      style: TextStyle(
+                        color: isLogin ? Colors.white : AppColor.textDeselect,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      if (isLogin) {
+                        setState(() {
+                          isLogin = false;
+                        });
+                      }
+                    },
+                    style: ButtonStyle(
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
+                    child: Text(
+                      "Sign Up",
+                      style: TextStyle(
+                        color: isLogin ? AppColor.textDeselect : Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -236,7 +319,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
             children: [
               _buildTextField(
                 controller: _emailController,
-                hintText: "Usuario",
+                hintText: "Usuario o correo electrónico",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
               const SizedBox(height: 30),
@@ -281,7 +364,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: () async {                
                     final email = _emailController.text.trim();
                     final password = _passwordController.text.trim();
 
@@ -400,22 +483,22 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                controller: _dniControllerRegister,
-                hintText: "DNI",
-                svgIconPath: "assets/icons/ic_email.svg",
-              ),
+              // const SizedBox(height: 20),
+              // _buildTextField(
+              //   controller: _dniControllerRegister,
+              //   hintText: "DNI",
+              //   svgIconPath: "assets/icons/ic_email.svg",
+              // ),
               const SizedBox(height: 20),
               _buildTextField(
                 controller: _emailControllerRegister,
-                hintText: "Correo electronico",
+                hintText: "Correo electrónico",
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 20),
               _buildTextField(
                 controller: _passwordControllerRegister,
-                hintText: "Contraseña",
+                hintText: "Contraseña*",
                 svgIconPath: "assets/icons/ic_pass.svg",
                 obscureText: visibilityPasswordIconSignup,
                 suffixIcon: IconButton(
@@ -432,33 +515,33 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 24,
-                    child: Checkbox(
-                      value: isEmployer,
-                      onChanged: (value) {
-                        setState(() {
-                          isEmployer = value ?? false;
-                        });
-                      },
-                      checkColor: Colors.white,
-                      activeColor: AppColor.colorInput,
-                      side: const BorderSide(
-                        color: AppColor.colorInput,
-                        width: 1.8,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  const Text(
-                    "Soy empleador",
-                    style: TextStyle(color: Colors.white, fontSize: 15),
-                  ),
-                ],
-              ),
+              // const SizedBox(height: 8),
+              // Row(
+              //   children: [
+              //     SizedBox(
+              //       width: 24,
+              //       child: Checkbox(
+              //         value: isEmployer,
+              //         onChanged: (value) {
+              //           setState(() {
+              //             isEmployer = value ?? false;
+              //           });
+              //         },
+              //         checkColor: Colors.white,
+              //         activeColor: AppColor.colorInput,
+              //         side: const BorderSide(
+              //           color: AppColor.colorInput,
+              //           width: 1.8,
+              //         ),
+              //       ),
+              //     ),
+              //     const SizedBox(width: 5),
+              //     const Text(
+              //       "Soy empleador",
+              //       style: TextStyle(color: Colors.white, fontSize: 15),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -599,7 +682,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         ),
         suffixIcon: suffixIcon,
         suffixIconColor:
-            isTextFormFieldClicked ? AppColor.colorInput : AppColor.textInput,
+            isTextFormFieldClicked ? AppColor.textInput : AppColor.colorInput,
       ),
     );
   }

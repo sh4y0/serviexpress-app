@@ -101,7 +101,8 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
         Expanded(
           child: MaterialButton(
             onPressed: () {
-              Get.toNamed("/signUp");
+              // Get.toNamed("/signUp");
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -109,7 +110,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
             ),
             height: 45,
             child: const Text(
-              "Empleador",
+              "Trabajador",
               style: TextStyle(
                 color: AppColor.bgAll,
                 fontSize: 16,
