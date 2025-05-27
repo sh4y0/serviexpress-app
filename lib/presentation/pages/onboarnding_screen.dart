@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboarndingScreen extends StatefulWidget {
@@ -61,7 +62,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
                   ],
                 ),
               ),
-      
+
               Expanded(
                 flex: 1,
                 child: Center(
@@ -77,7 +78,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
                   ),
                 ),
               ),
-      
+
               Expanded(
                 flex: 2,
                 child: Padding(
@@ -100,7 +101,8 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
       children: [
         Expanded(
           child: MaterialButton(
-            onPressed: () {
+            onPressed: () async {
+              await UserPreferences.saveRoleName("Trabajador");
               Get.toNamed("/signUp");
             },
             shape: RoundedRectangleBorder(
@@ -109,7 +111,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
             ),
             height: 45,
             child: const Text(
-              "Empleador",
+              "Trabajador",
               style: TextStyle(
                 color: AppColor.bgAll,
                 fontSize: 16,
@@ -123,7 +125,8 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
 
         Expanded(
           child: MaterialButton(
-            onPressed: () {
+            onPressed: () async {
+              await UserPreferences.saveRoleName("Cliente");
               Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
             color: AppColor.bgAll,
