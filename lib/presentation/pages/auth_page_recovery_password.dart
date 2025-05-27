@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
@@ -44,7 +43,9 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
                 "Se ha enviado un correo de recuperación a tu correo electrónico.",
               )
               .then((_) {
-                Navigator.pushReplacementNamed(context, AppRoutes.login);
+                if (mounted) {
+                  Navigator.pushReplacementNamed(context, AppRoutes.login);
+                }
               });
           break;
         case Failure(:final error):
@@ -61,12 +62,27 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        body: Container(
+        backgroundColor: AppColor.bgChat,
+        appBar: AppBar(
+          backgroundColor: AppColor.bgChat,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
+            },
+            icon: Transform.translate(
+              offset: const Offset(4, 0),
+              child: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            ),
+            style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+          ),
+        ),
+        body: SizedBox(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+          //decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
             child: Column(children: [_buildLoginForm(ref)]),
           ),
         ),

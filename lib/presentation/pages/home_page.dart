@@ -248,9 +248,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _requestService() {
     setState(() {
       _isSheetVisibleSolicitarServicio = true;
-      print(
-        '_isSheetVisibleSolicitarServicio $_isSheetVisibleSolicitarServicio',
-      );
     });
   }
 

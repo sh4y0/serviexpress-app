@@ -117,7 +117,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withAlpha((0.1 * 255).toInt()),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -131,10 +131,13 @@ class FormularioMultimediaState extends State<FormMultimedia> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-               Padding(
-                 padding: const EdgeInsets.only(top: 9),
-                 child: SvgCache.getIconSvg('assets/icons/ic_message_form.svg', color: const Color.fromRGBO(194, 215, 255, 0.6)),
-               ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 9),
+                  child: SvgCache.getIconSvg(
+                    'assets/icons/ic_message_form.svg',
+                    color: const Color.fromRGBO(194, 215, 255, 0.6),
+                  ),
+                ),
                 Expanded(
                   child: TextField(
                     controller: descripcionController,
@@ -288,7 +291,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
           Container(
             //padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withAlpha((0.2 * 255).toInt()),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
