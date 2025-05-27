@@ -39,6 +39,7 @@ dependencies:
   get: ^4.7.2
   image_picker: ^0.8.4+4
   video_player: ^2.1.15
+  dropdown_button2: ^2.3.9
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -80,6 +81,7 @@ flutter:
     - assets/icons/
     - assets/fonts/
     - assets/map_styles.json
+    - assets/gifs/
 
   fonts:
     - family: DMSans
