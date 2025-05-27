@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+<string name="app_name">ServiExpress</string>
+<string name="facebook_app_id">1202157647878159</string>
+<string name="fb_login_protocol_scheme">fb1202157647878159</string>
+<string name="facebook_client_token">02e2bbe2842c478cd39079e75a9e762d</string>
+
+</resources>

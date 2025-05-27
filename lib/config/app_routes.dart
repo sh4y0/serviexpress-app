@@ -5,4 +5,5 @@ class AppRoutes {
   static const String recoveryPassword = '/recovery_password';
   static const String verified = "/verified_page";
   static const String chat = '/chat_page';
+  static const String completeProfile = '/cuentanos_screen';
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
@@ -8,6 +9,7 @@ import 'package:serviexpress_app/presentation/pages/chat_page.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
+import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
 import 'package:sizer/sizer.dart';
 
 class Serviexpress extends StatelessWidget {
@@ -45,6 +47,11 @@ class Serviexpress extends StatelessWidget {
                 return CupertinoPageRoute(
                   builder: (context) => const ChatScreen(),
                 );
+              case AppRoutes.completeProfile:
+                final userData = settings.arguments as User;
+                return CupertinoPageRoute(
+                  builder: (context) => CuentanosScreen(data: userData),
+                );
               default:
                 return CupertinoPageRoute(
                   builder: (context) => const StartPage(),
@@ -53,7 +60,6 @@ class Serviexpress extends StatelessWidget {
               //   return CupertinoPageRoute(
               //     builder: (context) => const AuthPage(),
               //   );
-            
             }
           },
           //   getPages: [

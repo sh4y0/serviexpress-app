@@ -12,6 +12,18 @@ class AuthViewModel extends StateNotifier<ResultState> {
     state = result;
   }
 
+  Future<void> loginWithGoogle() async {
+    state = const Loading();
+    final result = await AuthRepository.instance.loginWithGoogle();
+    state = result;
+  }
+
+  Future<void> loginWithFacebook() async {
+    state = const Loading();
+    final result = await AuthRepository.instance.loginWithFacebook();
+    state = result;
+  }
+
   Future<void> recoverPassword(String email) async {
     state = const Loading();
     final result = await AuthRepository.instance.recoverPassword(email);
