@@ -92,4 +92,10 @@ class UserRepository {
       return Failure(ErrorMapper.map(e));
     }
   }
+
+  Future<void> updateUserToken(String uid, String token) async {
+    final userDoc = _firestore.collection('users').doc(uid);
+
+    await userDoc.update({'token': token});
+  }
 }
