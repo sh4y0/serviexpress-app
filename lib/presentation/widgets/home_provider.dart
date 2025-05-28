@@ -13,10 +13,26 @@ class _HomeProviderState extends State<HomeProvider> {
   int _selectedIndex = 0;
 
   final List<Map<String, dynamic>> drivers = [
-    {"name": "Carlos", "description": "Arregla una lavadora", "distance": "A 30 min de ti"},
-    {"name": "Ana", "description": "Arregla una lavadora", "distance": "2.7 km"},
-    {"name": "Luis", "description": "Arregla una lavadora", "distance": "4.1 km"},
-    {"name": "Luis", "description": "Arregla una lavadora", "distance": "4.1 km"},
+    {
+      "name": "Carlos",
+      "description": "Arregla una lavadora",
+      "distance": "A 30 min de ti",
+    },
+    {
+      "name": "Ana",
+      "description": "Arregla una lavadora",
+      "distance": "2.7 km",
+    },
+    {
+      "name": "Luis",
+      "description": "Arregla una lavadora",
+      "distance": "4.1 km",
+    },
+    {
+      "name": "Luis",
+      "description": "Arregla una lavadora",
+      "distance": "4.1 km",
+    },
   ];
   @override
   Widget build(BuildContext context) {
@@ -45,74 +61,7 @@ class _HomeProviderState extends State<HomeProvider> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Positioned(
-            top: topPadding,
-            left: 16,
-            right: 16,
-            child: Column(
-              children:
-                  drivers.map((driver) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColor.bgAll,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    driver["name"],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    driver["description"],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    driver["distance"],
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                              
-                              const Icon(
-                                Icons.home_repair_service,
-                                color: Colors.lightGreenAccent,
-                                size: 40,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-        ],
-      ),
+      body: const Stack(),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           splashColor: Colors.transparent,
