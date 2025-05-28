@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:serviexpress_app/data/models/fmc_message.dart';
-import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
+import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 
@@ -265,36 +264,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  final List<Map<String, dynamic>> drivers = [
+    {
+      "name": "Carlos",
+      "description": "Arregla una lavadora",
+      "distance": "A 30 min de ti",
+    },
+    {
+      "name": "Ana",
+      "description": "Arregla una lavadora",
+      "distance": "2.7 km",
+    },
+    {
+      "name": "Luis",
+      "description": "Arregla una lavadora",
+      "distance": "4.1 km",
+    },
+    {
+      "name": "Luis",
+      "description": "Arregla una lavadora",
+      "distance": "4.1 km",
+    },
+  ];
   @override
   Widget build(BuildContext context) {
-    // TEST
-
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser != null) {
-      const idServicio = '123ABC';
-
-      final fcmMessage = FCMMessage(
-        token: '',
-        idServicio: idServicio,
-        senderId: currentUser.uid,
-        title: 'Mensaje de prueba',
-        body: 'Hola desde el main 👋',
-        receiverId: currentUser.uid,
-      );
-
-      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
-        fcmMessage,
-        fcmMessage.receiverId,
-      );
-
-      print('📤 ¿Mensaje enviado? $enviado');
-    } else {
-      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
-    }
-
-    // TEST END
-
+    final double topPadding =
+        MediaQuery.of(context).padding.top + kToolbarHeight + 15;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
@@ -327,7 +322,70 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               );
             },
           ),
+          Positioned(
+            top: topPadding,
+            left: 16,
+            right: 16,
+            child: Column(
+              children:
+                  drivers.map((driver) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColor.bgAll,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    driver["name"],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    driver["description"],
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    driver["distance"],
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
 
+                              const Icon(
+                                Icons.home_repair_service,
+                                color: Colors.lightGreenAccent,
+                                size: 40,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+            ),
+          ),
           // SafeArea(
           //   child: Container(
           //     height: 56,
