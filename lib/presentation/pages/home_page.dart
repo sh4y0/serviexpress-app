@@ -1,8 +1,15 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
+import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 
@@ -14,7 +21,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
 
@@ -40,13 +48,107 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   //Marker? _selectedMarkerData;
 
+  late final StreamSubscription<RemoteMessage> _notificationSubscription;
+  List<FCMMessage> notifications = [];
+
+  AppLifecycleState? _appLifecycleState;
+
+  bool get isAppInForeground =>
+      _appLifecycleState == null ||
+      _appLifecycleState == AppLifecycleState.resumed;
+
   @override
   void initState() {
     super.initState();
+
+    // TESTING PURPOSES ONLY
+    _sendTestMessages();
+
+    // END TESTING PURPOSES
+
     _loadMarkerIcon();
     _initializeLocation();
+    WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notificationSubscription = NotificationManager().notificationStream
+          .listen((RemoteMessage message) {
+            final fcmMessage = FCMMessage.fromRemoteMessage(message);
+
+            bool exists = notifications.any(
+              (notification) =>
+                  notification.idServicio == fcmMessage.idServicio,
+            );
+            if (!exists) {
+              setState(() {
+                notifications.add(fcmMessage);
+              });
+
+              if (isAppInForeground) {
+                NotificationManager().showLocalNotification(
+                  title: fcmMessage.title ?? 'Notificación',
+                  body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
+                );
+              }
+            }
+          });
+    });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('AppLifecycleState changed to: $state');
+    setState(() {
+      _appLifecycleState = state;
+    });
+  }
+
+  // TESTING PURPOSES ONLY
+  void _sendTestMessages() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
+      return;
+    }
+
+    final messages = [
+      FCMMessage(
+        token: '',
+        idServicio: '123ABC',
+        senderId: currentUser.uid,
+        title: 'Mensaje de prueba',
+        body: 'Hola desde el main 👋',
+        receiverId: currentUser.uid,
+      ),
+      FCMMessage(
+        token: '',
+        idServicio: 'SEGUNDO_SERVICIO',
+        senderId: currentUser.uid,
+        title: 'SEGUNDO MENSAJE DE PRUEBA',
+        body: 'HOLA DESDE HOME 👋',
+        receiverId: currentUser.uid,
+      ),
+      FCMMessage(
+        token: '',
+        idServicio: 'TERCER_SERVICIO',
+        senderId: currentUser.uid,
+        title: 'TERCER MENSAJE DE PRUEBA',
+        body: 'HOLA DESDE HOME 👋',
+        receiverId: currentUser.uid,
+      ),
+    ];
+
+    for (var fcmMessage in messages) {
+      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
+        fcmMessage,
+        fcmMessage.receiverId,
+      );
+      print('📤 ¿Mensaje enviado? $enviado');
+    }
+  }
+
+  // END TESTING PURPOSES
   Future<void> _initializeLocation() async {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
@@ -263,32 +365,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  final List<Map<String, dynamic>> drivers = [
-    {
-      "name": "Carlos",
-      "description": "Arregla una lavadora",
-      "distance": "A 30 min de ti",
-    },
-    {
-      "name": "Ana",
-      "description": "Arregla una lavadora",
-      "distance": "2.7 km",
-    },
-    {
-      "name": "Luis",
-      "description": "Arregla una lavadora",
-      "distance": "4.1 km",
-    },
-    {
-      "name": "Luis",
-      "description": "Arregla una lavadora",
-      "distance": "4.1 km",
-    },
-  ];
   @override
   Widget build(BuildContext context) {
-    final double topPadding =
-        MediaQuery.of(context).padding.top + kToolbarHeight + 15;
+    final double topPadding = MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
@@ -327,7 +406,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             right: 16,
             child: Column(
               children:
-                  drivers.map((driver) {
+                  notifications.map((notification) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Container(
@@ -352,7 +431,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    driver["name"],
+                                    notification.title ?? 'Nuevo servicio',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 25,
@@ -361,12 +440,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
-                                    driver["description"],
+                                    notification.body ??
+                                        'Nuevo servicio solicitado',
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
-                                    driver["distance"],
+                                    notification.idServicio,
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                 ],
@@ -511,6 +591,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _markersNotifier.dispose();
     //_selectedCategoryIndex.dispose();
     //mapController.dispose();
+
+    _notificationSubscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
