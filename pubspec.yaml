@@ -55,6 +55,9 @@ dependencies:
   shared_preferences: ^2.5.3
   google_sign_in: ^6.3.0
   flutter_facebook_auth: ^7.1.2
+  firebase_messaging: ^15.2.6
+  flutter_local_notifications: ^19.2.1
+  googleapis_auth: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +86,7 @@ flutter:
     - assets/fonts/
     - assets/map_styles.json
     - assets/gifs/
+    - assets/serviexpressapp.json
 
   fonts:
     - family: DMSans

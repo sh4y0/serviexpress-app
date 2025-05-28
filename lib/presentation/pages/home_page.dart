@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 
@@ -264,6 +267,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // TEST
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      const idServicio = '123ABC';
+
+      final fcmMessage = FCMMessage(
+        token: '',
+        idServicio: idServicio,
+        senderId: currentUser.uid,
+        title: 'Mensaje de prueba',
+        body: 'Hola desde el main 👋',
+        receiverId: currentUser.uid,
+      );
+
+      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
+        fcmMessage,
+        fcmMessage.receiverId,
+      );
+
+      print('📤 ¿Mensaje enviado? $enviado');
+    } else {
+      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
+    }
+
+    // TEST END
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,

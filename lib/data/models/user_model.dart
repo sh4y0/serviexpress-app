@@ -14,6 +14,7 @@ class UserModel {
   final String? rol;
   final String? especialidad;
   final String? descripcion;
+  final String? token;
 
   UserModel({
     required this.uid,
@@ -29,6 +30,7 @@ class UserModel {
     this.rol,
     this.especialidad,
     this.descripcion,
+    this.token,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class UserModel {
       rol: json['rol'],
       especialidad: json['especialidad'],
       descripcion: json['descripcion'],
+      token: json['token'],
     );
   }
 
@@ -67,6 +70,7 @@ class UserModel {
       'rol': rol,
       'especialidad': especialidad,
       'descripcion': descripcion,
+      'token': token,
     };
   }
 }
