@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 class FCMMessage {
   final String token;
   final String idServicio;
@@ -14,6 +16,18 @@ class FCMMessage {
     this.title,
     this.body,
   });
+
+  factory FCMMessage.fromRemoteMessage(RemoteMessage message) {
+    final data = message.data;
+    return FCMMessage(
+      token: '',
+      idServicio: data['idServicio'] ?? '',
+      senderId: data['senderId'] ?? '',
+      receiverId: data['receiverId'] ?? '',
+      title: data['title'],
+      body: data['body'],
+    );
+  }
 
   FCMMessage copyWith({
     String? token,
@@ -37,15 +51,12 @@ class FCMMessage {
     return {
       'message': {
         'token': token,
-        if (title != null || body != null)
-          'notification': {
-            if (title != null) 'title': title,
-            if (body != null) 'body': body,
-          },
         'data': {
           'idServicio': idServicio,
           'senderId': senderId,
           'receiverId': receiverId,
+          if (title != null) 'title': title!,
+          if (body != null) 'body': body!,
         },
       },
     };
