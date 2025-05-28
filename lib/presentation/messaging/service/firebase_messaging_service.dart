@@ -27,7 +27,6 @@ class FirebaseMessagingService {
       final deviceToken = await _getDeviceToken(userId);
 
       if (deviceToken == null || deviceToken.isEmpty) {
-        print('❌ No se pudo obtener el token del dispositivo.');
         return false;
       }
 
@@ -54,10 +53,8 @@ class FirebaseMessagingService {
 
       await NotificationRepository.instance.saveNotification(messageWithToken);
 
-      print('[FCM Response] ${response.statusCode} → ${response.body}');
       return response.statusCode == 200;
     } catch (e) {
-      print('❌ Error al enviar mensaje FCM: $e');
       return false;
     }
   }
@@ -68,12 +65,10 @@ class FirebaseMessagingService {
     if (result is Success<UserModel>) {
       final token = result.data.token;
       if (token == null || token.isEmpty) {
-        print('❌ Usuario $userId no tiene token registrado.');
         return null;
       }
       return token;
     } else if (result is Failure) {
-      print('❌ Error al obtener usuario: ${result.error}');
       return null;
     }
     return null;

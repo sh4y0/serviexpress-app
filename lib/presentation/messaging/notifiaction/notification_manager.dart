@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,6 +14,12 @@ class NotificationManager {
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
+  final StreamController<RemoteMessage> _notificationStreamController =
+      StreamController<RemoteMessage>.broadcast();
+
+  Stream<RemoteMessage> get notificationStream =>
+      _notificationStreamController.stream;
+
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission(
       alert: true,
@@ -21,7 +28,6 @@ class NotificationManager {
     );
 
     final fcmToken = await _firebaseMessaging.getToken();
-
     if (fcmToken != null) {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
@@ -29,19 +35,16 @@ class NotificationManager {
           currentUser.uid,
           fcmToken,
         );
-        print('[NotificationManager] Token guardado en Firestore');
       }
     }
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      print('[NotificationManager] Token refrescado: $newToken');
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
         await UserRepository.instance.updateUserToken(
           currentUser.uid,
           newToken,
         );
-        print('[NotificationManager] Token actualizado en Firestore');
       }
     });
 
@@ -49,15 +52,18 @@ class NotificationManager {
       '@mipmap/ic_launcher',
     );
     const initSettings = InitializationSettings(android: androidSettings);
-    await _localNotifications.initialize(initSettings);
+    await _localNotifications.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        // Aquí puedes manejar acciones al tocar la notificación
+      },
+    );
 
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print("🔔 Abierto desde background: ${message.data}");
+      // Aquí puedes manejar navegación o acciones específicas
     });
-
-    print('[NotificationManager] Inicializado correctamente');
   }
 
   Future<String?> getDeviceToken() async {
@@ -96,7 +102,11 @@ class NotificationManager {
     final body =
         notification?.body ?? data['body'] ?? 'Tienes un nuevo mensaje.';
 
-    showLocalNotification(title: title, body: body);
+    _notificationStreamController.add(message);
+
+    if (notification == null) {
+      showLocalNotification(title: title, body: body);
+    }
   }
 
   static Future<void> handleBackgroundMessage(RemoteMessage message) async {
@@ -111,6 +121,9 @@ class NotificationManager {
         'Tienes un nuevo mensaje.';
 
     await NotificationManager().showLocalNotification(title: title, body: body);
-    print("📨 [Background] Mensaje recibido: ${message.messageId}");
+  }
+
+  void dispose() {
+    _notificationStreamController.close();
   }
 }

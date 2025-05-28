@@ -36,8 +36,6 @@ class _HomeProviderState extends State<HomeProvider> {
   ];
   @override
   Widget build(BuildContext context) {
-    final double topPadding =
-        MediaQuery.of(context).padding.top + kToolbarHeight + 15;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
