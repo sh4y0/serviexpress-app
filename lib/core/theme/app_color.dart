@@ -84,6 +84,13 @@ class AppColor {
   static const Color bgLabel = Color(0xFF141830);
   static const Color txtMsg = Color(0xFF686C8F);
 
+  //Color rating
+  static const Color bgStar = Color(0xFFFEA41D);
+
   //Color show 
   static const Color btnOpen = Color(0xFFC2D7FF);
+
+  //Color home proveedor bottomNavigation
+  static const Color bgBtnNav = Color(0xFF060716);
+  static const Color bgItmNav = Color(0xFF99A6BB);
 }
