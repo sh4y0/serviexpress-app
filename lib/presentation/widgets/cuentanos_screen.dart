@@ -168,7 +168,6 @@ class _CuentanosScreenState extends State<CuentanosScreen> {
       iconStyleData: IconStyleData(
         icon: SvgPicture.asset(
           "assets/icons/ic_down.svg",
-          // ignore: deprecated_member_use
           color: AppColor.textInput,
         ),
       ),

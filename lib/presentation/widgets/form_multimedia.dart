@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
+import 'package:path/path.dart' as p;
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 
 class FormMultimedia extends StatefulWidget {
@@ -15,6 +15,7 @@ class FormMultimedia extends StatefulWidget {
 
 class FormularioMultimediaState extends State<FormMultimedia> {
   final TextEditingController descripcionController = TextEditingController();
+  final FocusNode focusNodeSegundo = FocusNode();
   final ImagePicker _picker = ImagePicker();
   final List<File> _images = [];
   final List<File> _videos = [];
@@ -24,11 +25,37 @@ class FormularioMultimediaState extends State<FormMultimedia> {
   List<File> get images => _images;
   List<File> get videos => _videos;
 
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+
+  void setInitialData(
+    String categoria,
+    String description,
+    List<File> initialImages,
+    List<File> initialVideos,
+  ) {
+    if (mounted) {
       setState(() {
-        _images.add(File(image.path));
+        descripcionController.text = description;
+        _images.clear();
+        _images.addAll(initialImages);
+        _videos.clear();
+        _videos.addAll(initialVideos);
+
+        if (description.isNotEmpty ||
+            initialImages.isNotEmpty ||
+            initialVideos.isNotEmpty) {
+          _isExpanded = true;
+        } else {
+          _isExpanded = false;
+        }
+      });
+    }
+  }
+
+  Future<void> _pickMultiImageFromGallery() async {
+    final List<XFile> pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        _images.addAll(pickedFiles.map((xfile) => File(xfile.path)));
         _isExpanded = true;
       });
     }
@@ -44,13 +71,37 @@ class FormularioMultimediaState extends State<FormMultimedia> {
     }
   }
 
-  Future<void> _pickVideo() async {
-    final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-    if (video != null) {
-      setState(() {
-        _videos.add(File(video.path));
-        _isExpanded = true;
-      });
+  Future<void> _pickMultiVideoFromGallery() async {
+    final List<XFile> pickedFiles = await _picker.pickMultipleMedia();
+
+    if (pickedFiles.isNotEmpty) {
+      List<File> selectedVideos = [];
+      List<String> videoExtensions = [
+        '.mp4',
+        '.mov',
+        '.avi',
+        '.mkv',
+        '.webm',
+        '.flv',
+      ];
+
+      for (XFile xfile in pickedFiles) {
+        String extension = p.extension(xfile.path).toLowerCase();
+        if (videoExtensions.contains(extension)) {
+          selectedVideos.add(File(xfile.path));
+        }
+      }
+
+      if (selectedVideos.isNotEmpty) {
+        setState(() {
+          _videos.addAll(selectedVideos);
+          _isExpanded = true;
+        });
+      } else if (pickedFiles.isNotEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se seleccionaron videos válidos.')),
+        );
+      }
     }
   }
 
@@ -76,19 +127,6 @@ class FormularioMultimediaState extends State<FormMultimedia> {
     });
   }
 
-  // void _submitContent() {
-  //   if (widget.onSubmit != null) {
-  //     widget.onSubmit!(descripcionController.text, _images, _videos);
-  //   }
-
-  //   // setState(() {
-  //   //   descripcionController.clear();
-  //   //   _images.clear();
-  //   //   _videos.clear();
-  //   //   _isExpanded = false;
-  //   // });
-  // }
-
   void clearForm() {
     setState(() {
       descripcionController.clear();
@@ -109,11 +147,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
     return Container(
       margin: const EdgeInsets.only(top: 12, bottom: 12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF6366F1), Color(0xFF3B82F6)],
-        ),
+        color: const Color.fromRGBO(38, 48, 137, 1),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -124,10 +158,16 @@ class FormularioMultimediaState extends State<FormMultimedia> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            height: 120,
-            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+            constraints: const BoxConstraints(minHeight: 120, maxHeight: 120),
+            padding: const EdgeInsets.only(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              top: 8,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -138,10 +178,14 @@ class FormularioMultimediaState extends State<FormMultimedia> {
                     color: const Color.fromRGBO(194, 215, 255, 0.6),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: descripcionController,
+                    focusNode: focusNodeSegundo,
+                    autofocus: true,
                     maxLines: null,
+                    keyboardType: TextInputType.multiline,
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                     decoration: const InputDecoration(
                       hintText:
@@ -157,9 +201,18 @@ class FormularioMultimediaState extends State<FormMultimedia> {
                     ),
                     cursorColor: Colors.white,
                     onTap: () {
-                      setState(() {
-                        _isExpanded = true;
-                      });
+                      if (!_isExpanded) {
+                        setState(() {
+                          _isExpanded = true;
+                        });
+                      }
+                    },
+                    onChanged: (text) {
+                      if (text.isNotEmpty && !_isExpanded) {
+                        setState(() {
+                          _isExpanded = true;
+                        });
+                      }
                     },
                   ),
                 ),
@@ -167,129 +220,119 @@ class FormularioMultimediaState extends State<FormMultimedia> {
             ),
           ),
 
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height:
-                _isExpanded && (_images.isNotEmpty || _videos.isNotEmpty)
-                    ? null
-                    : 0,
-            child:
-                _isExpanded && (_images.isNotEmpty || _videos.isNotEmpty)
-                    ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          if (_images.isNotEmpty)
-                            SizedBox(
-                              height: 100,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _images.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Image.file(
-                                            _images[index],
-                                            width: 80,
-                                            height: 80,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
-                                          child: GestureDetector(
-                                            onTap: () => _removeImage(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: const Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+          if (_isExpanded && (_images.isNotEmpty || _videos.isNotEmpty))
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  if (_images.isNotEmpty)
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _images.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(
+                              right: 8,
+                              top: 4,
+                              bottom: 4,
                             ),
-
-                          if (_videos.isNotEmpty)
-                            Container(
-                              height: 80,
-                              margin: const EdgeInsets.only(top: 8),
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: _videos.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 8),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          width: 80,
-                                          height: 80,
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[800],
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.play_circle_filled,
-                                            color: Colors.white,
-                                            size: 40,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
-                                          child: GestureDetector(
-                                            onTap: () => _removeVideo(index),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: const Icon(
-                                                Icons.close,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    _images[index],
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () => _removeImage(index),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.8),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          const SizedBox(height: 12),
-                        ],
+                          );
+                        },
                       ),
-                    )
-                    : const SizedBox.shrink(),
-          ),
+                    ),
+                  if (_videos.isNotEmpty)
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _videos.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(
+                              right: 8,
+                              top: 4,
+                              bottom: 4,
+                            ),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.play_circle_filled,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () => _removeVideo(index),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.8),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
 
           Container(
-            //padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.black.withAlpha((0.2 * 255).toInt()),
               borderRadius: const BorderRadius.only(
@@ -298,55 +341,28 @@ class FormularioMultimediaState extends State<FormMultimedia> {
               ),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Expanded(
-                  child: IconButton(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.photo_library, color: Colors.white),
-                    tooltip: "Seleccionar imagen",
-                  ),
+                IconButton(
+                  onPressed: _pickMultiImageFromGallery,
+                  icon: const Icon(Icons.photo_library, color: Colors.white),
+                  tooltip: "Seleccionar imágenes",
                 ),
-                Expanded(
-                  child: IconButton(
-                    onPressed: _takePhoto,
-                    icon: const Icon(Icons.camera_alt, color: Colors.white),
-                    tooltip: "Tomar foto",
-                  ),
+                IconButton(
+                  onPressed: _takePhoto,
+                  icon: const Icon(Icons.camera_alt, color: Colors.white),
+                  tooltip: "Tomar foto",
                 ),
-                Expanded(
-                  child: IconButton(
-                    onPressed: _pickVideo,
-                    icon: const Icon(Icons.video_library, color: Colors.white),
-                    tooltip: "Seleccionar video",
-                  ),
+                IconButton(
+                  onPressed: _pickMultiVideoFromGallery,
+                  icon: const Icon(Icons.video_library, color: Colors.white),
+                  tooltip: "Seleccionar videos",
                 ),
-                Expanded(
-                  child: IconButton(
-                    onPressed: _recordVideo,
-                    icon: const Icon(Icons.videocam, color: Colors.white),
-                    tooltip: "Grabar video",
-                  ),
+                IconButton(
+                  onPressed: _recordVideo,
+                  icon: const Icon(Icons.videocam, color: Colors.white),
+                  tooltip: "Grabar video",
                 ),
-
-                //const Spacer(),
-
-                // Container(
-                //   decoration: BoxDecoration(
-                //     color: Colors.white.withOpacity(0.2),
-                //     borderRadius: BorderRadius.circular(20),
-                //   ),
-                //   child: TextButton.icon(
-                //     onPressed: _submitContent,
-                //     icon: const Icon(Icons.send, color: Colors.white, size: 16),
-                //     label: const Text(
-                //       "Tomar o Subir",
-                //       style: TextStyle(color: Colors.white, fontSize: 14),
-                //     ),
-                //     style: TextButton.styleFrom(
-                //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -358,6 +374,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
   @override
   void dispose() {
     descripcionController.dispose();
+    focusNodeSegundo.dispose();
     super.dispose();
   }
 }
