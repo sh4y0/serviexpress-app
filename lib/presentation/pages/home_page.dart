@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,6 +13,9 @@ import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
 import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
+import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
@@ -23,7 +29,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   bool _isZoomedIn = false;
@@ -59,9 +66,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   final List<ProveedorModel> _proveedoresSeleccionados = [];
 
+  late final StreamSubscription<RemoteMessage> _notificationSubscription;
+  List<FCMMessage> notifications = [];
+
+  AppLifecycleState? _appLifecycleState;
+
+  bool get isAppInForeground =>
+      _appLifecycleState == null ||
+      _appLifecycleState == AppLifecycleState.resumed;
+
   @override
   void initState() {
     super.initState();
+
+    // TESTING PURPOSES ONLY
+    _sendTestMessages();
+
+    // END TESTING PURPOSES
+
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
     _initializeLocation();
@@ -88,8 +110,87 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         BitmapDescriptor.hueBlue,
       );
     }
+    WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notificationSubscription = NotificationManager().notificationStream
+          .listen((RemoteMessage message) {
+            final fcmMessage = FCMMessage.fromRemoteMessage(message);
+
+            bool exists = notifications.any(
+              (notification) =>
+                  notification.idServicio == fcmMessage.idServicio,
+            );
+            if (!exists) {
+              setState(() {
+                notifications.add(fcmMessage);
+              });
+
+              if (isAppInForeground) {
+                NotificationManager().showLocalNotification(
+                  title: fcmMessage.title ?? 'Notificación',
+                  body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
+                );
+              }
+            }
+          });
+    });
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('AppLifecycleState changed to: $state');
+    setState(() {
+      _appLifecycleState = state;
+    });
+  }
+
+  // TESTING PURPOSES ONLY
+  void _sendTestMessages() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
+      return;
+    }
+
+    final messages = [
+      FCMMessage(
+        token: '',
+        idServicio: '123ABC',
+        senderId: currentUser.uid,
+        title: 'Mensaje de prueba',
+        body: 'Hola desde el main 👋',
+        receiverId: currentUser.uid,
+      ),
+      FCMMessage(
+        token: '',
+        idServicio: 'SEGUNDO_SERVICIO',
+        senderId: currentUser.uid,
+        title: 'SEGUNDO MENSAJE DE PRUEBA',
+        body: 'HOLA DESDE HOME 👋',
+        receiverId: currentUser.uid,
+      ),
+      FCMMessage(
+        token: '',
+        idServicio: 'TERCER_SERVICIO',
+        senderId: currentUser.uid,
+        title: 'TERCER MENSAJE DE PRUEBA',
+        body: 'HOLA DESDE HOME 👋',
+        receiverId: currentUser.uid,
+      ),
+    ];
+
+    for (var fcmMessage in messages) {
+      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
+        fcmMessage,
+        fcmMessage.receiverId,
+      );
+      print('📤 ¿Mensaje enviado? $enviado');
+    }
+  }
+
+  // END TESTING PURPOSES
   Future<void> _initializeLocation() async {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
@@ -667,6 +768,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     final double bottomSheetInitialHeight =
         MediaQuery.of(context).size.height * 0.34;
 
+    final double topPadding = MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
@@ -706,6 +808,71 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 },
               );
             },
+          ),
+         Positioned(
+            top: topPadding,
+            left: 16,
+            right: 16,
+            child: Column(
+              children:
+                  notifications.map((notification) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColor.bgAll,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 6,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    notification.title ?? 'Nuevo servicio',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    notification.body ??
+                                        'Nuevo servicio solicitado',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    notification.idServicio,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ],
+                              ),
+
+                              const Icon(
+                                Icons.home_repair_service,
+                                color: Colors.lightGreenAccent,
+                                size: 40,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+            ),
           ),
 
           SafeArea(
@@ -891,6 +1058,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _locationCircleNotifier.dispose();
     _circleRadiusNotifier.dispose();
     _markersNotifier.dispose();
+    _notificationSubscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

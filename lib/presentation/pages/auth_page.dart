@@ -9,6 +9,7 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -113,26 +114,26 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is User) {
             await UserPreferences.saveUserId(data.uid);
-            // Alerts.instance.showSuccessAlert(
-            //   context,
-            //   "Inicio de sesión exitoso",
-            //   onOk: () async {
-            //     if (mounted) {
-            //       FocusManager.instance.primaryFocus?.unfocus();
-            //       Navigator.pushReplacementNamed(
-            //         context,
-            //         AppRoutes.home,
-            //         arguments: MapStyleLoader.cachedStyle,
-            //       );
-            //     }
-            //   },
-            // );
+
+            final isDniEmpty = await UserRepository.instance.isDniEmpty(
+              data.uid,
+            );
+
+            if (isDniEmpty) {
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.completeProfile,
+                arguments: data,
+              );
+              return;
+            }
+
             if (mounted) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,
-                  );
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.home,
+                arguments: MapStyleLoader.cachedStyle,
+              );
             }
           }
           break;
@@ -224,7 +225,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
   Widget _buildAnimatedSwitcher() {
     final screenWidth = MediaQuery.of(context).size.width;
     final buttonWidth = (screenWidth - 60) / 2;
-    
+
     return RepaintBoundary(
       child: Container(
         height: 60,
@@ -370,7 +371,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () async {                
+                  onPressed: () async {
                     final email = _emailController.text.trim();
                     final password = _passwordController.text.trim();
 
@@ -423,11 +424,30 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: socialButton("assets/icons/ic_facebook.svg")),
+                  Expanded(
+                    child: socialButton(
+                      "assets/icons/ic_facebook.svg",
+                      () async {
+                        await ref
+                            .read(authViewModelProvider.notifier)
+                            .loginWithFacebook();
+                      },
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_google.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_google.svg", () async {
+                      await ref
+                          .read(authViewModelProvider.notifier)
+                          .loginWithGoogle();
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_apple.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_apple.svg", () {
+                      // Login con Apple
+                    }),
+                  ),
                 ],
               ),
               const SizedBox(height: 25),
@@ -515,7 +535,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                   ),
                 ),
               ),
-            
+
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -540,7 +560,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
 
                     ref
                         .read(registerViewModelProvider.notifier)
-                        .registerUser(email, password, dni, usuario);
+                        .registerUser(email, password, usuario);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
@@ -579,11 +599,30 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(child: socialButton("assets/icons/ic_facebook.svg")),
+                  Expanded(
+                    child: socialButton(
+                      "assets/icons/ic_facebook.svg",
+                      () async {
+                        await ref
+                            .read(authViewModelProvider.notifier)
+                            .loginWithFacebook();
+                      },
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_google.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_google.svg", () async {
+                      await ref
+                          .read(authViewModelProvider.notifier)
+                          .loginWithGoogle();
+                    }),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: socialButton("assets/icons/ic_apple.svg")),
+                  Expanded(
+                    child: socialButton("assets/icons/ic_apple.svg", () {
+                      // Login con Apple
+                    }),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -661,12 +700,12 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
     );
   }
 
-  Widget socialButton(String svgPath) {
+  Widget socialButton(String svgPath, VoidCallback onPressed) {
     return SizedBox(
       width: 100,
       height: 58,
       child: OutlinedButton(
-        onPressed: () {},
+        onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColor.textWelcome, width: 1.5),
           shape: RoundedRectangleBorder(

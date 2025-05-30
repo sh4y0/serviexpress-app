@@ -8,15 +8,13 @@ class RegisterViewModel extends StateNotifier<ResultState> {
   Future<void> registerUser(
     String email,
     String password,
-    String dni,
-    String telefono,
+    String username,
   ) async {
     state = const Loading();
     final result = await RegisterRepository.instance.registerUser(
       email,
       password,
-      dni,
-      telefono,
+      username,
     );
 
     state = result;
