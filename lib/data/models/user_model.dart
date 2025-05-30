@@ -11,6 +11,10 @@ class UserModel {
   final String apellidoMaterno;
   final String nombreCompleto;
   final DateTime? createdAt;
+  final String? rol;
+  final String? especialidad;
+  final String? descripcion;
+  final String? token;
 
   UserModel({
     required this.uid,
@@ -23,6 +27,10 @@ class UserModel {
     required this.apellidoMaterno,
     required this.nombreCompleto,
     this.createdAt,
+    this.rol,
+    this.especialidad,
+    this.descripcion,
+    this.token,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +48,10 @@ class UserModel {
           json['createdAt'] != null
               ? (json['createdAt'] as Timestamp).toDate()
               : null,
+      rol: json['rol'],
+      especialidad: json['especialidad'],
+      descripcion: json['descripcion'],
+      token: json['token'],
     );
   }
 
@@ -55,6 +67,10 @@ class UserModel {
       'apellidoMaterno': apellidoMaterno,
       'nombreCompleto': nombreCompleto,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
+      'rol': rol,
+      'especialidad': especialidad,
+      'descripcion': descripcion,
+      'token': token,
     };
   }
 }

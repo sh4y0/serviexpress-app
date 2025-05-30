@@ -43,6 +43,7 @@ dependencies:
   shimmer: ^3.0.0
   skeletonizer: ^1.4.2
   tutorial_coach_mark: ^1.3.0
+  flutter_rating_bar: ^4.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -57,6 +58,11 @@ dependencies:
   firebase_remote_config: ^5.4.3
   shared_preferences: ^2.5.3
   path: ^1.9.1
+  google_sign_in: ^6.3.0
+  flutter_facebook_auth: ^7.1.2
+  firebase_messaging: ^15.2.6
+  flutter_local_notifications: ^19.2.1
+  googleapis_auth: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -85,6 +91,7 @@ flutter:
     - assets/fonts/
     - assets/map_styles.json
     - assets/gifs/
+    - assets/serviexpressapp.json
 
   fonts:
     - family: DMSans
