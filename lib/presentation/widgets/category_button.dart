@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/data/models/category_model.dart';
+import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 
 class CategoryButton extends StatelessWidget {
-  final CategoryModel category;
+  final CategoryMock category;
   final int index;
   final ValueNotifier<int> selectedCategoryIndexNotifier;
 
@@ -31,11 +31,11 @@ class CategoryButton extends StatelessWidget {
                 isSelected ? const Color(0xFF3645f5) : const Color(0xFF263089),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
-              side: BorderSide(
-                color:
-                    isSelected ? const Color(0xFF3645f5) : AppColor.textInput,
-                width: 2,
-              ),
+              // side: BorderSide(
+              //   color:
+              //       isSelected ? const Color(0xFF3645f5) : AppColor.textInput,
+              //   width: 2,
+              // ),
             ),
             onPressed: () {
               selectedCategoryIndexNotifier.value = index;

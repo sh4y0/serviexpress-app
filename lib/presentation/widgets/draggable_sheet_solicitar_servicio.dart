@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
-import 'package:serviexpress_app/data/models/category_model.dart';
-import 'package:serviexpress_app/data/models/data_mock.dart';
-import 'package:serviexpress_app/presentation/widgets/category_button.dart';
-import 'package:serviexpress_app/presentation/widgets/form_multimedia.dart';
+import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
+import 'package:serviexpress_app/data/models/proveedor_model.dart';
+import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
 
 class DraggableSheetSolicitarServicio extends StatefulWidget {
   final VoidCallback? onDismiss;
@@ -13,6 +13,15 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
   final List<double> snapPoints;
   final Duration entryAnimationDuration;
   final Curve entryAnimationCurve;
+  final bool isInteractionEnabled;
+  final VoidCallback onTapPressed;
+
+  final SolicitudServicioModel? datosSolicitudExistente;
+  final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
+
+  final List<ProveedorModel> proveedoresSeleccionados;
+  final Function(ProveedorModel)? onProveedorRemovido;
+  final Function(ProveedorModel)? onProveedorTapped;
 
   const DraggableSheetSolicitarServicio({
     super.key,
@@ -23,24 +32,35 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
     required this.snapPoints,
     this.entryAnimationDuration = const Duration(milliseconds: 200),
     this.entryAnimationCurve = Curves.easeOutCubic,
+    this.isInteractionEnabled = true,
+    required this.onTapPressed,
+    required this.onAbrirDetallesPressed,
+    this.datosSolicitudExistente,
+    required this.proveedoresSeleccionados,
+    this.onProveedorRemovido,
+    this.onProveedorTapped,
   });
-
   @override
   State<DraggableSheetSolicitarServicio> createState() =>
-      _DraggableSheetState();
+      DraggableSheetSolicitarServicio2State();
 }
 
-class _DraggableSheetState extends State<DraggableSheetSolicitarServicio> {
+class DraggableSheetSolicitarServicio2State
+    extends State<DraggableSheetSolicitarServicio> {
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
-  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(0);
+  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
+  late TextEditingController _descripcionController = TextEditingController();
+  final FocusNode focusNodePrimero = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _internalController = DraggableScrollableController();
     _internalController.addListener(_onChanged);
+
+    _descripcionController = TextEditingController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _internalController.isAttached) {
@@ -51,6 +71,14 @@ class _DraggableSheetState extends State<DraggableSheetSolicitarServicio> {
         );
       }
     });
+  }
+
+  void resetSheet() {
+    if (mounted) {
+      setState(() {
+        _selectedCategoryIndex.value = -1;
+      });
+    }
   }
 
   @override
@@ -75,7 +103,7 @@ class _DraggableSheetState extends State<DraggableSheetSolicitarServicio> {
 
   void collapse() {
     final targetSnap = widget.snapPoints.firstWhere(
-      (s) => s > widget.minSheetSize,
+      (s) => s >= widget.minSheetSize,
       orElse: () => widget.targetInitialSize,
     );
     _animatedSheet(targetSnap);
@@ -121,6 +149,11 @@ class _DraggableSheetState extends State<DraggableSheetSolicitarServicio> {
 
   @override
   Widget build(BuildContext context) {
+    // bool hayDatosParaEditar =
+    //     widget.datosSolicitudExistente != null &&
+    //     widget.datosSolicitudExistente!.hasData;
+    final categories = CategoryMock.getCategories();
+
     return LayoutBuilder(
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
@@ -133,113 +166,201 @@ class _DraggableSheetState extends State<DraggableSheetSolicitarServicio> {
           snapSizes: widget.snapPoints,
           controller: _internalController,
           builder: (context, scrollController) {
-            return DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Color(0xff161a50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xff161a50),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: Offset(0, 1),
+            return AbsorbPointer(
+              absorbing: !widget.isInteractionEnabled,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: Color(0xff161a50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff161a50),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
-                ],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
                 ),
-              ),
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        //vertical: 20.5,
-                        horizontal: 15,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Opacity(
-                            opacity: 0.15,
-                            child: Container(
-                              margin: const EdgeInsets.all(13),
-                              decoration: const BoxDecoration(                      
-                                borderRadius: BorderRadius.all(Radius.circular(12)),
-                                color: Color.fromRGBO(117, 148, 255, 1),
-                                shape: BoxShape.rectangle,
-                              ),
-                              width: 154,
-                              height: 2,
-                              ),
-                          ),
-                          SizedBox(
-                            height: 56,
-                            // margin: const EdgeInsets.symmetric(
-                            //   //horizontal: 6,
-                            //   //vertical: 39,
-                            // ),
-                            child: ValueListenableBuilder<int>(
-                              valueListenable: _selectedCategoryIndex,
-                              builder: (context, selectedIndex, _) {
-                                return ListView.builder(
-                                  padding: const EdgeInsets.only(
-                                    top: 10,
-                                    bottom: 10,
+                child: CustomScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  controller: scrollController,
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                                child: Text(
+                                  'Proveedores que seleccionaste:',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
                                   ),
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) {
-                                    var category =
-                                        CategoryModel.getCategories()[index];
+                                ),
+                              ),
+                              if (widget.proveedoresSeleccionados.isNotEmpty)
+                                SizedBox(
+                                  height: 80,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount:
+                                        widget.proveedoresSeleccionados.length,
+                                    itemBuilder: (context, index) {
+                                      final proveedor =
+                                          widget
+                                              .proveedoresSeleccionados[index];
+                                      return ProveedorModelCard(
+                                        proveedor: proveedor,
+                                        onTap:
+                                            () => widget.onProveedorTapped
+                                                ?.call(proveedor),
+                                        onRemove:
+                                            () => widget.onProveedorRemovido
+                                                ?.call(proveedor),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              Container(
+                                margin: const EdgeInsets.only(
+                                  top: 12,
+                                  bottom: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromRGBO(38, 48, 137, 1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(
+                                        (0.1 * 255).toInt(),
+                                      ),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 5,
+                                            ),
+                                            child: SvgCache.getIconSvg(
+                                              'assets/icons/ic_message_form.svg',
+                                              color: const Color.fromRGBO(
+                                                194,
+                                                215,
+                                                255,
+                                                0.6,
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: TextField(
+                                              controller:
+                                                  _descripcionController,
+                                              focusNode: focusNodePrimero,
+                                              maxLines: null,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                              decoration: const InputDecoration(
+                                                hintText:
+                                                    "Detalla el servicio que necesitas...",
+                                                hintStyle: TextStyle(
+                                                  color: Color.fromRGBO(
+                                                    194,
+                                                    215,
+                                                    255,
+                                                    0.6,
+                                                  ),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                border: InputBorder.none,
+                                                enabledBorder: InputBorder.none,
+                                                focusedBorder: InputBorder.none,
+                                              ),
+                                              showCursor: false,
+                                              onTap: () {
+                                                focusNodePrimero.unfocus();
+                                                String? catSeleccionada;
+                                                if (_selectedCategoryIndex
+                                                        .value !=
+                                                    -1) {
+                                                  catSeleccionada =
+                                                      categories[_selectedCategoryIndex
+                                                              .value]
+                                                          .name;
+                                                }
 
-                                    return CategoryButton(
-                                      category: category,
-                                      index: index,
-                                      selectedCategoryIndexNotifier:
-                                          _selectedCategoryIndex,
-                                    );
+                                                widget.onAbrirDetallesPressed(
+                                                  catSeleccionada,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // if (hayDatosParaEditar) {
+                                    //   print(
+                                    //     "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
+                                    //   );
+                                    // } else {
+
+                                    // }
                                   },
-                                  itemCount: DataMock.mockData.length,
-                                );
-                              },
-                            ),
-                          ),
-
-                          //const SizedBox(height: 24),
-                          const FormMultimedia(),
-                          const SizedBox(height: 12),
-
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, AppRoutes.chat);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3645f5),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3645f5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Solicitar Servicio',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: const Text(
-                                'Obtener cotizaciones',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           },

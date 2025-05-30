@@ -113,21 +113,27 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is User) {
             await UserPreferences.saveUserId(data.uid);
-            Alerts.instance.showSuccessAlert(
-              context,
-              "Inicio de sesión exitoso",
-              onOk: () async {
-                if (mounted) {
-                  FocusManager.instance.primaryFocus?.unfocus();
+            // Alerts.instance.showSuccessAlert(
+            //   context,
+            //   "Inicio de sesión exitoso",
+            //   onOk: () async {
+            //     if (mounted) {
+            //       FocusManager.instance.primaryFocus?.unfocus();
+            //       Navigator.pushReplacementNamed(
+            //         context,
+            //         AppRoutes.home,
+            //         arguments: MapStyleLoader.cachedStyle,
+            //       );
+            //     }
+            //   },
+            // );
+            if (mounted) {
                   Navigator.pushReplacementNamed(
                     context,
-
                     AppRoutes.home,
                     arguments: MapStyleLoader.cachedStyle,
                   );
-                }
-              },
-            );
+            }
           }
           break;
         case Failure(:final error):
@@ -375,7 +381,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                       );
                       return;
                     }
-
+                    FocusManager.instance.primaryFocus?.unfocus();
                     await ref
                         .read(authViewModelProvider.notifier)
                         .loginUser(email, password);
@@ -483,12 +489,6 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 hintText: "Usuario",
                 svgIconPath: "assets/icons/ic_person.svg",
               ),
-              // const SizedBox(height: 20),
-              // _buildTextField(
-              //   controller: _dniControllerRegister,
-              //   hintText: "DNI",
-              //   svgIconPath: "assets/icons/ic_email.svg",
-              // ),
               const SizedBox(height: 20),
               _buildTextField(
                 controller: _emailControllerRegister,
@@ -515,33 +515,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                   ),
                 ),
               ),
-              // const SizedBox(height: 8),
-              // Row(
-              //   children: [
-              //     SizedBox(
-              //       width: 24,
-              //       child: Checkbox(
-              //         value: isEmployer,
-              //         onChanged: (value) {
-              //           setState(() {
-              //             isEmployer = value ?? false;
-              //           });
-              //         },
-              //         checkColor: Colors.white,
-              //         activeColor: AppColor.colorInput,
-              //         side: const BorderSide(
-              //           color: AppColor.colorInput,
-              //           width: 1.8,
-              //         ),
-              //       ),
-              //     ),
-              //     const SizedBox(width: 5),
-              //     const Text(
-              //       "Soy empleador",
-              //       style: TextStyle(color: Colors.white, fontSize: 15),
-              //     ),
-              //   ],
-              // ),
+            
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
