@@ -102,7 +102,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
           child: MaterialButton(
             onPressed: () async {
               await UserPreferences.saveRoleName("Trabajador");
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
+              Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

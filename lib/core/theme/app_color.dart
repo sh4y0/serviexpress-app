@@ -86,6 +86,7 @@ class AppColor {
 
   //Color rating
   static const Color bgStar = Color(0xFFFEA41D);
+  static const Color bgStr = Color(0xFFDEB754);
 
   //Color show 
   static const Color btnOpen = Color(0xFFC2D7FF);
