@@ -13,7 +13,6 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(
     NotificationManager.handleBackgroundMessage,
   );
-  await NotificationManager().initialize();
   await RemoteConfigService.instance.initialize();
   runApp(const ProviderScope(child: Serviexpress()));
 }

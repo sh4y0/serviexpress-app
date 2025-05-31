@@ -19,7 +19,7 @@ class GoogleAuthService {
 
   Future<String> getAccessToken() async {
     final client = await getClient();
-    final token = await client.credentials.accessToken;
+    final token = client.credentials.accessToken;
     client.close();
     return token.data;
   }
