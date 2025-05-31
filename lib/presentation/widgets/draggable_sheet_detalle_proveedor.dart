@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/proveedor_model.dart';
 
 class DraggableSheetDetalleProveedor extends StatefulWidget {
   final VoidCallback? onDismiss;
@@ -10,6 +11,8 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final List<double> snapPoints;
   final Duration entryAnimationDuration;
   final Curve entryAnimationCurve;
+  final Function(ProveedorModel)? onProveedorAgregado;
+  final ProveedorModel? selectedProvider;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -20,12 +23,16 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     required this.snapPoints,
     this.entryAnimationDuration = const Duration(milliseconds: 200),
     this.entryAnimationCurve = Curves.easeOutCubic,
+    this.onProveedorAgregado,
+    this.selectedProvider,
   });
   @override
-  State<DraggableSheetDetalleProveedor> createState() => _DraggableSheetState();
+  State<DraggableSheetDetalleProveedor> createState() =>
+      _DraggableSheetDetalleProveedorState();
 }
 
-class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
+class _DraggableSheetDetalleProveedorState
+    extends State<DraggableSheetDetalleProveedor> {
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
@@ -112,6 +119,19 @@ class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
     }
   }
 
+  void _agregarProveedor() {
+    final proveedor = ProveedorModel(
+      id: widget.selectedProvider!.id,
+      nombre: widget.selectedProvider!.nombre,
+      calificacion: widget.selectedProvider!.calificacion,
+      categoria: widget.selectedProvider!.categoria,
+      descripcion: widget.selectedProvider?.descripcion,
+      imagenUrl: '',
+    );
+    widget.onProveedorAgregado?.call(proveedor);
+    hide();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -156,14 +176,16 @@ class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
                         children: [
                           Container(
                             margin: const EdgeInsets.only(bottom: 29.5),
-                            decoration: const BoxDecoration(                      
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
                               color: Color.fromRGBO(117, 148, 255, 1),
                               shape: BoxShape.rectangle,
                             ),
                             width: 154,
                             height: 4,
-                            ),
+                          ),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -182,40 +204,40 @@ class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
                               ),
                               const SizedBox(width: 12),
 
-                              const Expanded(
+                              Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Rodri Gutierrez',
-                                      style: TextStyle(
+                                      widget.selectedProvider!.nombre,
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.star,
                                           color: Colors.amber,
                                           size: 16,
                                         ),
-                                        SizedBox(width: 4),
+                                        const SizedBox(width: 4),
                                         Text(
-                                          '4.9 (120+ review)',
-                                          style: TextStyle(
+                                          '${widget.selectedProvider!.calificacion} (120+ review)',
+                                          style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 12,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 4),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      'Desarrollador Flutter',
-                                      style: TextStyle(
+                                      widget.selectedProvider?.descripcion ?? '',
+                                      style: const TextStyle(
                                         color: Colors.white70,
                                         fontSize: 12,
                                       ),
@@ -227,16 +249,7 @@ class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
                           ),
 
                           const SizedBox(height: 16),
-
-                          const Text(
-                            'Los sistemas de aire acondicionado pueden experimentar diversos problemas y su solucion depende del problema especifico que este enfrentando',
-                            style: TextStyle(
-                              color: AppColor.textInput,
-                              fontSize: 14,
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
+                          //const SizedBox(height: 24),
 
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -349,30 +362,63 @@ class _DraggableSheetState extends State<DraggableSheetDetalleProveedor> {
 
                           const SizedBox(height: 24),
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, AppRoutes.chat);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3645f5),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: _agregarProveedor,
+                                  icon: const Icon(
+                                    Icons.add_box_rounded,
+                                    color: Colors.white,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3645f5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  label: const Text(
+                                    'Agregar',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: const Text(
-                                'Cotizar servicio',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.chat,
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  label: const Text(
+                                    'No me interesa',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),

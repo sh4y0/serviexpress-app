@@ -60,12 +60,10 @@ class AuthRepository {
   Future<ResultState<User>> loginWithGoogle() async {
     try {
       await GoogleSignIn().signOut();
-
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         return const Failure(UserNotFound("Inicio de sesión cancelado."));
       }
-
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
