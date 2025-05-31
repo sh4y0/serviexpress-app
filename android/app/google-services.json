@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "970897771269-20m4fiuirsnogv0uu2kiln2sv0mkp6cs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "031d10497d803a981f841e049ec91a33501e1352"
+          }
+        },
+        {
           "client_id": "970897771269-nv86qbt0i8so96uacigsvtjop5499nt7.apps.googleusercontent.com",
           "client_type": 3
         }
