@@ -7,6 +7,7 @@ import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page_recovery_password.dart';
 import 'package:serviexpress_app/presentation/pages/chat_page.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
+import 'package:serviexpress_app/presentation/pages/home_provider.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
@@ -34,6 +35,11 @@ class Serviexpress extends StatelessWidget {
                 final mapStyle = settings.arguments as String;
                 return CupertinoPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
+                );
+              case AppRoutes.homeProvider:
+                
+                return CupertinoPageRoute(
+                  builder: (context) => const HomeProvider(),
                 );
               case AppRoutes.recoveryPassword:
                 return CupertinoPageRoute(
