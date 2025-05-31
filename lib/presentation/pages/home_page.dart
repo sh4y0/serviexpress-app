@@ -78,6 +78,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    _setupToken();
 
     // TESTING PURPOSES ONLY
     _sendTestMessages();
@@ -87,10 +88,14 @@ class _HomePageState extends State<HomePage>
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
     _initializeLocation();
-
+  
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupKeyboardListener();
     });
+  }
+
+  void _setupToken() async{
+     await NotificationManager().initialize();
   }
 
   void _setupKeyboardListener() {
