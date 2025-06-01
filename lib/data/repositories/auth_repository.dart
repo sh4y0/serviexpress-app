@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:serviexpress_app/core/utils/result_state.dart';
-import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
+import 'package:serviexpress_app/core/exceptions/error_state.dart';
+import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/auth/auth_provider_strategy.dart';
+import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
 class AuthRepository {
@@ -15,7 +15,13 @@ class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<ResultState<User>> loginUser(
+  final Map<String, AuthProviderStrategy> _providers = {
+    'google': GoogleAuthProviderStrategy(),
+    'facebook': FacebookAuthProviderStrategy(),
+    'apple': AppleAuthProviderStrategy(),
+  };
+
+  Future<ResultState<AuthResult>> loginUser(
     String identifier,
     String password,
   ) async {
@@ -46,7 +52,7 @@ class AuthRepository {
 
       final user = result.user;
       if (user != null) {
-        return Success(user);
+        return await _processAuthenticatedUser(user, isNewUser: false);
       } else {
         return const Failure(UnknownError("No se pudo obtener el usuario."));
       }
@@ -57,145 +63,118 @@ class AuthRepository {
     }
   }
 
-  Future<ResultState<User>> loginWithGoogle() async {
-    try {
-      await GoogleSignIn().signOut();
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        return const Failure(UserNotFound("Inicio de sesión cancelado."));
-      }
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+  Future<ResultState<AuthResult>> loginWithProvider(String providerName) async {
+    final provider = _providers[providerName.toLowerCase()];
+    if (provider == null) {
+      return Failure(UnknownError("Proveedor '$providerName' no soportado."));
+    }
 
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+    final authResult = await provider.authenticate();
+
+    if (authResult is Success<User>) {
+      return await _processAuthenticatedUser(
+        authResult.data,
+        isNewUser: false,
+        providerName: providerName,
       );
-
-      final UserCredential userCredential = await _auth.signInWithCredential(
-        credential,
-      );
-
-      final User? user = userCredential.user;
-
-      if (user == null) {
-        return const Failure(UnknownError("No se pudo autenticar con Google."));
-      }
-
-      final DocumentReference docRef = _firestore
-          .collection('users')
-          .doc(user.uid);
-
-      String rolSaved = await UserPreferences.getRoleName() ?? '';
-
-      final DocumentSnapshot doc = await docRef.get();
-      if (!doc.exists) {
-        final newUser = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          username: _buildUsername(user.displayName),
-          dni: '',
-          telefono: '',
-          nombres: user.displayName ?? '',
-          apellidoPaterno: '',
-          apellidoMaterno: '',
-          nombreCompleto: user.displayName ?? '',
-          createdAt: DateTime.now(),
-          rol: rolSaved,
-          especialidad: "",
-          descripcion: "",
-        );
-
-        await docRef.set(newUser.toJson());
-        return Success(user);
-      }
-
-      return Success(user);
-    } on FirebaseAuthException catch (e) {
-      return Failure(ErrorMapper.map(e));
-    } catch (e) {
-      return const Failure(
-        UnknownError("Error inesperado en login con Google."),
-      );
+    } else {
+      return Failure((authResult as Failure).error);
     }
   }
 
-  Future<ResultState<User>> loginWithFacebook() async {
+  Future<ResultState<AuthResult>> registerUser(
+    String email,
+    String password,
+    String username,
+  ) async {
     try {
-      await FacebookAuth.instance.logOut();
-
-      final LoginResult loginResult = await FacebookAuth.instance.login(
-        permissions: ['email', 'public_profile'],
+      final UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      if (loginResult.status != LoginStatus.success) {
-        return const Failure(
-          UserNotFound("Inicio de sesión cancelado o fallido."),
-        );
-      }
-
-      final accessToken = loginResult.accessToken;
-      if (accessToken == null) {
-        return const Failure(UserNotFound("No se obtuvo token de Facebook."));
-      }
-
-      final OAuthCredential facebookAuthCredential =
-          FacebookAuthProvider.credential(accessToken.tokenString);
-
-      final UserCredential userCredential = await _auth.signInWithCredential(
-        facebookAuthCredential,
-      );
-      final User? user = userCredential.user;
-
+      final User? user = result.user;
       if (user == null) {
-        return const Failure(
-          UnknownError("No se pudo autenticar con Facebook."),
-        );
+        return const Failure(UnknownError("No se pudo crear el usuario."));
       }
 
+      return await _processAuthenticatedUser(
+        user,
+        isNewUser: true,
+        username: username,
+      );
+    } on FirebaseAuthException catch (e) {
+      return Failure(ErrorMapper.map(e));
+    } catch (e) {
+      return Failure(UnknownError("Error al registrar: ${e.toString()}"));
+    }
+  }
+
+  Future<ResultState<AuthResult>> _processAuthenticatedUser(
+    User firebaseUser, {
+    required bool isNewUser,
+    String? providerName,
+    String? username,
+  }) async {
+    try {
       final DocumentReference docRef = _firestore
           .collection('users')
-          .doc(user.uid);
-      String rolSaved = await UserPreferences.getRoleName() ?? '';
+          .doc(firebaseUser.uid);
 
       final DocumentSnapshot doc = await docRef.get();
-      if (!doc.exists) {
-        final userData = await FacebookAuth.instance.getUserData();
+      UserModel userModel;
+      bool needsProfileCompletion = false;
 
-        final newUser = UserModel(
-          uid: user.uid,
-          email: user.email ?? '',
-          username: _buildUsername(userData['name']),
+      if (!doc.exists || isNewUser) {
+        final String rolSaved = await UserPreferences.getRoleName() ?? '';
+
+        userModel = UserModel(
+          uid: firebaseUser.uid,
+          email: firebaseUser.email ?? '',
+          username: username ?? _buildUsername(firebaseUser.displayName),
           dni: '',
           telefono: '',
-          nombres: userData['name'] ?? '',
+          nombres: firebaseUser.displayName ?? '',
           apellidoPaterno: '',
           apellidoMaterno: '',
-          nombreCompleto: userData['name'] ?? '',
+          nombreCompleto: firebaseUser.displayName ?? '',
           createdAt: DateTime.now(),
           rol: rolSaved,
           especialidad: "",
           descripcion: "",
         );
 
-        await docRef.set(newUser.toJson());
-        return Success(user);
+        await docRef.set(userModel.toJson());
+        needsProfileCompletion = await _checkProfileCompletion(userModel);
+      } else {
+        final data = doc.data() as Map<String, dynamic>;
+        userModel = UserModel.fromJson(data);
+        needsProfileCompletion = await _checkProfileCompletion(userModel);
       }
 
-      return Success(user);
-    } on FirebaseAuthException catch (e) {
-      return Failure(ErrorMapper.map(e));
-    } catch (e) {
-      return const Failure(
-        UnknownError("Error inesperado en login con Facebook."),
+      return Success(
+        AuthResult(
+          userModel: userModel,
+          isNewUser: isNewUser,
+          needsProfileCompletion: needsProfileCompletion,
+        ),
       );
+    } catch (e) {
+      return Failure(UnknownError("Error procesando usuario: ${e.toString()}"));
     }
+  }
+
+  Future<bool> _checkProfileCompletion(UserModel user) async {
+    if (user.rol == "Trabajador") {
+      return user.dni.trim().isEmpty;
+    }
+    return false;
   }
 
   Future<ResultState<String>> recoverPassword(String email) async {
     try {
       final snapshot =
-          await FirebaseFirestore.instance
+          await _firestore
               .collection("users")
               .where("email", isEqualTo: email)
               .limit(1)
@@ -207,7 +186,7 @@ class AuthRepository {
         );
       }
 
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      await _auth.sendPasswordResetEmail(email: email);
       return Success('Correo de recuperación enviado a $email');
     } catch (e) {
       return Failure(ErrorMapper.map(e));
@@ -221,6 +200,14 @@ class AuthRepository {
     } catch (_) {
       return const Failure(UnknownError("Error al cerrar sesión"));
     }
+  }
+
+  void addAuthProvider(String name, AuthProviderStrategy provider) {
+    _providers[name.toLowerCase()] = provider;
+  }
+
+  List<String> getAvailableProviders() {
+    return _providers.keys.toList();
   }
 
   String _buildUsername(String? displayName) {

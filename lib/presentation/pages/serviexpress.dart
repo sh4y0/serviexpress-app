@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page_recovery_password.dart';
 import 'package:serviexpress_app/presentation/pages/chat_page.dart';
@@ -36,8 +36,7 @@ class Serviexpress extends StatelessWidget {
                 return CupertinoPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
                 );
-              case AppRoutes.homeProvider:
-                
+              case AppRoutes.homeProvider:              
                 return CupertinoPageRoute(
                   builder: (context) => const HomeProvider(),
                 );
@@ -54,7 +53,7 @@ class Serviexpress extends StatelessWidget {
                   builder: (context) => const ChatScreen(),
                 );
               case AppRoutes.completeProfile:
-                final userData = settings.arguments as User;
+                final userData = settings.arguments as UserModel;
                 return CupertinoPageRoute(
                   builder: (context) => CuentanosScreen(data: userData),
                 );
