@@ -1,5 +1,4 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,13 +8,14 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/viewmodels/user_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/show_super.dart';
 
 class CuentanosScreen extends ConsumerStatefulWidget {
-  final User data;
+  final UserModel data;
   const CuentanosScreen({super.key, required this.data});
 
   @override
@@ -34,6 +34,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   void initState() {
     super.initState();
     _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
+
   }
 
   Future<void> _precacheSvgs() async {
@@ -94,8 +95,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
               onOk: () {
                 Navigator.pushReplacementNamed(
                   context,
-                  AppRoutes.home,
-                  arguments: MapStyleLoader.cachedStyle,
+                  AppRoutes.homeProvider,
                 );
               },
             );

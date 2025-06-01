@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
+import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
 
 class HomeProvider extends StatefulWidget {
@@ -123,7 +123,7 @@ class _HomeProviderState extends State<HomeProvider> {
                                           context,
                                           animation,
                                           secondaryAnimation,
-                                        ) => ProviderDetails(cliente: cliente),
+                                        ) => ProviderDetails(cliente: cliente, mapStyle: MapStyleLoader.cachedStyle),
                                     transitionsBuilder: _transition,
                                     transitionDuration: const Duration(
                                       milliseconds: 300,

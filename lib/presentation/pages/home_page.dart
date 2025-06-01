@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -88,14 +87,14 @@ class _HomePageState extends State<HomePage>
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
     _initializeLocation();
-  
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupKeyboardListener();
     });
   }
 
-  void _setupToken() async{
-     await NotificationManager().initialize();
+  void _setupToken() async {
+    await NotificationManager().initialize();
   }
 
   void _setupKeyboardListener() {
@@ -144,7 +143,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('AppLifecycleState changed to: $state');
     setState(() {
       _appLifecycleState = state;
     });
@@ -773,7 +771,6 @@ class _HomePageState extends State<HomePage>
     final double bottomSheetInitialHeight =
         MediaQuery.of(context).size.height * 0.34;
 
-    final double topPadding = MediaQuery.of(context).padding.top + 10;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
@@ -804,82 +801,14 @@ class _HomePageState extends State<HomePage>
                     onCameraMove: _onCameraMove,
                     onCameraIdle: _onCameraIdle,
                     padding: EdgeInsets.only(
-                      top:
-                          topPaddingHeight,
-                      bottom:
-                          bottomSheetInitialHeight, 
+                      top: topPaddingHeight,
+                      bottom: bottomSheetInitialHeight,
                     ),
                   );
                 },
               );
             },
           ),
-         Positioned(
-            top: topPadding,
-            left: 16,
-            right: 16,
-            child: Column(
-              children:
-                  notifications.map((notification) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColor.bgAll,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 6,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    notification.title ?? 'Nuevo servicio',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    notification.body ??
-                                        'Nuevo servicio solicitado',
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    notification.idServicio,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-
-                              const Icon(
-                                Icons.home_repair_service,
-                                color: Colors.lightGreenAccent,
-                                size: 40,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-
           SafeArea(
             child: Container(
               height: 60,

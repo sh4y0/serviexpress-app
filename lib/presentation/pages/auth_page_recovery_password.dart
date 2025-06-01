@@ -68,7 +68,21 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
           elevation: 0,
           leading: IconButton(
             onPressed: () {
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const AuthPage(),
+                  transitionsBuilder: (_, animation, __, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(1.0, 0.0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
             icon: Transform.translate(
               offset: const Offset(4, 0),
@@ -166,7 +180,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
   }) {
     return TextFormField(
       onTap: () {
-        setState(() {});
+        //setState(() {});
       },
       controller: controller,
       obscureText: obscureText,
