@@ -114,6 +114,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is AuthResult) {
             await UserPreferences.saveUserId(data.userModel.uid);
+            final role = await UserPreferences.getRoleName();
 
             if (data.needsProfileCompletion) {
               if (mounted) {
@@ -137,21 +138,30 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       AppRoutes.home,
                       arguments: MapStyleLoader.cachedStyle,
                     );
-                  //   if (mounted) {
-                  //   setState(() {
-                  //     _isLogin = true;
-                  //   });
-                  // }
+                    //   if (mounted) {
+                    //   setState(() {
+                    //     _isLogin = true;
+                    //   });
+                    // }
                   },
                 );
               }
             } else {
-              if (mounted) {
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.home,
-                  arguments: MapStyleLoader.cachedStyle,
-                );
+              if (role == "Trabajador") {
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.homeProvider,
+                  );
+                }
+              } else if (role == "Cliente") {
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.home,
+                    arguments: MapStyleLoader.cachedStyle,
+                  );
+                }
               }
             }
           }
@@ -236,7 +246,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                       passwordController: _passwordSignupController,
                       obscurePassword: _obscurePasswordSignup,
                       onTogglePasswordVisibility:
-                          () => setState(() =>_obscurePasswordSignup =! _obscurePasswordSignup),
+                          () => setState(
+                            () =>
+                                _obscurePasswordSignup =
+                                    !_obscurePasswordSignup,
+                          ),
                       onSignup: _performSignup,
                       onSwitchToLogin: _toggleAuthMode,
                       ref: ref,
@@ -284,7 +298,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       final usuario = _usuarioSignupController.text.trim();
       final email = _emailSignupController.text.trim();
       final password = _passwordSignupController.text.trim();
-       ref.read(authViewModelProvider.notifier)
+      ref
+          .read(authViewModelProvider.notifier)
           .registerUser(email, password, usuario);
     } else {
       Alerts.instance.showErrorAlert(
