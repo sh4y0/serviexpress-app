@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
@@ -22,7 +21,8 @@ class _HomeProviderState extends State<HomeProvider> {
       "distance": "A 30 min de ti",
       "images": [
         "assets/images/img_services.png",
-        "assets/images/profile_default.png",
+        "assets/images/img_services.png",
+        "assets/images/img_services.png",
         "assets/images/img_services.png",
       ],
     },
@@ -30,29 +30,20 @@ class _HomeProviderState extends State<HomeProvider> {
       "name": "Ana Lucia Mendez Hugarte",
       "description": "Limpiar un locar de 300m",
       "distance": "2.7 km",
-      "images": [
-        "assets/images/img_services.png",
-        "assets/images/profile_default.png",
-      ],
+      "images": ["assets/images/img_services.png"],
     },
     {
       "name": "Luis Alfredo Benites ",
       "description":
           "Instalar ventanas en una habitacion y en la sala de unos 250 metros aproximadamente",
       "distance": "4.1 km",
-      "images": [
-        "assets/images/img_services.png",
-        "assets/images/profile_default.png",
-      ],
+      "images": ["assets/images/img_services.png"],
     },
     {
       "name": "Mario Gimenez Mendez",
       "description": "Reparar un refrigerador que no congela",
       "distance": "4.1 km",
-      "images": [
-        "assets/images/img_services.png",
-        "assets/images/profile_default.png",
-      ],
+      "images": ["assets/images/img_services.png"],
     },
   ];
   @override
@@ -61,7 +52,9 @@ class _HomeProviderState extends State<HomeProvider> {
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+            decoration: const BoxDecoration(
+              gradient: AppColor.backgroudGradient,
+            ),
           ),
           if (clientes.isNotEmpty)
             SafeArea(
