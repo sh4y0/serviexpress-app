@@ -48,17 +48,26 @@ class FCMMessage {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'message': {
-        'token': token,
-        'data': {
-          'idServicio': idServicio,
-          'senderId': senderId,
-          'receiverId': receiverId,
-          if (title != null) 'title': title!,
-          if (body != null) 'body': body!,
-        },
-      },
+    final data = {
+      'idServicio': idServicio,
+      'senderId': senderId,
+      'receiverId': receiverId,
+      if (title != null) 'title': title!,
+      if (body != null) 'body': body!,
     };
+
+    final message = {'token': token, 'data': data};
+
+    if (title != null || body != null) {
+      message['notification'] = {
+        if (title != null) 'title': title!,
+        if (body != null) 'body': body!,
+      };
+      message['android'] = {
+        'notification': {'channel_id': 'default_channel'},
+      };
+    }
+
+    return {'message': message};
   }
 }
