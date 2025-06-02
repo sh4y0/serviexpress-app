@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/service.dart';
 
 class ProviderDetails extends StatefulWidget {
-  final Map<String, dynamic> cliente;
+  final Service service;
   final String? mapStyle;
 
   const ProviderDetails({
     super.key,
-    required this.cliente,
+    required this.service,
     required this.mapStyle,
   });
 
@@ -28,7 +29,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.cliente["name"])),
+      appBar: AppBar(title: Text(widget.service.cliente.nombreCompleto)),
       body: Stack(
         children: [
           GoogleMap(
@@ -44,7 +45,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
             maxChildSize: 0.6,
             builder: (context, scrollController) {
               return ScreenClientData(
-                cliente: widget.cliente,
+                service: widget.service,
                 scrollController: scrollController,
               );
             },
@@ -58,11 +59,11 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 class ScreenClientData extends StatelessWidget {
   const ScreenClientData({
     super.key,
-    required this.cliente,
+    required this.service,
     required this.scrollController,
   });
 
-  final Map<String, dynamic> cliente;
+  final Service service;
   final ScrollController scrollController;
 
   @override
@@ -112,7 +113,7 @@ class ScreenClientData extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "${cliente["name"]}",
+                        service.cliente.nombreCompleto,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -131,10 +132,11 @@ class ScreenClientData extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
+                      /*
                       Text(
                         "${cliente["distance"]}",
                         style: const TextStyle(color: Colors.white),
-                      ),
+                      ), */
                     ],
                   ),
                 ),
@@ -176,7 +178,7 @@ class ScreenClientData extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "${cliente["description"]}",
+                    service.service.descripcion,
                     style: const TextStyle(color: AppColor.txtBooking),
                   ),
                   const SizedBox(height: 15),
@@ -184,12 +186,29 @@ class ScreenClientData extends StatelessWidget {
                     height: 90,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: (cliente["images"] as List).length,
+                      itemCount: service.service.fotos!.length,
                       separatorBuilder:
                           (context, index) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         return Image.asset(
-                          cliente["images"][index],
+                          service.service.fotos![index],
+                          width: 90,
+                          height: 90,
+                        );
+                      },
+                    ),
+                  ),
+
+                  SizedBox(
+                    height: 90,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: service.service.videos!.length,
+                      separatorBuilder:
+                          (context, index) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        return Image.asset(
+                          service.service.videos![index],
                           width: 90,
                           height: 90,
                         );

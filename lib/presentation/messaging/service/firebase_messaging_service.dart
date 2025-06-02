@@ -42,18 +42,25 @@ class FirebaseMessagingService {
         'https://fcm.googleapis.com/v1/projects/$_projectId/messages:send',
       );
 
+      final requestBody = jsonEncode(messageWithToken.toJson());
+
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(messageWithToken.toJson()),
+        body: requestBody,
       );
 
-      await NotificationRepository.instance.saveNotification(messageWithToken);
-
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        await NotificationRepository.instance.saveNotification(
+          messageWithToken,
+        );
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return false;
     }
