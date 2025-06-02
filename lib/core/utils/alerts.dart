@@ -11,7 +11,7 @@ class Alerts {
   }) async {
     return _showAnimatedDialog(
       context,
-      title: "Éxito",
+      //title: "Éxito",
       message: message,
       isError: false,
       onOk: onOk,
@@ -21,7 +21,16 @@ class Alerts {
   Future<void> showErrorAlert(BuildContext context, String message) async {
     return _showAnimatedDialog(
       context,
-      title: "Error",
+      //title: "Error",
+      message: message,
+      isError: true,
+    );
+  }
+
+  Future<void> showInfoAlert(BuildContext context, String message) async {
+    return _showAnimatedDialog(
+      context,
+      //title: "Error",
       message: message,
       isError: true,
     );
@@ -29,7 +38,7 @@ class Alerts {
 
   Future<void> _showAnimatedDialog(
     BuildContext context, {
-    required String title,
+    //required String title,
     required String message,
     required bool isError,
     VoidCallback? onOk,
@@ -66,16 +75,16 @@ class Alerts {
                     size: 60,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
+                  // Text(
+                  //   title,
+                  //   style: const TextStyle(
+                  //     color: Colors.white,
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 22,
+                  //   ),
+                  //   textAlign: TextAlign.center,
+                  // ),
+                  // const SizedBox(height: 12),
                   Text(
                     message,
                     style: const TextStyle(color: Colors.white70, fontSize: 16),
