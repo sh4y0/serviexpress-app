@@ -42,7 +42,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: 0.30,
-            maxChildSize: 0.6,
+            maxChildSize: 0.8,
             builder: (context, scrollController) {
               return ScreenClientData(
                 service: widget.service,
@@ -56,7 +56,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
   }
 }
 
-class ScreenClientData extends StatelessWidget {
+class ScreenClientData extends StatefulWidget {
   const ScreenClientData({
     super.key,
     required this.service,
@@ -67,6 +67,13 @@ class ScreenClientData extends StatelessWidget {
   final ScrollController scrollController;
 
   @override
+  State<ScreenClientData> createState() => _ScreenClientDataState();
+}
+
+class _ScreenClientDataState extends State<ScreenClientData> {
+  List<String> precio = ["150", "200", "250"];
+  int selectedPrecio = 0;
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
@@ -76,9 +83,17 @@ class ScreenClientData extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
-          controller: scrollController,
+          controller: widget.scrollController,
           shrinkWrap: true,
           children: [
+            Container(
+              height: 5,
+              margin: const EdgeInsets.only(bottom: 20, left: 80, right: 80),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: AppColor.dotColor,
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -127,7 +142,10 @@ class ScreenClientData extends StatelessWidget {
                           const SizedBox(width: 4),
                           const Text(
                             "Moche 135",
-                            style: TextStyle(color: AppColor.txtPrice),
+                            style: TextStyle(
+                              color: AppColor.txtPrice,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -218,9 +236,240 @@ class ScreenClientData extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 15),
+            const Text(
+              "Escoge el precio:",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Row(
+            //   children: [
+            //   Expanded(
+            //     child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.start,
+            //     children: List.generate(precio.length, (index) {
+            //       final isSelected = selectedPrecio == index;
+            //       return Padding(
+            //       padding: EdgeInsets.only(right: index < precio.length - 1 ? 10 : 0),
+            //       child: GestureDetector(
+            //         onTap: () {
+            //         setState(() {
+            //           selectedPrecio = index;
+            //         });
+            //         },
+            //         child: Container(
+            //         padding: const EdgeInsets.symmetric(
+            //           vertical: 8,
+            //           horizontal: 12,
+            //         ),
+            //         decoration: BoxDecoration(
+            //           color: isSelected ? AppColor.btnColor : Colors.transparent,
+            //           borderRadius: BorderRadius.circular(6),
+            //           border: Border.all(
+            //           color: isSelected ? AppColor.btnColor : AppColor.btnColor,
+            //           width: 1.5,
+            //           ),
+            //         ),
+            //         child: Text(
+            //           "\$${precio[index]}",
+            //           style: TextStyle(
+            //           color: isSelected ? Colors.white : AppColor.btnColor,
+            //           fontWeight: FontWeight.bold,
+            //           ),
+            //         ),
+            //         ),
+            //       ),
+            //       );
+            //     }),
+            //     ),
+            //   ),
+            //   TextButton.icon(
+            //     onPressed: () {
+            //     mostrarPropuesta(context);
+            //     },
+            //     label: const Text("Otro"),
+            //     icon: const Icon(Icons.add),
+            //     style: ButtonStyle(
+            //     overlayColor: WidgetStateProperty.all(Colors.transparent),
+            //     splashFactory: NoSplash.splashFactory,
+            //     ),
+            //   ),
+            //   ],
+            // ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => mostrarPropuesta(context),
+              child: const InputPresupuesto().inptDesing(),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColor.bgMsgUser,
+                ),
+                child: const Text(
+                  "No me interesa",
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColor.btnColor,
+                ),
+                child: const Text(
+                  "Aceptar",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class InputPresupuesto extends StatelessWidget {
+  const InputPresupuesto({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Presupuesto",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        inptDesing(),
+        const SizedBox(height: 10),
+        const Text(
+          "Propuesta",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "Describe detalladamente el servicio que ofrecerás",
+          style: TextStyle(color: AppColor.txtBooking),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          maxLines: 6,
+          style: const TextStyle(color: AppColor.bgMsgUser),
+          decoration: InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: AppColor.colorInput,
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: AppColor.bgMsgUser,
+                width: 1.5,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          child: ElevatedButton(
+            onPressed: () {},
+            child: const Text(
+              "Crear Propuesta",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row inptDesing() {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 17.5),
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColor.colorInput,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(12),
+              bottomLeft: Radius.circular(12),
+            ),
+          ),
+          child: const Text(
+            "S/",
+            style: TextStyle(color: AppColor.txtBooking, fontSize: 17),
+          ),
+        ),
+        const Expanded(
+          child: TextField(
+            style: TextStyle(color: AppColor.bgMsgUser, fontSize: 18),
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                borderSide: BorderSide(color: AppColor.colorInput, width: 1.5),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                borderSide: BorderSide(color: AppColor.bgMsgUser, width: 1.5),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void mostrarPropuesta(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return Center(
+        child: SingleChildScrollView(
+          child: AlertDialog(
+            backgroundColor: AppColor.bgContendeor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              child: const InputPresupuesto(),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
