@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,10 +8,18 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
-import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
-import 'package:serviexpress_app/presentation/viewmodels/register_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+
+class _AppIcons {
+  static const String person = "assets/icons/ic_person.svg";
+  static const String pass = "assets/icons/ic_pass.svg";
+  static const String email = "assets/icons/ic_email.svg";
+  static const String facebook = "assets/icons/ic_facebook.svg";
+  static const String google = "assets/icons/ic_google.svg";
+  static const String apple = "assets/icons/ic_apple.svg";
+}
 
 class SvgCache {
   static final Map<String, SvgPicture> _cache = {};
@@ -38,130 +45,116 @@ class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
 
   @override
-  ConsumerState<AuthPage> createState() => _AuthScreenState();
+  ConsumerState<AuthPage> createState() => _AuthPageState();
 }
 
-class _AuthScreenState extends ConsumerState<AuthPage> {
-  bool isLogin = true;
-  bool visibilityPasswordIconLogin = true;
-  bool visibilityPasswordIconSignup = true;
+class _AuthPageState extends ConsumerState<AuthPage> {
+  bool _isLogin = true;
+
   final _formLoginKey = GlobalKey<FormState>();
+  final _emailLoginController = TextEditingController();
+  final _passwordLoginController = TextEditingController();
+  bool _obscurePasswordLogin = true;
+
   final _formSignupKey = GlobalKey<FormState>();
-  bool isEmployer = false;
-
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  final TextEditingController _usuarioControllerRegister =
-      TextEditingController();
-  final TextEditingController _dniControllerRegister = TextEditingController();
-  final TextEditingController _emailControllerRegister =
-      TextEditingController();
-  final TextEditingController _passwordControllerRegister =
-      TextEditingController();
-
-  late BoxDecoration userContainerDecoration;
-  late BoxDecoration passwordContainerDecoration;
-  bool isTextFormFieldClicked = false;
+  final _usuarioSignupController = TextEditingController();
+  final _dniSignupController = TextEditingController();
+  final _emailSignupController = TextEditingController();
+  final _passwordSignupController = TextEditingController();
+  bool _obscurePasswordSignup = true;
 
   late Future<void> _preloadFuture;
 
   @override
   void initState() {
     super.initState();
-    _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
+    _preloadFuture = Future.wait([
+      MapStyleLoader.loadStyle(),
+      _precacheSvgs(context),
+    ]);
   }
 
-  Future<void> _precacheSvgs() async {
-    final svgPaths = [
-      "assets/icons/ic_person.svg",
-      "assets/icons/ic_pass.svg",
-      "assets/icons/ic_email.svg",
-      "assets/icons/ic_facebook.svg",
-      "assets/icons/ic_google.svg",
-      "assets/icons/ic_apple.svg",
+  Future<void> _precacheSvgs(BuildContext context) async {
+    final svgAssets = [
+      _AppIcons.person,
+      _AppIcons.pass,
+      _AppIcons.email,
+      _AppIcons.facebook,
+      _AppIcons.google,
+      _AppIcons.apple,
     ];
 
-    for (final path in svgPaths) {
+    for (final path in svgAssets) {
+      if (!mounted) return;
       SvgCache.getIconSvg(path);
     }
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-
-    _usuarioControllerRegister.dispose();
-    _dniControllerRegister.dispose();
-    _emailControllerRegister.dispose();
-    _passwordControllerRegister.dispose();
+    _emailLoginController.dispose();
+    _passwordLoginController.dispose();
+    _usuarioSignupController.dispose();
+    _dniSignupController.dispose();
+    _emailSignupController.dispose();
+    _passwordSignupController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    ref.listen<ResultState>(authViewModelProvider, (previous, next) async {
+  void _listenToAuthViewModel() {
+    ref.listen<ResultState>(authViewModelProvider, (_, next) async {
       switch (next) {
         case Idle():
           LoadingScreen.hide();
           break;
         case Loading():
-          _preloadFuture;
           LoadingScreen.show(context);
           break;
-        case Success(:final data):
+        case Success(data: final data):
           LoadingScreen.hide();
-          if (mounted && data is User) {
-            await UserPreferences.saveUserId(data.uid);
+          if (mounted && data is AuthResult) {
+            await UserPreferences.saveUserId(data.userModel.uid);
+            final role = await UserPreferences.getRoleName();
 
-            final isDniEmpty = await UserRepository.instance.isDniEmpty(
-              data.uid,
-            );
-
-            if (isDniEmpty) {
-              Navigator.pushReplacementNamed(
-                context,
-                AppRoutes.completeProfile,
-                arguments: data,
-              );
+            if (data.needsProfileCompletion) {
+              if (mounted) {
+                Navigator.pushReplacementNamed(
+                  context,
+                  AppRoutes.completeProfile,
+                  arguments: data.userModel,
+                );
+              }
               return;
             }
 
-            if (mounted) {
-              Navigator.pushReplacementNamed(
-                context,
-                AppRoutes.home,
-                arguments: MapStyleLoader.cachedStyle,
-              );
-            }
-          }
-          break;
-        case Failure(:final error):
-          LoadingScreen.hide();
-          if (mounted) {
-            Alerts.instance.showErrorAlert(context, error.message);
-          }
-          break;
-      }
-    });
-
-    ref.listen<ResultState>(registerViewModelProvider, (previous, next) {
-      switch (next) {
-        case Idle():
-          LoadingScreen.hide();
-          break;
-        case Loading():
-          _preloadFuture;
-          LoadingScreen.show(context);
-          break;
-        case Success():
-          LoadingScreen.hide();
-          if (mounted) {
-            Alerts.instance.showSuccessAlert(
-              context,
-              "Usted se ha registrado exitosamente",
-              onOk: () {
+            if (data.isNewUser && !data.needsProfileCompletion) {
+              if (mounted) {
+                Alerts.instance.showSuccessAlert(
+                  context,
+                  "¡Registro exitoso! Bienvenido a ServiExpress",
+                  onOk: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      AppRoutes.home,
+                      arguments: MapStyleLoader.cachedStyle,
+                    );
+                    //   if (mounted) {
+                    //   setState(() {
+                    //     _isLogin = true;
+                    //   });
+                    // }
+                  },
+                );
+              }
+            } else {
+              if (role == "Trabajador") {
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.homeProvider,
+                  );
+                }
+              } else if (role == "Cliente") {
                 if (mounted) {
                   Navigator.pushReplacementNamed(
                     context,
@@ -169,11 +162,11 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                     arguments: MapStyleLoader.cachedStyle,
                   );
                 }
-              },
-            );
+              }
+            }
           }
           break;
-        case Failure(:final error):
+        case Failure(error: final error):
           LoadingScreen.hide();
           if (mounted) {
             Alerts.instance.showErrorAlert(context, error.message);
@@ -181,6 +174,15 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           break;
       }
     });
+  }
+
+  void _toggleAuthMode() {
+    setState(() => _isLogin = !_isLogin);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _listenToAuthViewModel();
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -188,43 +190,136 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-          child: Column(
-            children: [
-              _buildAnimatedSwitcher(),
-              const SizedBox(height: 35),
-              //const SizedBox(height: 20),
-              AnimatedCrossFade(
-                crossFadeState:
-                    isLogin
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                firstChild: _buildLoginForm(ref),
-                secondChild: _buildSignupForm(ref),
-                duration: const Duration(milliseconds: 500),
-                firstCurve: Curves.easeOutQuart,
-                secondCurve: Curves.easeInQuart,
-                sizeCurve: Curves.easeInOutCubic,
-                layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
-                  return Stack(
-                    children: [
-                      Positioned(key: bottomKey, child: bottomChild),
-                      Positioned(key: topKey, child: topChild),
-                    ],
-                  );
-                },
+        child: FutureBuilder<void>(
+          future: _preloadFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
+            }
+            if (snapshot.hasError) {
+              return const Center(
+                child: Text(
+                  "Error al cargar recursos",
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+              child: Column(
+                children: [
+                  _AuthHeader(isLogin: _isLogin, onToggle: _toggleAuthMode),
+                  const SizedBox(height: 35),
+                  AnimatedCrossFade(
+                    crossFadeState:
+                        _isLogin
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                    firstChild: _LoginFormWidget(
+                      formKey: _formLoginKey,
+                      emailController: _emailLoginController,
+                      passwordController: _passwordLoginController,
+                      obscurePassword: _obscurePasswordLogin,
+                      onTogglePasswordVisibility:
+                          () => setState(
+                            () =>
+                                _obscurePasswordLogin = !_obscurePasswordLogin,
+                          ),
+                      onLogin: _performLogin,
+                      onForgotPassword: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.recoveryPassword,
+                        );
+                      },
+                      onSwitchToSignup: _toggleAuthMode,
+                      ref: ref,
+                    ),
+                    secondChild: _SignupFormWidget(
+                      formKey: _formSignupKey,
+                      usuarioController: _usuarioSignupController,
+                      dniController: _dniSignupController,
+                      emailController: _emailSignupController,
+                      passwordController: _passwordSignupController,
+                      obscurePassword: _obscurePasswordSignup,
+                      onTogglePasswordVisibility:
+                          () => setState(
+                            () =>
+                                _obscurePasswordSignup =
+                                    !_obscurePasswordSignup,
+                          ),
+                      onSignup: _performSignup,
+                      onSwitchToLogin: _toggleAuthMode,
+                      ref: ref,
+                    ),
+                    duration: const Duration(milliseconds: 500),
+                    firstCurve: Curves.easeOutQuart,
+                    secondCurve: Curves.easeInQuart,
+                    sizeCurve: Curves.easeInOutCubic,
+                    layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(key: bottomKey, child: bottomChild),
+                          Positioned(key: topKey, child: topChild),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildAnimatedSwitcher() {
+  Future<void> _performLogin() async {
+    if (_formLoginKey.currentState?.validate() ?? false) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      final email = _emailLoginController.text.trim();
+      final password = _passwordLoginController.text.trim();
+      await ref.read(authViewModelProvider.notifier).loginUser(email, password);
+    } else {
+      Alerts.instance.showErrorAlert(
+        context,
+        "Por favor completa todos los campos requeridos.",
+      );
+    }
+  }
+
+  void _performSignup() {
+    if (_formSignupKey.currentState?.validate() ?? false) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      final usuario = _usuarioSignupController.text.trim();
+      final email = _emailSignupController.text.trim();
+      final password = _passwordSignupController.text.trim();
+      ref
+          .read(authViewModelProvider.notifier)
+          .registerUser(email, password, usuario);
+    } else {
+      Alerts.instance.showErrorAlert(
+        context,
+        "Por favor completa todos los campos requeridos.",
+      );
+    }
+  }
+}
+
+class _AuthHeader extends StatelessWidget {
+  final bool isLogin;
+  final VoidCallback onToggle;
+
+  const _AuthHeader({required this.isLogin, required this.onToggle});
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = (screenWidth - 60) / 2;
+    final buttonWidth = (screenWidth - 48 - 12) / 2;
 
     return RepaintBoundary(
       child: Container(
@@ -242,6 +337,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
               alignment: isLogin ? Alignment.centerLeft : Alignment.centerRight,
               child: Container(
                 width: buttonWidth,
+                height: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColor.loginSelect,
                   borderRadius: BorderRadius.circular(25),
@@ -251,47 +347,21 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
             Row(
               children: [
                 Expanded(
-                  child: TextButton(
+                  child: _AuthHeaderButton(
+                    text: "Login",
+                    isActive: isLogin,
                     onPressed: () {
-                      if (!isLogin) {
-                        setState(() {
-                          isLogin = true;
-                        });
-                      }
+                      if (!isLogin) onToggle();
                     },
-                    style: ButtonStyle(
-                      overlayColor: WidgetStateProperty.all(Colors.transparent),
-                    ),
-                    child: Text(
-                      "Login",
-                      style: TextStyle(
-                        color: isLogin ? Colors.white : AppColor.textDeselect,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ),
                 Expanded(
-                  child: TextButton(
+                  child: _AuthHeaderButton(
+                    text: "Sign Up",
+                    isActive: !isLogin,
                     onPressed: () {
-                      if (isLogin) {
-                        setState(() {
-                          isLogin = false;
-                        });
-                      }
+                      if (isLogin) onToggle();
                     },
-                    style: ButtonStyle(
-                      overlayColor: WidgetStateProperty.all(Colors.transparent),
-                    ),
-                    child: Text(
-                      "Sign Up",
-                      style: TextStyle(
-                        color: isLogin ? AppColor.textDeselect : Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ),
               ],
@@ -301,9 +371,152 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
       ),
     );
   }
+}
 
-  Widget _buildLoginForm(WidgetRef ref) {
+class _AuthHeaderButton extends StatelessWidget {
+  final String text;
+  final bool isActive;
+  final VoidCallback onPressed;
+
+  const _AuthHeaderButton({
+    required this.text,
+    required this.isActive,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: isActive ? Colors.white : AppColor.textDeselect,
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _CommonAuthFormFields {
+  static Widget buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required String svgIconPath,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      cursorColor: AppColor.colorInput,
+      style: const TextStyle(color: AppColor.textInput),
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 18,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColor.textInput, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColor.colorInput, width: 1),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        hintText: hintText,
+        hintStyle: const TextStyle(color: AppColor.textInput),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(14),
+          child: SvgPicture.asset(
+            svgIconPath,
+            width: 26,
+            height: 26,
+            colorFilter: const ColorFilter.mode(
+              AppColor.textInput,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+        suffixIcon: suffixIcon,
+        suffixIconColor: AppColor.textInput,
+      ),
+      validator:
+          validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return 'Este campo es obligatorio.';
+            }
+            if (svgIconPath == _AppIcons.email &&
+                !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+              return 'Por favor ingresa un correo válido.';
+            }
+            if (hintText.toLowerCase().contains("contraseña") &&
+                value.length < 6) {
+              return 'La contraseña debe tener al menos 6 caracteres.';
+            }
+            return null;
+          },
+    );
+  }
+
+  static Widget buildPasswordToggleIcon(
+    bool isObscured,
+    VoidCallback onPressed,
+  ) {
+    return IconButton(
+      icon: Icon(isObscured ? Icons.visibility_off : Icons.visibility),
+      onPressed: onPressed,
+    );
+  }
+}
+
+class _LoginFormWidget extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool obscurePassword;
+  final VoidCallback onTogglePasswordVisibility;
+  final VoidCallback onLogin;
+  final VoidCallback onForgotPassword;
+  final VoidCallback onSwitchToSignup;
+  final WidgetRef ref;
+
+  const _LoginFormWidget({
+    required this.formKey,
+    required this.emailController,
+    required this.passwordController,
+    required this.obscurePassword,
+    required this.onTogglePasswordVisibility,
+    required this.onLogin,
+    required this.onForgotPassword,
+    required this.onSwitchToSignup,
+    required this.ref,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      key: const ValueKey('loginForm'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
@@ -320,45 +533,31 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
         ),
         const SizedBox(height: 32),
         Form(
-          key: _formLoginKey,
+          key: formKey,
           child: Column(
-            key: const ValueKey('loginForm'),
             children: [
-              _buildTextField(
-                controller: _emailController,
+              _CommonAuthFormFields.buildTextField(
+                controller: emailController,
                 hintText: "Usuario o correo electrónico",
-                svgIconPath: "assets/icons/ic_person.svg",
+                svgIconPath: _AppIcons.person,
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 30),
-              _buildTextField(
-                controller: _passwordController,
+              _CommonAuthFormFields.buildTextField(
+                controller: passwordController,
                 hintText: "Contraseña*",
-                svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: visibilityPasswordIconLogin,
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      visibilityPasswordIconLogin =
-                          !visibilityPasswordIconLogin;
-                    });
-                  },
-                  icon: Icon(
-                    visibilityPasswordIconLogin
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                  ),
+                svgIconPath: _AppIcons.pass,
+                obscureText: obscurePassword,
+                suffixIcon: _CommonAuthFormFields.buildPasswordToggleIcon(
+                  obscurePassword,
+                  onTogglePasswordVisibility,
                 ),
               ),
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      AppRoutes.recoveryPassword,
-                    );
-                  },
+                  onPressed: onForgotPassword,
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: const Text(
                     "Olvidaste tu contraseña?",
@@ -371,22 +570,7 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    final email = _emailController.text.trim();
-                    final password = _passwordController.text.trim();
-
-                    if (email.isEmpty || password.isEmpty) {
-                      Alerts.instance.showErrorAlert(
-                        context,
-                        "Por favor completa todos los campos.",
-                      );
-                      return;
-                    }
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    await ref
-                        .read(authViewModelProvider.notifier)
-                        .loginUser(email, password);
-                  },
+                  onPressed: onLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
                     shape: RoundedRectangleBorder(
@@ -404,76 +588,16 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Row(
-                children: [
-                  Expanded(child: Divider(color: AppColor.textWelcome)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "O inicia sesión con",
-                      style: TextStyle(
-                        color: AppColor.textWelcome,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: AppColor.textWelcome)),
-                ],
-              ),
+              const _SocialLoginDivider(text: "O inicia sesión con"),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: socialButton(
-                      "assets/icons/ic_facebook.svg",
-                      () async {
-                        await ref
-                            .read(authViewModelProvider.notifier)
-                            .loginWithFacebook();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: socialButton("assets/icons/ic_google.svg", () async {
-                      await ref
-                          .read(authViewModelProvider.notifier)
-                          .loginWithGoogle();
-                    }),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: socialButton("assets/icons/ic_apple.svg", () {
-                      // Login con Apple
-                    }),
-                  ),
-                ],
+              _SocialLoginButtons(
+                authViewModelNotifier: ref.read(authViewModelProvider.notifier),
               ),
               const SizedBox(height: 25),
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    text: "¿No tienes una cuenta? ",
-                    style: const TextStyle(color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: "Registrate Ahora",
-                        style: const TextStyle(
-                          color: AppColor.colorInput,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = () {
-                                setState(() {
-                                  isLogin = false;
-                                });
-                              },
-                      ),
-                    ],
-                  ),
-                ),
+              _AlternateAuthAction(
+                promptText: "¿No tienes una cuenta? ",
+                actionText: "Registrate Ahora",
+                onActionTap: onSwitchToSignup,
               ),
             ],
           ),
@@ -481,9 +605,37 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
       ],
     );
   }
+}
 
-  Widget _buildSignupForm(WidgetRef ref) {
+class _SignupFormWidget extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController usuarioController;
+  final TextEditingController dniController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool obscurePassword;
+  final VoidCallback onTogglePasswordVisibility;
+  final VoidCallback onSignup;
+  final VoidCallback onSwitchToLogin;
+  final WidgetRef ref;
+
+  const _SignupFormWidget({
+    required this.formKey,
+    required this.usuarioController,
+    required this.dniController,
+    required this.emailController,
+    required this.passwordController,
+    required this.obscurePassword,
+    required this.onTogglePasswordVisibility,
+    required this.onSignup,
+    required this.onSwitchToLogin,
+    required this.ref,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      key: const ValueKey('signupForm'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
@@ -495,73 +647,43 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
           ),
         ),
         const Text(
-          "Welcome back you've been missed!",
+          "Welcome, let's get you started!",
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
         Form(
-          key: _formSignupKey,
+          key: formKey,
           child: Column(
-            key: const ValueKey('signupForm'),
             children: [
-              _buildTextField(
-                controller: _usuarioControllerRegister,
+              _CommonAuthFormFields.buildTextField(
+                controller: usuarioController,
                 hintText: "Usuario",
-                svgIconPath: "assets/icons/ic_person.svg",
+                svgIconPath: _AppIcons.person,
               ),
               const SizedBox(height: 20),
-              _buildTextField(
-                controller: _emailControllerRegister,
+              _CommonAuthFormFields.buildTextField(
+                controller: emailController,
                 hintText: "Correo electrónico",
-                svgIconPath: "assets/icons/ic_email.svg",
+                svgIconPath: _AppIcons.email,
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
-              _buildTextField(
-                controller: _passwordControllerRegister,
+              _CommonAuthFormFields.buildTextField(
+                controller: passwordController,
                 hintText: "Contraseña*",
-                svgIconPath: "assets/icons/ic_pass.svg",
-                obscureText: visibilityPasswordIconSignup,
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      visibilityPasswordIconSignup =
-                          !visibilityPasswordIconSignup;
-                    });
-                  },
-                  icon: Icon(
-                    visibilityPasswordIconSignup
-                        ? Icons.visibility_off
-                        : Icons.visibility,
-                  ),
+                svgIconPath: _AppIcons.pass,
+                obscureText: obscurePassword,
+                suffixIcon: _CommonAuthFormFields.buildPasswordToggleIcon(
+                  obscurePassword,
+                  onTogglePasswordVisibility,
                 ),
               ),
-
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: () {
-                    final usuario = _usuarioControllerRegister.text.trim();
-                    final dni = _dniControllerRegister.text.trim();
-                    final email = _emailControllerRegister.text.trim();
-                    final password = _passwordControllerRegister.text.trim();
-
-                    if (usuario.isEmpty ||
-                        dni.isEmpty ||
-                        email.isEmpty ||
-                        password.isEmpty) {
-                      Alerts.instance.showErrorAlert(
-                        context,
-                        "Por favor completa todos los campos.",
-                      );
-                      return;
-                    }
-
-                    ref
-                        .read(registerViewModelProvider.notifier)
-                        .registerUser(email, password, usuario);
-                  },
+                  onPressed: onSignup,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColor.btnColor,
                     shape: RoundedRectangleBorder(
@@ -579,76 +701,16 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Row(
-                children: [
-                  Expanded(child: Divider(color: AppColor.textWelcome)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 65),
-                    child: Text(
-                      "O",
-                      style: TextStyle(
-                        color: AppColor.textWelcome,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: AppColor.textWelcome)),
-                ],
-              ),
+              const _SocialLoginDivider(text: "O regístrate con"),
               const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: socialButton(
-                      "assets/icons/ic_facebook.svg",
-                      () async {
-                        await ref
-                            .read(authViewModelProvider.notifier)
-                            .loginWithFacebook();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: socialButton("assets/icons/ic_google.svg", () async {
-                      await ref
-                          .read(authViewModelProvider.notifier)
-                          .loginWithGoogle();
-                    }),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: socialButton("assets/icons/ic_apple.svg", () {
-                      // Login con Apple
-                    }),
-                  ),
-                ],
+              _SocialLoginButtons(
+                authViewModelNotifier: ref.read(authViewModelProvider.notifier),
               ),
               const SizedBox(height: 20),
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    text: "¿Ya tienes una cuenta? ",
-                    style: const TextStyle(color: Colors.white),
-                    children: [
-                      TextSpan(
-                        text: "Inicia Sesion",
-                        style: const TextStyle(
-                          color: AppColor.colorInput,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = () {
-                                setState(() {
-                                  isLogin = true;
-                                });
-                              },
-                      ),
-                    ],
-                  ),
-                ),
+              _AlternateAuthAction(
+                promptText: "¿Ya tienes una cuenta? ",
+                actionText: "Inicia Sesion",
+                onActionTap: onSwitchToLogin,
               ),
             ],
           ),
@@ -656,64 +718,119 @@ class _AuthScreenState extends ConsumerState<AuthPage> {
       ],
     );
   }
+}
 
-  Widget _buildTextField({
-    required String hintText,
-    required String svgIconPath,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    TextEditingController? controller,
-  }) {
-    return TextFormField(
-      onTap: () {
-        setState(() {
-          isTextFormFieldClicked = !isTextFormFieldClicked;
-        });
-      },
-      controller: controller,
-      obscureText: obscureText,
-      cursorColor: AppColor.colorInput,
-      style: const TextStyle(color: AppColor.textInput),
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 18,
+class _SocialLoginDivider extends StatelessWidget {
+  final String text;
+  const _SocialLoginDivider({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider(color: AppColor.textWelcome)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            text,
+            style: const TextStyle(color: AppColor.textWelcome, fontSize: 15),
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColor.textInput, width: 1),
+        const Expanded(child: Divider(color: AppColor.textWelcome)),
+      ],
+    );
+  }
+}
+
+class _SocialLoginButtons extends StatelessWidget {
+  final AuthViewModel authViewModelNotifier;
+  const _SocialLoginButtons({required this.authViewModelNotifier});
+
+  Widget _socialButton(String svgPath, VoidCallback onPressed) {
+    return Expanded(
+      child: SizedBox(
+        height: 58,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: AppColor.textWelcome, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          child: SvgPicture.asset(
+            svgPath,
+            width: 26,
+            height: 26,
+            colorFilter: const ColorFilter.mode(
+              Color(0Xffc0c0c0),
+              BlendMode.srcIn,
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColor.colorInput, width: 1),
-        ),
-        hintText: hintText,
-        hintStyle: const TextStyle(color: AppColor.textInput),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.all(14),
-          child: SvgCache.getIconSvg(svgIconPath),
-        ),
-        suffixIcon: suffixIcon,
-        suffixIconColor:
-            isTextFormFieldClicked ? AppColor.textInput : AppColor.colorInput,
       ),
     );
   }
 
-  Widget socialButton(String svgPath, VoidCallback onPressed) {
-    return SizedBox(
-      width: 100,
-      height: 58,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColor.textWelcome, width: 1.5),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _socialButton(
+          _AppIcons.facebook,
+          () async => await authViewModelNotifier.loginWithFacebook(),
         ),
-        child: SvgCache.getIconSvg(svgPath, color: const Color(0Xffc0c0c0)),
+        const SizedBox(width: 16),
+        _socialButton(
+          _AppIcons.google,
+          () async => await authViewModelNotifier.loginWithGoogle(),
+        ),
+        const SizedBox(width: 16),
+        _socialButton(_AppIcons.apple, () {
+          Alerts.instance.showInfoAlert(
+            context,
+            "Inicio de sesión con Apple no implementado aún.",
+          );
+        }),
+      ],
+    );
+  }
+}
+
+class _AlternateAuthAction extends StatelessWidget {
+  final String promptText;
+  final String actionText;
+  final VoidCallback onActionTap;
+
+  const _AlternateAuthAction({
+    required this.promptText,
+    required this.actionText,
+    required this.onActionTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: RichText(
+        text: TextSpan(
+          text: promptText,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+          children: [
+            TextSpan(
+              text: actionText,
+              style: const TextStyle(
+                color: AppColor.colorInput,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                decoration: TextDecoration.underline,
+                decorationColor: AppColor.colorInput,
+              ),
+              recognizer: TapGestureRecognizer()..onTap = onActionTap,
+            ),
+          ],
+        ),
       ),
     );
   }

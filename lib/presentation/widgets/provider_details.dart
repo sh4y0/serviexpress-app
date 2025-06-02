@@ -3,21 +3,40 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
-class ProviderDetails extends StatelessWidget {
+class ProviderDetails extends StatefulWidget {
   final Map<String, dynamic> cliente;
-  const ProviderDetails({super.key, required this.cliente});
+  final String? mapStyle;
+
+  const ProviderDetails({
+    super.key,
+    required this.cliente,
+    required this.mapStyle,
+  });
+
+  @override
+  State<ProviderDetails> createState() => _ProviderDetailsState();
+}
+
+class _ProviderDetailsState extends State<ProviderDetails> {
+  late GoogleMapController mapController;
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    mapController.setMapStyle(widget.mapStyle);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(cliente["name"]), centerTitle: true),
+      appBar: AppBar(title: Text(widget.cliente["name"])),
       body: Stack(
         children: [
-          const GoogleMap(
-            initialCameraPosition: CameraPosition(
+          GoogleMap(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(-8.1052, -79.0264),
               zoom: 15,
             ),
+            onMapCreated: _onMapCreated,
           ),
           DraggableScrollableSheet(
             initialChildSize: 0.30,
@@ -25,7 +44,7 @@ class ProviderDetails extends StatelessWidget {
             maxChildSize: 0.8,
             builder: (context, scrollController) {
               return ScreenClientData(
-                cliente: cliente,
+                cliente: widget.cliente,
                 scrollController: scrollController,
               );
             },
