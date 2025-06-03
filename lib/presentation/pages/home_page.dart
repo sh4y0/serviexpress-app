@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,10 +8,8 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
-import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
@@ -28,8 +23,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   bool _isZoomedIn = false;
@@ -52,10 +46,10 @@ class _HomePageState extends State<HomePage>
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
   bool _mapLoaded = false;
   bool _ignoreNextCameraMove = false;
-  SolicitudServicioModel? _datosSolicitudGuardada;
+  ServiceModel? _datosSolicitudGuardada;
   String? _categoriaTemporalDeSheet2;
-  final GlobalKey<DraggableSheetSolicitarServicio2State> _sheet2Key =
-      GlobalKey<DraggableSheetSolicitarServicio2State>();
+  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key =
+      GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
 
   BitmapDescriptor? _providerMarkerIcon;
@@ -65,24 +59,10 @@ class _HomePageState extends State<HomePage>
 
   final List<ProveedorModel> _proveedoresSeleccionados = [];
 
-  late final StreamSubscription<RemoteMessage> _notificationSubscription;
-  List<FCMMessage> notifications = [];
-
-  AppLifecycleState? _appLifecycleState;
-
-  bool get isAppInForeground =>
-      _appLifecycleState == null ||
-      _appLifecycleState == AppLifecycleState.resumed;
-
   @override
   void initState() {
     super.initState();
     _setupToken();
-
-    // TESTING PURPOSES ONLY
-    _sendTestMessages();
-
-    // END TESTING PURPOSES
 
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
@@ -114,86 +94,8 @@ class _HomePageState extends State<HomePage>
         BitmapDescriptor.hueBlue,
       );
     }
-    WidgetsBinding.instance.addObserver(this);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _notificationSubscription = NotificationManager().notificationStream
-          .listen((RemoteMessage message) {
-            final fcmMessage = FCMMessage.fromRemoteMessage(message);
-
-            bool exists = notifications.any(
-              (notification) =>
-                  notification.idServicio == fcmMessage.idServicio,
-            );
-            if (!exists) {
-              setState(() {
-                notifications.add(fcmMessage);
-              });
-
-              if (isAppInForeground) {
-                NotificationManager().showLocalNotification(
-                  title: fcmMessage.title ?? 'Notificación',
-                  body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-                );
-              }
-            }
-          });
-    });
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _appLifecycleState = state;
-    });
-  }
-
-  // TESTING PURPOSES ONLY
-  void _sendTestMessages() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser == null) {
-      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
-      return;
-    }
-
-    final messages = [
-      FCMMessage(
-        token: '',
-        idServicio: '123ABC',
-        senderId: currentUser.uid,
-        title: 'Mensaje de prueba',
-        body: 'Hola desde el main 👋',
-        receiverId: currentUser.uid,
-      ),
-      FCMMessage(
-        token: '',
-        idServicio: 'SEGUNDO_SERVICIO',
-        senderId: currentUser.uid,
-        title: 'SEGUNDO MENSAJE DE PRUEBA',
-        body: 'HOLA DESDE HOME 👋',
-        receiverId: currentUser.uid,
-      ),
-      FCMMessage(
-        token: '',
-        idServicio: 'TERCER_SERVICIO',
-        senderId: currentUser.uid,
-        title: 'TERCER MENSAJE DE PRUEBA',
-        body: 'HOLA DESDE HOME 👋',
-        receiverId: currentUser.uid,
-      ),
-    ];
-
-    for (var fcmMessage in messages) {
-      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
-        fcmMessage,
-        fcmMessage.receiverId,
-      );
-      print('📤 ¿Mensaje enviado? $enviado');
-    }
-  }
-
-  // END TESTING PURPOSES
   Future<void> _initializeLocation() async {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
@@ -552,7 +454,7 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  void _manejarGuardadoDesdeSheetDetallado(SolicitudServicioModel data) {
+  void _manejarGuardadoDesdeSheetDetallado(ServiceModel data) {
     if (mounted) {
       setState(() {
         _datosSolicitudGuardada = data;
@@ -587,11 +489,12 @@ class _HomePageState extends State<HomePage>
 
   void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
     setState(() {
-      if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
+      if (_datosSolicitudGuardada != null) {
         _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
       } else {
         _categoriaTemporalDeSheet2 = categoria;
       }
+
       _isSheetVisibleSolicitarServicio = true;
     });
   }
@@ -949,12 +852,15 @@ class _HomePageState extends State<HomePage>
                 snapPoints: const [0.0, 0.95],
                 onDismiss: _handleSheetDismissedSolicitarServicio,
                 initialData:
-                    _datosSolicitudGuardada != null &&
-                            _datosSolicitudGuardada!.hasData
-                        ? _datosSolicitudGuardada
-                        : SolicitudServicioModel(
-                          categoria: _categoriaTemporalDeSheet2,
-                        ),
+                    _datosSolicitudGuardada ??
+                    ServiceModel(
+                      categoria: _categoriaTemporalDeSheet2,
+                      id: '',
+                      descripcion: '',
+                      estado: '',
+                      clientId: '',
+                      workerId: '',
+                    ),
                 onGuardarSolicitudCallback: (data) {
                   _manejarGuardadoDesdeSheetDetallado(data);
                 },
@@ -992,8 +898,6 @@ class _HomePageState extends State<HomePage>
     _locationCircleNotifier.dispose();
     _circleRadiusNotifier.dispose();
     _markersNotifier.dispose();
-    _notificationSubscription.cancel();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }
