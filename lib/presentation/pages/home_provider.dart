@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
 
 class HomeProvider extends StatefulWidget {
@@ -14,6 +15,7 @@ class HomeProvider extends StatefulWidget {
 
 class _HomeProviderState extends State<HomeProvider> {
   int _selectedIndex = 0;
+  late final List<Widget Function()> _screens;
 
   final List<Map<String, dynamic>> clientes = [
     {
@@ -46,158 +48,193 @@ class _HomeProviderState extends State<HomeProvider> {
       "distance": "4.1 km",
       "images": ["assets/images/img_services.png"],
     },
+    {
+      "name": "Sofía Ramírez Torres",
+      "description": "Pintar la fachada de una casa de dos pisos",
+      "distance": "3.2 km",
+      "images": ["assets/images/img_services.png"],
+    },
+    {
+      "name": "Jorge Luis Fernández",
+      "description": "Instalar sistema de cámaras de seguridad",
+      "distance": "5.5 km",
+      "images": ["assets/images/img_services.png"],
+    },
+    {
+      "name": "María Fernanda López",
+      "description": "Reparar fuga de agua en baño principal",
+      "distance": "1.8 km",
+      "images": ["assets/images/img_services.png"],
+    },
   ];
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: AppColor.backgroudGradient,
-            ),
-          ),
-          if (clientes.isNotEmpty)
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 15,
-                ),
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollStartNotification) {
-                    } else if (notification is ScrollEndNotification) {}
-                    return true;
-                  },
-                  child: SizedBox(
-                    //height: MediaQuery.of(context).size.height * 0.60,
-                    child: ListView.builder(
-                      itemCount: clientes.length,
-                      itemBuilder: (context, index) {
-                        final cliente = clientes[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Dismissible(
-                            key: Key(cliente["name"] + index.toString()),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (direction) {
-                              setState(() {
-                                clientes.removeAt(index);
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "${cliente["name"]} fue eliminado",
+  void initState() {
+    super.initState();
+    _screens = [
+      () => _buildHomeScreen(),
+      () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
+      () => const ProfileScreen(isProvider: true,),
+    ];
+  }
+
+  Widget _buildHomeScreen() {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+        ),
+        if (clientes.isNotEmpty)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 15, left: 16, right: 16),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollStartNotification) {
+                  } else if (notification is ScrollEndNotification) {}
+                  return true;
+                },
+                child: SizedBox(
+                  //height: MediaQuery.of(context).size.height * 0.60,
+                  child: ListView.builder(
+                    itemCount: clientes.length,
+                    itemBuilder: (context, index) {
+                      final cliente = clientes[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Dismissible(
+                          key: Key(cliente["name"] + index.toString()),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (direction) {
+                            setState(() {
+                              clientes.removeAt(index);
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "${cliente["name"]} fue eliminado",
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          background: Container(
+                            padding: const EdgeInsets.only(right: 20),
+                            alignment: Alignment.centerRight,
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => ProviderDetails(
+                                        cliente: cliente,
+                                        mapStyle: MapStyleLoader.cachedStyle,
+                                      ),
+                                  transitionsBuilder: _transition,
+                                  transitionDuration: const Duration(
+                                    milliseconds: 300,
                                   ),
-                                  duration: const Duration(seconds: 1),
                                 ),
                               );
                             },
-                            background: Container(
-                              padding: const EdgeInsets.only(right: 20),
-                              alignment: Alignment.centerRight,
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder:
-                                        (
-                                          context,
-                                          animation,
-                                          secondaryAnimation,
-                                        ) => ProviderDetails(cliente: cliente, mapStyle: MapStyleLoader.cachedStyle),
-                                    transitionsBuilder: _transition,
-                                    transitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: CardDesing(cliente: cliente),
-                            ),
+                            child: CardDesing(cliente: cliente),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
             ),
-        ],
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex](),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
       ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: AppColor.bgBtnNav,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_home.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+      child: BottomNavigationBar(
+        backgroundColor: AppColor.bgBtnNav,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_home.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Home",
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_chat.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_chat.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Conversar",
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_person.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+            label: "Conversar",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_person.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Mi Perfil",
             ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: AppColor.dotColor,
-          unselectedItemColor: AppColor.bgItmNav,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          enableFeedback: true,
-          elevation: 15,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
+            label: "Mi Perfil",
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColor.dotColor,
+        unselectedItemColor: AppColor.bgItmNav,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        enableFeedback: true,
+        elevation: 15,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }
