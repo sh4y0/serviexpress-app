@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
