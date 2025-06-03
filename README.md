@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="/assets/icons/logo_serviexpress.png" alt="ServiExpress Logo" width="250"/>
+<img src="/assets/icons/logo_serviexpress-nobg.png" alt="ServiExpress Logo" width="250"/>
 
 # ServiExpress
 
