@@ -27,44 +27,44 @@ class Serviexpress extends StatelessWidget {
 
           onGenerateRoute: (settings) {
             switch (settings.name) {
-              case AppRoutes.login:
-                return CupertinoPageRoute(
-                  builder: (context) => const AuthPage(),
-                );
+              // case AppRoutes.login:
+              //   return MaterialPageRoute(
+              //     builder: (context) => const AuthPage(),
+              //   );
               case AppRoutes.home:
                 final mapStyle = settings.arguments as String;
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => HomePage(mapStyle: mapStyle),
                 );
               case AppRoutes.homeProvider:              
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const HomeProvider(),
                 );
               case AppRoutes.recoveryPassword:
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const AuthPageRecoveryPassword(),
                 );
               case AppRoutes.verified:
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const Verification(),
                 );
               case AppRoutes.chat:
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => const ChatScreen(),
                 );
               case AppRoutes.completeProfile:
                 final userData = settings.arguments as UserModel;
-                return CupertinoPageRoute(
+                return MaterialPageRoute(
                   builder: (context) => CuentanosScreen(data: userData),
                 );
-              default:
-                return CupertinoPageRoute(
-                  builder: (context) => const StartPage(),
-                );
-              //  default:
-              //   return CupertinoPageRoute(
-              //     builder: (context) => const AuthPage(),
+              // default:
+              //   return MaterialPageRoute(
+              //     builder: (context) => const StartPage(),
               //   );
+               default:
+                return MaterialPageRoute(
+                  builder: (context) => const AuthPage(),
+                );
             }
           },
           //   getPages: [

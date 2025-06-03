@@ -17,7 +17,8 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
   final VoidCallback onTapPressed;
 
   final SolicitudServicioModel? datosSolicitudExistente;
-  final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
+  //final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
+  final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
   final List<ProveedorModel> proveedoresSeleccionados;
   final Function(ProveedorModel)? onProveedorRemovido;
@@ -50,7 +51,6 @@ class DraggableSheetSolicitarServicio2State
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
-  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   late TextEditingController _descripcionController = TextEditingController();
   final FocusNode focusNodePrimero = FocusNode();
 
@@ -73,19 +73,20 @@ class DraggableSheetSolicitarServicio2State
     });
   }
 
-  void resetSheet() {
-    if (mounted) {
-      setState(() {
-        _selectedCategoryIndex.value = -1;
-      });
-    }
-  }
+  
+
+  // void resetSheet() {
+  //   if (mounted) {
+  //     setState(() {
+  //       _selectedCategoryIndex.value = -1;
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
     _internalController.removeListener(_onChanged);
     _internalController.dispose();
-    _selectedCategoryIndex.dispose();
     super.dispose();
   }
 
@@ -152,7 +153,7 @@ class DraggableSheetSolicitarServicio2State
     // bool hayDatosParaEditar =
     //     widget.datosSolicitudExistente != null &&
     //     widget.datosSolicitudExistente!.hasData;
-    final categories = CategoryMock.getCategories();
+    //final categories = CategoryMock.getCategories();
 
     return LayoutBuilder(
       builder: (builder, constraints) {
@@ -299,18 +300,27 @@ class DraggableSheetSolicitarServicio2State
                                               showCursor: false,
                                               onTap: () {
                                                 focusNodePrimero.unfocus();
-                                                String? catSeleccionada;
-                                                if (_selectedCategoryIndex
-                                                        .value !=
-                                                    -1) {
-                                                  catSeleccionada =
-                                                      categories[_selectedCategoryIndex
-                                                              .value]
-                                                          .name;
-                                                }
-
+                                                // String? catSeleccionada;
+                                                // if (_selectedCategoryIndex
+                                                //         .value !=
+                                                //     -1) {
+                                                //   catSeleccionada =
+                                                //       categories[_selectedCategoryIndex
+                                                //               .value]
+                                                //           .name;
+                                                // }
+                                                // print(
+                                                //   "Cat - _selectedCategoryIndex: ${_selectedCategoryIndex.value}",
+                                                // );
+                                                // print(
+                                                //   "Cat - catSeleccionada $catSeleccionada",
+                                                // );
+                                                // widget.onAbrirDetallesPressed(
+                                                //   catSeleccionada,
+                                                // );
+                                                bool? isSheetVisibleSolicitarServicio = true;
                                                 widget.onAbrirDetallesPressed(
-                                                  catSeleccionada,
+                                                   isSheetVisibleSolicitarServicio,
                                                 );
                                               },
                                             ),

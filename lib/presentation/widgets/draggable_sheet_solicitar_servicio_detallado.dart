@@ -17,6 +17,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
   final SolicitudServicioModel? initialData;
   final Function(SolicitudServicioModel) onGuardarSolicitudCallback;
 
+  final int selectedCategoryIndex;
+
   const DraggableSheetSolicitarServicioDetallado({
     super.key,
     this.onDismiss,
@@ -27,7 +29,7 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
     this.entryAnimationDuration = const Duration(milliseconds: 300),
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.initialData,
-    required this.onGuardarSolicitudCallback,
+    required this.onGuardarSolicitudCallback, required this.selectedCategoryIndex,
   });
   @override
   State<DraggableSheetSolicitarServicioDetallado> createState() =>
@@ -38,9 +40,11 @@ class DraggableSheetState
     extends State<DraggableSheetSolicitarServicioDetallado> {
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
-  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
+  //final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   final GlobalKey<FormularioMultimediaState> _formMultimediaKey =
       GlobalKey<FormularioMultimediaState>();
+
+  late ValueNotifier<int> _selectedCategoryIndex;
 
   @override
   void initState() {
@@ -48,17 +52,19 @@ class DraggableSheetState
     _internalController = DraggableScrollableController();
     _internalController.addListener(_onChanged);
 
-    if (widget.initialData != null) {
-      if (widget.initialData!.categoria != null) {
-        final categories = CategoryMock.getCategories();
-        int initialIndex = categories.indexWhere(
-          (cat) => cat.name == widget.initialData!.categoria,
-        );
-        if (initialIndex != -1) {
-          _selectedCategoryIndex.value = initialIndex;
-        }
-      }
-    }
+    // if (widget.initialData != null) {
+    //   if (widget.initialData!.categoria != null) {
+    //     final categories = CategoryMock.getCategories();
+    //     int initialIndex = categories.indexWhere(
+    //       (cat) => cat.name == widget.initialData!.categoria,
+    //     );
+    //     if (initialIndex != -1) {
+    //       _selectedCategoryIndex.value = initialIndex;
+    //     }
+    //   }
+    // }
+
+    _selectedCategoryIndex = ValueNotifier<int>(widget.selectedCategoryIndex);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _internalController.isAttached) {
@@ -97,6 +103,14 @@ class DraggableSheetState
       widget.onDismiss?.call();
     } else if (currentSize > widget.minSheetSize + 0.01) {
       _isDismissing = false;
+    }
+  }
+
+  @override
+  void didUpdateWidget(DraggableSheetSolicitarServicioDetallado oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedCategoryIndex != widget.selectedCategoryIndex) {
+      _selectedCategoryIndex.value = widget.selectedCategoryIndex;
     }
   }
 
