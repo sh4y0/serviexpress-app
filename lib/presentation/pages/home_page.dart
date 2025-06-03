@@ -18,7 +18,7 @@ import 'package:serviexpress_app/presentation/messaging/service/firebase_messagi
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
-import 'package:skeletonizer/skeletonizer.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
   final String mapStyle;
@@ -429,6 +429,7 @@ class _HomePageState extends State<HomePage>
         _currentProviders = ProveedorMock.getProveedoresPorCategoria(
           selectedCategory,
         );
+        
       });
 
       _updateMarkers();
@@ -558,7 +559,7 @@ class _HomePageState extends State<HomePage>
         _datosSolicitudGuardada = data;
         _isSheetVisibleSolicitarServicio = false;
 
-        _categoriaTemporalDeSheet2 = null;
+        //_categoriaTemporalDeSheet2 = null;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -573,9 +574,9 @@ class _HomePageState extends State<HomePage>
         ),
       );
 
-      if (_sheet2Key.currentState != null) {
-        _sheet2Key.currentState!.resetSheet();
-      }
+      // if (_sheet2Key.currentState != null) {
+      //   _sheet2Key.currentState!.resetSheet();
+      // }
     }
   }
 
@@ -585,14 +586,22 @@ class _HomePageState extends State<HomePage>
   //   });
   // }
 
-  void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
+  // void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
+  //   setState(() {
+  //     if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
+  //       _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
+  //     } else {
+  //       _categoriaTemporalDeSheet2 = categoria;
+  //     }
+  //     _isSheetVisibleSolicitarServicio = true;
+  //   });
+  // }
+
+  void _abrirSheetDetalladoDesdeSheet2({
+    bool? isSheetVisibleSolicitarServicio,
+  }) {
     setState(() {
-      if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
-        _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
-      } else {
-        _categoriaTemporalDeSheet2 = categoria;
-      }
-      _isSheetVisibleSolicitarServicio = true;
+      _isSheetVisibleSolicitarServicio = isSheetVisibleSolicitarServicio!;
     });
   }
 
@@ -625,144 +634,186 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _buildSkeletonPlaceholder() {
-    return Skeletonizer(
-      enabled: true,
-      effect: const ShimmerEffect(
-        baseColor: Color.fromRGBO(38, 48, 137, 1),
-        highlightColor: Color.fromRGBO(58, 68, 157, 1),
-        duration: Duration(milliseconds: 1200),
-      ),
-      child: Scaffold(
-        backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
-        body: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: const Color.fromRGBO(38, 48, 137, 1),
-            ),
+    return Scaffold(
+      backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: const Color.fromRGBO(38, 48, 137, 1),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 70,
+            child: Shimmer.fromColors(
+              baseColor: const Color.fromRGBO(200, 200, 200, 0.3),
+              highlightColor: const Color.fromRGBO(255, 255, 255, 0.6),
 
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(22, 26, 80, 1),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromRGBO(
-                        38,
-                        48,
-                        137,
-                        1,
-                      ).withOpacity(0.5),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, -2),
+              child: SizedBox(
+                height: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(
+                    3,
+                    (index) => Container(
+                      width: 98,
+                      height: 39,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(88, 101, 242, 0.6),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                  ],
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-
-                      Container(
-                        height: 16,
-                        width: 150,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SizedBox(
-                        height: 40,
-                        child: Row(
-                          children: List.generate(
-                            3,
-                            (index) => Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              width: 80,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: const Color.fromRGBO(38, 48, 137, 1),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Container(
-                        height: 60,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(58, 68, 157, 1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Container(
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromRGBO(58, 68, 157, 1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Container(
-                        width: double.infinity,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  // Widget _buildSkeletonPlaceholder() {
+  //   return Skeletonizer(
+  //     enabled: true,
+  //     effect: const ShimmerEffect(
+  //       baseColor: Color.fromRGBO(38, 48, 137, 1),
+  //       highlightColor: Color.fromRGBO(58, 68, 157, 1),
+  //       duration: Duration(milliseconds: 1200),
+  //     ),
+  //     child: Scaffold(
+  //       backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
+  //       body: Stack(
+  //         children: [
+  //           Container(
+  //             width: double.infinity,
+  //             height: double.infinity,
+  //             color: const Color.fromRGBO(38, 48, 137, 1),
+  //           ),
+
+  //           Positioned(
+  //             left: 0,
+  //             right: 0,
+  //             bottom: 0,
+  //             child: Container(
+  //               decoration: BoxDecoration(
+  //                 color: const Color.fromRGBO(22, 26, 80, 1),
+  //                 borderRadius: const BorderRadius.only(
+  //                   topLeft: Radius.circular(24),
+  //                   topRight: Radius.circular(24),
+  //                 ),
+  //                 boxShadow: [
+  //                   BoxShadow(
+  //                     color: const Color.fromRGBO(
+  //                       38,
+  //                       48,
+  //                       137,
+  //                       1,
+  //                     ).withOpacity(0.5),
+  //                     blurRadius: 10,
+  //                     spreadRadius: 1,
+  //                     offset: const Offset(0, -2),
+  //                   ),
+  //                 ],
+  //               ),
+  //               clipBehavior: Clip.antiAlias,
+  //               child: Padding(
+  //                 padding: const EdgeInsets.symmetric(horizontal: 15),
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     const SizedBox(height: 20),
+
+  //                     Container(
+  //                       height: 16,
+  //                       width: 150,
+  //                       decoration: BoxDecoration(
+  //                         color: const Color.fromRGBO(38, 48, 137, 1),
+  //                         borderRadius: BorderRadius.circular(4),
+  //                       ),
+  //                     ),
+
+  //                     const SizedBox(height: 12),
+
+  //                     SizedBox(
+  //                       height: 40,
+  //                       child: Row(
+  //                         children: List.generate(
+  //                           3,
+  //                           (index) => Container(
+  //                             margin: const EdgeInsets.only(right: 12),
+  //                             width: 80,
+  //                             height: 36,
+  //                             decoration: BoxDecoration(
+  //                               color: const Color.fromRGBO(38, 48, 137, 1),
+  //                               borderRadius: BorderRadius.circular(18),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+
+  //                     const SizedBox(height: 16),
+
+  //                     Container(
+  //                       height: 60,
+  //                       width: double.infinity,
+  //                       decoration: BoxDecoration(
+  //                         color: const Color.fromRGBO(38, 48, 137, 1),
+  //                         borderRadius: BorderRadius.circular(16),
+  //                       ),
+  //                       child: Padding(
+  //                         padding: const EdgeInsets.all(12),
+  //                         child: Row(
+  //                           children: [
+  //                             Container(
+  //                               width: 24,
+  //                               height: 24,
+  //                               decoration: BoxDecoration(
+  //                                 color: const Color.fromRGBO(58, 68, 157, 1),
+  //                                 borderRadius: BorderRadius.circular(4),
+  //                               ),
+  //                             ),
+  //                             const SizedBox(width: 12),
+  //                             Expanded(
+  //                               child: Container(
+  //                                 height: 16,
+  //                                 decoration: BoxDecoration(
+  //                                   color: const Color.fromRGBO(58, 68, 157, 1),
+  //                                   borderRadius: BorderRadius.circular(4),
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           ],
+  //                         ),
+  //                       ),
+  //                     ),
+
+  //                     const SizedBox(height: 16),
+
+  //                     Container(
+  //                       width: double.infinity,
+  //                       height: 48,
+  //                       decoration: BoxDecoration(
+  //                         color: const Color.fromRGBO(38, 48, 137, 1),
+  //                         borderRadius: BorderRadius.circular(12),
+  //                       ),
+  //                     ),
+
+  //                     const SizedBox(height: 20),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -897,17 +948,26 @@ class _HomePageState extends State<HomePage>
                         maxSheetSize: 0.95,
                         snapPoints: const [0.34, 0.95],
                         onTapPressed: _requestService,
+                        // onAbrirDetallesPressed: (
+                        //   String? categoriaSeleccionada,
+                        // ) {
+                        //   _abrirSheetDetalladoDesdeSheet2(
+                        //     categoria: categoriaSeleccionada,
+                        //   );
+                        // },
                         onAbrirDetallesPressed: (
-                          String? categoriaSeleccionada,
+                          bool? isSheetVisibleSolicitarServicioTapped,
                         ) {
                           _abrirSheetDetalladoDesdeSheet2(
-                            categoria: categoriaSeleccionada,
+                            isSheetVisibleSolicitarServicio:
+                                isSheetVisibleSolicitarServicioTapped,
                           );
                         },
                         datosSolicitudExistente: _datosSolicitudGuardada,
                         proveedoresSeleccionados: _proveedoresSeleccionados,
                         onProveedorRemovido: _removerProveedor,
                         onProveedorTapped: _abrirDetalleProveedor,
+                        //selectedCategoryIndex: _selectedCategoryIndex.value,
                       ),
                     ),
 
@@ -958,6 +1018,7 @@ class _HomePageState extends State<HomePage>
                 onGuardarSolicitudCallback: (data) {
                   _manejarGuardadoDesdeSheetDetallado(data);
                 },
+                selectedCategoryIndex: _selectedCategoryIndex.value,
               ),
             ),
 
