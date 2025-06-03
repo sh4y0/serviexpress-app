@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
 
-class DraggableSheetSolicitarServicio extends StatefulWidget {
+class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback? onDismiss;
   final double targetInitialSize;
   final double minSheetSize;
@@ -15,7 +18,7 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
   final bool isInteractionEnabled;
   final VoidCallback onTapPressed;
 
-  final SolicitudServicioModel? datosSolicitudExistente;
+  final ServiceModel? datosSolicitudExistente;
   //final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
@@ -41,12 +44,12 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
     this.onProveedorTapped,
   });
   @override
-  State<DraggableSheetSolicitarServicio> createState() =>
-      DraggableSheetSolicitarServicio2State();
+  ConsumerState<DraggableSheetSolicitarServicio> createState() =>
+      DraggableSheetSolicitarServicioState();
 }
 
-class DraggableSheetSolicitarServicio2State
-    extends State<DraggableSheetSolicitarServicio> {
+class DraggableSheetSolicitarServicioState
+    extends ConsumerState<DraggableSheetSolicitarServicio> {
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
@@ -335,14 +338,21 @@ class DraggableSheetSolicitarServicio2State
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // if (hayDatosParaEditar) {
-                                    //   print(
-                                    //     "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
-                                    //   );
-                                    // } else {
-
-                                    // }
+                                  onPressed: () async {
+                                    if (widget.datosSolicitudExistente !=
+                                        null) {
+                                      widget.datosSolicitudExistente!.workerId =
+                                          "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
+                                      await ServiceRepository.instance
+                                          .createService(
+                                            widget.datosSolicitudExistente!,
+                                          );
+                                      print(
+                                        "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
+                                      );
+                                    } else {
+                                      print("NO SE PUDO CREAR LA SOLICITUD");
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3645f5),

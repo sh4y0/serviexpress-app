@@ -25,7 +25,6 @@ class FormularioMultimediaState extends State<FormMultimedia> {
   List<File> get images => _images;
   List<File> get videos => _videos;
 
-
   void setInitialData(
     String categoria,
     String description,

@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/form_multimedia.dart';
 
 class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
@@ -14,8 +16,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
   final Duration entryAnimationDuration;
   final Curve entryAnimationCurve;
 
-  final SolicitudServicioModel? initialData;
-  final Function(SolicitudServicioModel) onGuardarSolicitudCallback;
+  final ServiceModel? initialData;
+  final Function(ServiceModel) onGuardarSolicitudCallback;
 
   final int selectedCategoryIndex;
 
@@ -77,10 +79,10 @@ class DraggableSheetState
       if (widget.initialData != null &&
           _formMultimediaKey.currentState != null) {
         _formMultimediaKey.currentState?.setInitialData(
-          widget.initialData!.categoria ?? "",
-          widget.initialData!.descripcion ?? "",
-          widget.initialData!.fotos.toList(),
-          widget.initialData!.videos.toList(),
+          widget.initialData?.categoria ?? '',
+          widget.initialData!.descripcion,
+          widget.initialData!.fotosFiles ?? [],
+          widget.initialData!.videosFiles ?? [],
         );
       }
     });
@@ -114,7 +116,7 @@ class DraggableSheetState
     }
   }
 
-  void _accionAgregarSolicitud() {
+  Future<void> _accionAgregarSolicitud() async {
     if (_formMultimediaKey.currentState == null) {
       return;
     }
@@ -130,14 +132,33 @@ class DraggableSheetState
     final List<File> fotos = _formMultimediaKey.currentState!.images;
     final List<File> videos = _formMultimediaKey.currentState!.videos;
 
-    final data = SolicitudServicioModel(
+    /*final data = SolicitudServicioModel(
       categoria: categoriaSeleccionada,
       descripcion: descripcion,
       fotos: fotos.toList(),
       videos: videos.toList(),
+    );*/
+
+    String id = ServiceRepository.instance.generateServiceId();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      print('Usuario no autenticado');
+    }
+
+    final ServiceModel service = ServiceModel(
+      id: id,
+      categoria: categoriaSeleccionada,
+      descripcion: descripcion,
+      estado: 'Pendiente',
+      clientId: currentUser?.uid ?? '',
+      workerId: '',
+      fotosFiles: fotos,
+      videosFiles: videos,
     );
 
-    widget.onGuardarSolicitudCallback(data);
+    //await ServiceRepository.instance.createService(service);
+
+    widget.onGuardarSolicitudCallback(service);
   }
 
   @override
@@ -197,10 +218,9 @@ class DraggableSheetState
                           const Text(
                             'Brinda mas detalle al Proveedor',
                             style: TextStyle(
-                              color: Colors.white, 
+                              color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              
                             ),
                           ),
 
