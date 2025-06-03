@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:uuid/uuid.dart';
 
 class ServiceRepository {
@@ -17,33 +17,29 @@ class ServiceRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Future<ResultState<ServiceModel>> createService({
-    required ServiceModel service,
-    List<File>? fotos,
-    List<File>? videos,
-  }) async {
+  Future<ResultState<ServiceModel>> createService(ServiceModel service) async {
     try {
       final String serviceId = service.id;
       List<String> fotoUrls = [];
       List<String> videoUrls = [];
 
-      if (fotos != null) {
-        for (int i = 0; i < fotos.length; i++) {
+      if (service.fotosFiles != null) {
+        for (int i = 0; i < service.fotosFiles!.length; i++) {
           final String fileName =
               '${serviceId}_foto_${(i + 1).toString().padLeft(3, '0')}';
           final ref = _storage.ref().child('services/$fileName');
-          final uploadTask = await ref.putFile(fotos[i]);
+          final uploadTask = await ref.putFile(service.fotosFiles![i]);
           final url = await uploadTask.ref.getDownloadURL();
           fotoUrls.add(url);
         }
       }
 
-      if (videos != null) {
-        for (int i = 0; i < videos.length; i++) {
+      if (service.videosFiles != null) {
+        for (int i = 0; i < service.videosFiles!.length; i++) {
           final String fileName =
               '${serviceId}_video_${(i + 1).toString().padLeft(3, '0')}';
           final ref = _storage.ref().child('services/$fileName');
-          final uploadTask = await ref.putFile(videos[i]);
+          final uploadTask = await ref.putFile(service.videosFiles![i]);
           final url = await uploadTask.ref.getDownloadURL();
           videoUrls.add(url);
         }
@@ -62,10 +58,24 @@ class ServiceRepository {
         fechaFinalizacion: service.fechaFinalizacion,
       );
 
+      final message = FCMMessage(
+        token: '',
+        idServicio: serviceId,
+        senderId: updatedService.clientId,
+        title: 'Tienes un nuevo servicio',
+        body: 'Limpieza solicitada por ${updatedService.clientId}',
+        receiverId: updatedService.workerId,
+      );
+
       await _firestore
           .collection('services')
           .doc(serviceId)
           .set(updatedService.toJson());
+
+      await FirebaseMessagingService.instance.sendFCMMessage(
+        message,
+        updatedService.workerId,
+      );
 
       return Success(updatedService);
     } catch (e) {
@@ -75,12 +85,13 @@ class ServiceRepository {
     }
   }
 
-  Future<ResultState<Service>> getService(String serviceId) async {
+  Future<ServiceComplete?> getService(String serviceId) async {
     try {
       final doc = await _firestore.collection('services').doc(serviceId).get();
 
       if (!doc.exists) {
-        return const Failure(UnknownError("Servicio no encontrado."));
+        //return const Failure(UnknownError("Servicio no encontrado."));
+        return null;
       }
 
       final serviceModel = ServiceModel.fromJson(doc.data()!);
@@ -88,19 +99,21 @@ class ServiceRepository {
       final clienteDoc =
           await _firestore.collection('users').doc(serviceModel.clientId).get();
       if (!clienteDoc.exists) {
-        return Failure(
+        /*return Failure(
           UnknownError('El cliente con ID ${serviceModel.clientId} no existe'),
-        );
+        );*/
+        return null;
       }
 
       final trabajadorDoc =
           await _firestore.collection('users').doc(serviceModel.workerId).get();
       if (!trabajadorDoc.exists) {
-        return Failure(
+        /*return Failure(
           UnknownError(
             'El trabajador con ID ${serviceModel.workerId} no existe',
           ),
-        );
+        );*/
+        return null;
       }
 
       final cliente = UserModel.fromJson(
@@ -110,18 +123,20 @@ class ServiceRepository {
         trabajadorDoc.data()!..['id'] = trabajadorDoc.id,
       );
 
-      final service = Service(
+      final service = ServiceComplete(
         service: serviceModel,
         cliente: cliente,
         trabajador: trabajador,
       );
 
-      return Success(service);
+      return service;
     } catch (e) {
-      return Failure(
+      /*return Failure(
         UnknownError("Error al obtener el servicio: ${e.toString()}"),
-      );
+      );*/
+      print('Error al obtener el servicio: ${e.toString()}');
     }
+    return null;
   }
 
   String generateServiceId() {

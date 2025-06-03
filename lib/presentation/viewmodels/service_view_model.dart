@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
@@ -10,19 +8,11 @@ import 'package:serviexpress_app/data/repositories/service_repository.dart';
 class ServiceViewModel extends StateNotifier<ResultState<ServiceModel>> {
   ServiceViewModel() : super(const Idle());
 
-  Future<void> createService({
-    required ServiceModel service,
-    List<File>? fotos,
-    List<File>? videos,
-  }) async {
+  Future<void> createService(ServiceModel service) async {
     state = const Loading();
 
     try {
-      final result = await ServiceRepository.instance.createService(
-        service: service,
-        fotos: fotos,
-        videos: videos,
-      );
+      final result = await ServiceRepository.instance.createService(service);
 
       if (result is Success<ServiceModel>) {
         state = Success(result.data);

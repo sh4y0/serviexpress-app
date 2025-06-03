@@ -3,7 +3,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 
 class CardDesing extends StatelessWidget {
-  final Service service;
+  final ServiceComplete service;
   const CardDesing({super.key, required this.service});
 
   @override
@@ -53,7 +53,7 @@ class CardDesing extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    service.cliente.nombreCompleto,
+                    service.cliente.username,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
