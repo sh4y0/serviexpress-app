@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
@@ -27,10 +26,10 @@ class Serviexpress extends StatelessWidget {
 
           onGenerateRoute: (settings) {
             switch (settings.name) {
-              // case AppRoutes.login:
-              //   return MaterialPageRoute(
-              //     builder: (context) => const AuthPage(),
-              //   );
+              case AppRoutes.login:
+                return MaterialPageRoute(
+                  builder: (context) => const AuthPage(),
+                );
               case AppRoutes.home:
                 final mapStyle = settings.arguments as String;
                 return MaterialPageRoute(
@@ -57,14 +56,14 @@ class Serviexpress extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => CuentanosScreen(data: userData),
                 );
-              // default:
-              //   return MaterialPageRoute(
-              //     builder: (context) => const StartPage(),
-              //   );
-               default:
+              default:
                 return MaterialPageRoute(
-                  builder: (context) => const AuthPage(),
+                  builder: (context) => const StartPage(),
                 );
+              //  default:
+              //   return MaterialPageRoute(
+              //     builder: (context) => const AuthPage(),
+              //   );
             }
           },
           //   getPages: [
