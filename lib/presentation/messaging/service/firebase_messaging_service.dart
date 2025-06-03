@@ -22,9 +22,9 @@ class FirebaseMessagingService {
 
   final String _projectId = 'serviexpressapp-7e391';
 
-  Future<bool> sendFCMMessage(FCMMessage message, String userId) async {
+  Future<bool> sendFCMMessage(FCMMessage message, String workerId) async {
     try {
-      final deviceToken = await _getDeviceToken(userId);
+      final deviceToken = await _getDeviceToken(workerId);
 
       if (deviceToken == null || deviceToken.isEmpty) {
         return false;
@@ -42,18 +42,25 @@ class FirebaseMessagingService {
         'https://fcm.googleapis.com/v1/projects/$_projectId/messages:send',
       );
 
+      final requestBody = jsonEncode(messageWithToken.toJson());
+
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(messageWithToken.toJson()),
+        body: requestBody,
       );
 
-      await NotificationRepository.instance.saveNotification(messageWithToken);
-
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        await NotificationRepository.instance.saveNotification(
+          messageWithToken,
+        );
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       return false;
     }

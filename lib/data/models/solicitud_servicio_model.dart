@@ -3,7 +3,7 @@ import 'dart:io';
 class SolicitudServicioModel {
   String? categoria;
   String? descripcion;
-  List<File> fotos; 
+  List<File> fotos;
   List<File> videos;
 
   SolicitudServicioModel({

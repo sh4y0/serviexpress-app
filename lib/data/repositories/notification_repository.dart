@@ -11,7 +11,9 @@ class NotificationRepository {
 
   Future<void> saveNotification(FCMMessage message) async {
     try {
-      await _firestore.collection(collectionName).add(message.toJson());
+      await _firestore
+          .collection(collectionName)
+          .add(message.toFirestoreJson());
     } catch (e) {
       throw Exception('Error guardando notificación: $e');
     }

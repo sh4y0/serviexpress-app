@@ -1,52 +1,83 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/data/models/service.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
+import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
 
-class HomeProvider extends StatefulWidget {
+class HomeProvider extends ConsumerStatefulWidget {
   const HomeProvider({super.key});
 
   @override
-  State<HomeProvider> createState() => _HomeProviderState();
+  ConsumerState<HomeProvider> createState() => _HomeProviderState();
 }
 
-class _HomeProviderState extends State<HomeProvider> {
+class _HomeProviderState extends ConsumerState<HomeProvider>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
+  late final StreamSubscription<RemoteMessage> _notificationSubscription;
+  List<FCMMessage> notifications = [];
+  final Map<String, ServiceComplete> _services = {};
+  ServiceComplete? service = null;
 
-  final List<Map<String, dynamic>> clientes = [
-    {
-      "name": "Carlos Enrique Casemiro",
-      "description": "Arregla una lavadora que no enciende",
-      "distance": "A 30 min de ti",
-      "images": [
-        "assets/images/img_services.png",
-        "assets/images/img_services.png",
-        "assets/images/img_services.png",
-        "assets/images/img_services.png",
-      ],
-    },
-    {
-      "name": "Ana Lucia Mendez Hugarte",
-      "description": "Limpiar un locar de 300m",
-      "distance": "2.7 km",
-      "images": ["assets/images/img_services.png"],
-    },
-    {
-      "name": "Luis Alfredo Benites ",
-      "description":
-          "Instalar ventanas en una habitacion y en la sala de unos 250 metros aproximadamente",
-      "distance": "4.1 km",
-      "images": ["assets/images/img_services.png"],
-    },
-    {
-      "name": "Mario Gimenez Mendez",
-      "description": "Reparar un refrigerador que no congela",
-      "distance": "4.1 km",
-      "images": ["assets/images/img_services.png"],
-    },
-  ];
+  AppLifecycleState? _appLifecycleState;
+
+  bool get isAppInForeground =>
+      _appLifecycleState == null ||
+      _appLifecycleState == AppLifecycleState.resumed;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupToken();
+    _notificationSubscription = NotificationManager().notificationStream.listen(
+      (RemoteMessage message) async {
+        final fcmMessage = FCMMessage.fromRemoteMessage(message);
+        service = await ServiceRepository.instance.getService(
+          fcmMessage.idServicio,
+        );
+
+        bool exists = notifications.any(
+          (notification) => notification.idServicio == fcmMessage.idServicio,
+        );
+        if (!exists) {
+          setState(() {
+            _services[fcmMessage.idServicio] = service!;
+            notifications.add(fcmMessage);
+          });
+
+          if (isAppInForeground) {
+            NotificationManager().showLocalNotification(
+              title: fcmMessage.title ?? 'Notificación',
+              body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
+            );
+          }
+        }
+      },
+    );
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _appLifecycleState = state;
+    });
+  }
+
+  void _setupToken() async {
+    await NotificationManager().initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +88,7 @@ class _HomeProviderState extends State<HomeProvider> {
               gradient: AppColor.backgroudGradient,
             ),
           ),
-          if (clientes.isNotEmpty)
+          if (notifications.isNotEmpty)
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -73,22 +104,24 @@ class _HomeProviderState extends State<HomeProvider> {
                   child: SizedBox(
                     //height: MediaQuery.of(context).size.height * 0.60,
                     child: ListView.builder(
-                      itemCount: clientes.length,
+                      itemCount: notifications.length,
                       itemBuilder: (context, index) {
-                        final cliente = clientes[index];
+                        final cliente = notifications[index];
+                        final serviceForCliente =
+                            _services[cliente.idServicio]!;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: Dismissible(
-                            key: Key(cliente["name"] + index.toString()),
+                            key: Key(cliente.idServicio + index.toString()),
                             direction: DismissDirection.endToStart,
                             onDismissed: (direction) {
                               setState(() {
-                                clientes.removeAt(index);
+                                notifications.removeAt(index);
                               });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    "${cliente["name"]} fue eliminado",
+                                    "${cliente.idServicio} fue eliminado",
                                   ),
                                   duration: const Duration(seconds: 1),
                                 ),
@@ -117,7 +150,10 @@ class _HomeProviderState extends State<HomeProvider> {
                                           context,
                                           animation,
                                           secondaryAnimation,
-                                        ) => ProviderDetails(cliente: cliente, mapStyle: MapStyleLoader.cachedStyle),
+                                        ) => ProviderDetails(
+                                          service: serviceForCliente,
+                                          mapStyle: MapStyleLoader.cachedStyle,
+                                        ),
                                     transitionsBuilder: _transition,
                                     transitionDuration: const Duration(
                                       milliseconds: 300,
@@ -125,7 +161,7 @@ class _HomeProviderState extends State<HomeProvider> {
                                   ),
                                 );
                               },
-                              child: CardDesing(cliente: cliente),
+                              child: CardDesing(service: service!),
                             ),
                           ),
                         );
@@ -218,5 +254,12 @@ class _HomeProviderState extends State<HomeProvider> {
         child: child,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }
