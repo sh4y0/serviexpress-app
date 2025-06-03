@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ServiceModel {
   String id;
-  String categoria;
+  String? categoria;
   String descripcion;
   String estado;
   String clientId;
@@ -12,10 +14,12 @@ class ServiceModel {
   List<String>? videos;
   DateTime? fechaCreacion;
   DateTime? fechaFinalizacion;
+  List<File>? fotosFiles;
+  List<File>? videosFiles;
 
   ServiceModel({
     required this.id,
-    required this.categoria,
+    this.categoria,
     required this.descripcion,
     required this.estado,
     required this.clientId,
@@ -25,6 +29,9 @@ class ServiceModel {
     this.videos,
     this.fechaCreacion,
     this.fechaFinalizacion,
+
+    this.fotosFiles,
+    this.videosFiles,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {

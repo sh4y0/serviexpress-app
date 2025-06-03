@@ -70,4 +70,14 @@ class FCMMessage {
 
     return {'message': message};
   }
+
+  Map<String, dynamic> toFirestoreJson() {
+    return {
+      'idServicio': idServicio,
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'title': title,
+      'body': body,
+    };
+  }
 }

@@ -1,12 +1,12 @@
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
-class Service {
+class ServiceComplete {
   final ServiceModel service;
   final UserModel cliente;
   final UserModel trabajador;
 
-  Service({
+  ServiceComplete({
     required this.service,
     required this.cliente,
     required this.trabajador,

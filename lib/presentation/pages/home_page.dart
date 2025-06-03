@@ -8,7 +8,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
@@ -46,10 +46,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
   bool _mapLoaded = false;
   bool _ignoreNextCameraMove = false;
-  SolicitudServicioModel? _datosSolicitudGuardada;
+  ServiceModel? _datosSolicitudGuardada;
   String? _categoriaTemporalDeSheet2;
-  final GlobalKey<DraggableSheetSolicitarServicio2State> _sheet2Key =
-      GlobalKey<DraggableSheetSolicitarServicio2State>();
+  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key =
+      GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
 
   BitmapDescriptor? _providerMarkerIcon;
@@ -63,8 +63,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _setupToken();
-
-    // END TESTING PURPOSES
 
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
@@ -456,7 +454,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void _manejarGuardadoDesdeSheetDetallado(SolicitudServicioModel data) {
+  void _manejarGuardadoDesdeSheetDetallado(ServiceModel data) {
     if (mounted) {
       setState(() {
         _datosSolicitudGuardada = data;
@@ -491,11 +489,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
     setState(() {
-      if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
+      if (_datosSolicitudGuardada != null) {
         _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
       } else {
         _categoriaTemporalDeSheet2 = categoria;
       }
+
       _isSheetVisibleSolicitarServicio = true;
     });
   }
@@ -681,7 +680,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          /*ValueListenableBuilder<Circle?>(
+          ValueListenableBuilder<Circle?>(
             valueListenable: _locationCircleNotifier,
             builder: (context, locationCircle, _) {
               final Set<Circle> circles =
@@ -712,7 +711,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 },
               );
             },
-          ),*/
+          ),
           SafeArea(
             child: Container(
               height: 60,
@@ -853,12 +852,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 snapPoints: const [0.0, 0.95],
                 onDismiss: _handleSheetDismissedSolicitarServicio,
                 initialData:
-                    _datosSolicitudGuardada != null &&
-                            _datosSolicitudGuardada!.hasData
-                        ? _datosSolicitudGuardada
-                        : SolicitudServicioModel(
-                          categoria: _categoriaTemporalDeSheet2,
-                        ),
+                    _datosSolicitudGuardada ??
+                    ServiceModel(
+                      categoria: _categoriaTemporalDeSheet2,
+                      id: '',
+                      descripcion: '',
+                      estado: '',
+                      clientId: '',
+                      workerId: '',
+                    ),
                 onGuardarSolicitudCallback: (data) {
                   _manejarGuardadoDesdeSheetDetallado(data);
                 },

@@ -5,7 +5,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 
 class ProviderDetails extends StatefulWidget {
-  final Service service;
+  final ServiceComplete service;
   final String? mapStyle;
 
   const ProviderDetails({
@@ -63,7 +63,7 @@ class ScreenClientData extends StatefulWidget {
     required this.scrollController,
   });
 
-  final Service service;
+  final ServiceComplete service;
   final ScrollController scrollController;
 
   @override
@@ -128,10 +128,10 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        service.cliente.nombreCompleto,
+                        widget.service.cliente.username,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -196,43 +196,48 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                     ),
                   ),
                   Text(
-                    service.service.descripcion,
+                    widget.service.service.descripcion,
                     style: const TextStyle(color: AppColor.txtBooking),
                   ),
                   const SizedBox(height: 15),
-                  SizedBox(
-                    height: 90,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: service.service.fotos!.length,
-                      separatorBuilder:
-                          (context, index) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        return Image.asset(
-                          service.service.fotos![index],
-                          width: 90,
-                          height: 90,
-                        );
-                      },
+                  if (widget.service.service.fotos != null &&
+                      widget.service.service.fotos!.isNotEmpty)
+                    SizedBox(
+                      height: 90,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.service.service.fotos!.length,
+                        separatorBuilder:
+                            (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          return Image.asset(
+                            widget.service.service.fotos![index],
+                            width: 90,
+                            height: 90,
+                          );
+                        },
+                      ),
                     ),
-                  ),
 
-                  SizedBox(
-                    height: 90,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: service.service.videos!.length,
-                      separatorBuilder:
-                          (context, index) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        return Image.asset(
-                          service.service.videos![index],
-                          width: 90,
-                          height: 90,
-                        );
-                      },
-                    ),
-                  ),
+                  widget.service.service.videos != null &&
+                          widget.service.service.videos!.isNotEmpty
+                      ? SizedBox(
+                        height: 90,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: widget.service.service.videos!.length,
+                          separatorBuilder:
+                              (context, index) => const SizedBox(width: 8),
+                          itemBuilder: (context, index) {
+                            return Image.asset(
+                              widget.service.service.videos![index],
+                              width: 90,
+                              height: 90,
+                            );
+                          },
+                        ),
+                      )
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),

@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/viewmodels/service_complete_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
@@ -26,7 +25,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   int _selectedIndex = 0;
   late final StreamSubscription<RemoteMessage> _notificationSubscription;
   List<FCMMessage> notifications = [];
-  Service? _service;
+  final Map<String, ServiceComplete> _services = {};
+  ServiceComplete? service = null;
 
   AppLifecycleState? _appLifecycleState;
 
@@ -37,33 +37,32 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _notificationSubscription = NotificationManager().notificationStream
-          .listen((RemoteMessage message) async {
-            final fcmMessage = FCMMessage.fromRemoteMessage(message);
+    _setupToken();
+    _notificationSubscription = NotificationManager().notificationStream.listen(
+      (RemoteMessage message) async {
+        final fcmMessage = FCMMessage.fromRemoteMessage(message);
+        service = await ServiceRepository.instance.getService(
+          fcmMessage.idServicio,
+        );
 
-            ref
-                .read(serviceCompleteViewModelProvider.notifier)
-                .getService(fcmMessage.idServicio);
-
-            bool exists = notifications.any(
-              (notification) =>
-                  notification.idServicio == fcmMessage.idServicio,
-            );
-            if (!exists) {
-              setState(() {
-                notifications.add(fcmMessage);
-              });
-
-              if (isAppInForeground) {
-                NotificationManager().showLocalNotification(
-                  title: fcmMessage.title ?? 'Notificación',
-                  body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-                );
-              }
-            }
+        bool exists = notifications.any(
+          (notification) => notification.idServicio == fcmMessage.idServicio,
+        );
+        if (!exists) {
+          setState(() {
+            _services[fcmMessage.idServicio] = service!;
+            notifications.add(fcmMessage);
           });
-    });
+
+          if (isAppInForeground) {
+            NotificationManager().showLocalNotification(
+              title: fcmMessage.title ?? 'Notificación',
+              body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
+            );
+          }
+        }
+      },
+    );
 
     WidgetsBinding.instance.addObserver(this);
   }
@@ -75,19 +74,12 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     });
   }
 
-  void _listenToServiceViewModel() {
-    ref.listen<ResultState>(serviceCompleteViewModelProvider, (_, next) async {
-      if (next is Success<Service>) {
-        setState(() {
-          _service = next.data;
-        });
-      }
-    });
+  void _setupToken() async {
+    await NotificationManager().initialize();
   }
 
   @override
   Widget build(BuildContext context) {
-    _listenToServiceViewModel();
     return Scaffold(
       body: Stack(
         children: [
@@ -115,6 +107,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                       itemCount: notifications.length,
                       itemBuilder: (context, index) {
                         final cliente = notifications[index];
+                        final serviceForCliente =
+                            _services[cliente.idServicio]!;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: Dismissible(
@@ -148,9 +142,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                             ),
                             child: GestureDetector(
                               onTap: () {
-                                if (_service != null) {
-                                  return;
-                                }
                                 Navigator.push(
                                   context,
                                   PageRouteBuilder(
@@ -160,7 +151,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                           animation,
                                           secondaryAnimation,
                                         ) => ProviderDetails(
-                                          service: _service!,
+                                          service: serviceForCliente,
                                           mapStyle: MapStyleLoader.cachedStyle,
                                         ),
                                     transitionsBuilder: _transition,
@@ -170,12 +161,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                   ),
                                 );
                               },
-                              child:
-                                  _service != null
-                                      ? CardDesing(service: _service!)
-                                      : const SizedBox(
-                                        child: Text("No hay servicio causa"),
-                                      ),
+                              child: CardDesing(service: service!),
                             ),
                           ),
                         );

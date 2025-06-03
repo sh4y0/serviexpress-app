@@ -22,9 +22,9 @@ class FirebaseMessagingService {
 
   final String _projectId = 'serviexpressapp-7e391';
 
-  Future<bool> sendFCMMessage(FCMMessage message, String userId) async {
+  Future<bool> sendFCMMessage(FCMMessage message, String workerId) async {
     try {
-      final deviceToken = await _getDeviceToken(userId);
+      final deviceToken = await _getDeviceToken(workerId);
 
       if (deviceToken == null || deviceToken.isEmpty) {
         return false;
