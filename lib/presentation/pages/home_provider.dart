@@ -8,6 +8,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
+import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -26,7 +27,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   late final StreamSubscription<RemoteMessage> _notificationSubscription;
   List<FCMMessage> notifications = [];
   final Map<String, ServiceComplete> _services = {};
-  ServiceComplete? service = null;
+  ServiceComplete? service;
 
   AppLifecycleState? _appLifecycleState;
 
@@ -38,6 +39,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   void initState() {
     super.initState();
     _setupToken();
+    _setupLocation();
     _notificationSubscription = NotificationManager().notificationStream.listen(
       (RemoteMessage message) async {
         final fcmMessage = FCMMessage.fromRemoteMessage(message);
@@ -76,6 +78,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   void _setupToken() async {
     await NotificationManager().initialize();
+  }
+
+  void _setupLocation() async {
+    await LocationMapsService().initialize();
   }
 
   @override
