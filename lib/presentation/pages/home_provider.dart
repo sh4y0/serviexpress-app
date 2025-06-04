@@ -12,6 +12,7 @@ import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/cardDesing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
 
 class HomeProvider extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class HomeProvider extends ConsumerStatefulWidget {
 class _HomeProviderState extends ConsumerState<HomeProvider>
     with WidgetsBindingObserver {
   int _selectedIndex = 0;
+  late final List<Widget Function()> _screens;
   late final StreamSubscription<RemoteMessage> _notificationSubscription;
   List<FCMMessage> notifications = [];
   final Map<String, ServiceComplete> _services = {};
@@ -38,6 +40,11 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   @override
   void initState() {
     super.initState();
+    _screens = [
+      () => _buildHomeProvider(),
+      () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
+      () => const ProfileScreen(isProvider: true,),
+    ];
     _setupToken();
     _setupLocation();
     _notificationSubscription = NotificationManager().notificationStream.listen(
@@ -84,10 +91,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     await LocationMapsService().initialize();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+  Widget _buildHomeProvider(){
+    return Stack(
         children: [
           Container(
             decoration: const BoxDecoration(
@@ -129,7 +134,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                   content: Text(
                                     "${cliente.idServicio} fue eliminado",
                                   ),
-                                  duration: const Duration(seconds: 1),
                                 ),
                               );
                             },
@@ -178,68 +182,78 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
               ),
             ),
         ],
+      );
+  }  
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex](),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
       ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: AppColor.bgBtnNav,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_home.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+      child: BottomNavigationBar(
+        backgroundColor: AppColor.bgBtnNav,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_home.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Home",
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_chat.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_chat.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Conversar",
             ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset(
-                  "assets/icons/ic_person.svg",
-                  colorFilter: ColorFilter.mode(
-                    _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
-                    BlendMode.srcIn,
-                  ),
+            label: "Conversar",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_person.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
                 ),
               ),
-              label: "Mi Perfil",
             ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: AppColor.dotColor,
-          unselectedItemColor: AppColor.bgItmNav,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          enableFeedback: true,
-          elevation: 15,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
+            label: "Mi Perfil",
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColor.dotColor,
+        unselectedItemColor: AppColor.bgItmNav,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        enableFeedback: true,
+        elevation: 15,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }
