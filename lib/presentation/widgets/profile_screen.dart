@@ -70,42 +70,138 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {"icon": Icons.help_outline, "title": "Ayuda"},
     ];
     return Scaffold(
-      backgroundColor: AppColor.bgCard,
+      backgroundColor: AppColor.bgMsgUser,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.only(top: 20, left: 20),
               child: Text(
-                "Mi Perfil",
+                "Perfil",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const Divider(),
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomCenter,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 50,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColor.btnOpen,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                Positioned(
+                  top: 50,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        const CircleAvatar(
+                          radius: 50,
+                          backgroundImage: AssetImage(
+                            "assets/images/profile_default.png",
+                          ),
+                          backgroundColor: Colors.white,
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColor.bgAll,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.add,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 155,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Text(
+                      "Jeffer G".toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 45),
             Expanded(
               child: ListView.separated(
                 itemBuilder: (context, index) {
                   if (index < options.length) {
                     final option = options[index];
-                    return ListTile(
-                      leading: Icon(option["icon"] as IconData),
-                      title: Text(option["title"] as String),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () async {
-                        final route = option["route"];
-                        final mapStyle = await MapStyleLoader.loadStyle();
-                        if (route != null) {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            route as String,
-                            (route) => false,
-                            arguments: mapStyle,
-                          );
-                        }
-                      },
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        // ignore: deprecated_member_use
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: Icon(
+                          option["icon"] as IconData,
+                          color: Colors.white,
+                        ),
+                        title: Text(
+                          option["title"] as String,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        onTap: () async {
+                          final route = option["route"];
+                          final mapStyle = await MapStyleLoader.loadStyle();
+                          if (route != null) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              route as String,
+                              (route) => false,
+                              arguments: mapStyle,
+                            );
+                          }
+                        },
+                      ),
                     );
                   } else {
                     return ListTile(
