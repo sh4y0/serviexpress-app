@@ -110,47 +110,47 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
   <table cellspacing="50">
     <tr>
       <td align="center">
-        <a href="https://github.com/elAsksito">
+        <a href="https://github.com/elAsksito" target="_blank">
           <img src="https://github.com/elAsksito.png" width="100px;" alt="Allan Sagastegui"/><br />
           <sub><b>Allan Sagastegui</b></sub><br>
         </a><br />
-        <a href="https://github.com/elAsksito">
+        <a href="https://github.com/elAsksito" target="_blank">
           <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
         </a>
-        <a href="https://www.linkedin.com/in/allansagastegui/">
+        <a href="https://www.linkedin.com/in/allan-sagastegui/" target="_blank">
           <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
         </a>
-        <a href="https://www.instagram.com/elasksito/">
+        <a href="https://www.instagram.com/_ask.dev/" target="_blank">
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>
       <td align="center">
-        <a href="https://github.com/sh4y0">
+        <a href="https://github.com/sh4y0" target="_blank">
           <img src="https://github.com/sh4y0.png" width="100px;" alt="Rodrigo Gutierrez"/><br />
           <sub><b>Rodrigo Gutierrez</b></sub><br>
         </a><br />
-        <a href="https://github.com/sh4y0">
+        <a href="https://github.com/sh4y0" target="_blank">
           <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
         </a>
-        <a href="#">
+        <a href="#" target="_blank">
           <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
         </a>
-        <a href="#">
+        <a href="#" target="_blank">
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>
       <td align="center">
-        <a href="https://github.com/Jefferson-Gonzales">
+        <a href="https://github.com/Jefferson-Gonzales" target="_blank">
           <img src="https://github.com/Jefferson-Gonzales.png" width="100px;" alt="Jefferson Gonzales"/><br />
           <sub><b>Jefferson Gonzales</b></sub><br>
         </a><br />
-        <a href="https://github.com/Jefferson-Gonzales">
+        <a href="https://github.com/Jefferson-Gonzales" target="_blank">
           <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
         </a>
-        <a href="#">
+        <a href="#" target="_blank">
           <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
         </a>
-        <a href="#">
+        <a href="#" target="_blank">
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>
