@@ -40,6 +40,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ValueNotifier<Set<Marker>>({});
   BitmapDescriptor? _locationMarkerIcon;
   bool _isSheetVisibleSolicitarServicio = false;
+  bool _isSheetVisibleSolicitarServicioDetallado = false;
   bool _isSheetVisibleDetalleProveedor = false;
   Timer? _mapInteractionTimer;
   bool _isMapBeingMoved = false;
@@ -59,6 +60,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   MarkerId? _currentlyOpenInfoWindowMarkerId;
 
   final List<ProveedorModel> _proveedoresSeleccionados = [];
+  bool _isSolicitudGuardadaFromServicioDetallado = false;
 
   @override
   void initState() {
@@ -511,10 +513,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
+  void _isSolicitudGuardadaOnTapped(bool isSolicitudGuardada) {
+    _isSolicitudGuardadaFromServicioDetallado = isSolicitudGuardada;
+  }
+
   void _agregarProveedor(ProveedorModel proveedor) {
     setState(() {
       if (!_proveedoresSeleccionados.any((p) => p.id == proveedor.id)) {
         _proveedoresSeleccionados.add(proveedor);
+      }
+      if (_proveedoresSeleccionados.length == 1) {
+        _isSheetVisibleSolicitarServicioDetallado = true;
       }
     });
   }
@@ -522,6 +531,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _removerProveedor(ProveedorModel proveedor) {
     setState(() {
       _proveedoresSeleccionados.removeWhere((p) => p.id == proveedor.id);
+      if (_proveedoresSeleccionados.isEmpty) {
+        _isSheetVisibleSolicitarServicioDetallado = false;
+        _isSolicitudGuardadaFromServicioDetallado = false;
+      }
     });
   }
 
@@ -770,70 +783,102 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Container(
               height: 60,
               margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
-              child: ValueListenableBuilder<int>(
-                valueListenable: _selectedCategoryIndex,
-                builder: (context, selectedIndex, _) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      var category = CategoryMock.getCategories()[index];
-                      final bool isSelected = index == selectedIndex;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: MaterialButton(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SizedBox(
+                    width: constraints.maxWidth,
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: _selectedCategoryIndex,
+                      builder: (context, selectedIndex, _) {
+                        return ListView.builder(
                           padding: const EdgeInsets.all(10),
-                          height: 39,
-                          minWidth: 98,
-                          color:
-                              isSelected
-                                  ? const Color(0xFF3645f5)
-                                  : const Color(0xFF263089),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          onPressed: () {
-                            _onCategorySelected(index);
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            var category = CategoryMock.getCategories()[index];
+                            final bool isSelected = index == selectedIndex;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: MaterialButton(
+                                padding: const EdgeInsets.all(10),
+                                height: 39,
+                                minWidth: 98,
+                                color:
+                                    isSelected
+                                        ? const Color(0xFF3645f5)
+                                        : const Color(0xFF263089),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                onPressed: () {
+                                  _onCategorySelected(index);
+                                },
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SvgPicture.asset(
+                                      category.iconPath,
+                                      width: 20,
+                                      height: 15,
+                                      colorFilter: ColorFilter.mode(
+                                        isSelected
+                                            ? Colors.white
+                                            : AppColor.textInput,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      category.name,
+                                      style: TextStyle(
+                                        color:
+                                            isSelected
+                                                ? Colors.white
+                                                : AppColor.textInput,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
                           },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                category.iconPath,
-                                width: 20,
-                                height: 15,
-                                colorFilter: ColorFilter.mode(
-                                  isSelected
-                                      ? Colors.white
-                                      : AppColor.textInput,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                category.name,
-                                style: TextStyle(
-                                  color:
-                                      isSelected
-                                          ? Colors.white
-                                          : AppColor.textInput,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    itemCount: CategoryMock.getCategories().length,
+                          itemCount: CategoryMock.getCategories().length,
+                        );
+                      },
+                    ),
                   );
                 },
               ),
             ),
           ),
 
-          if (!(_selectedCategoryIndex.value < 0))
+          if (!_isSheetVisibleSolicitarServicioDetallado)
+            Positioned(
+              bottom: MediaQuery.of(context).size.height * 0.1,
+              right: 10,
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: FloatingActionButton(
+                  heroTag: 'fabHomeRightsheet',
+                  shape: const CircleBorder(),
+                  backgroundColor: const Color(0xFF4a66ff),
+                  onPressed: _toggleZoom,
+                  child: SvgPicture.asset(
+                    'assets/icons/ic_current_location.svg',
+                    width: 26,
+                    height: 26,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          if (_isSheetVisibleSolicitarServicioDetallado)
             ValueListenableBuilder<bool>(
               valueListenable: _shouldShowSheet,
               builder: (context, shouldShow, child) {
@@ -849,18 +894,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       top: 0,
                       child: DraggableSheetSolicitarServicio(
                         key: _sheet2Key,
-                        targetInitialSize: 0.34,
-                        minSheetSize: 0.34,
+                        targetInitialSize: 0.38,
+                        minSheetSize: 0.38,
                         maxSheetSize: 0.95,
-                        snapPoints: const [0.34, 0.95],
+                        snapPoints: const [0.38, 0.95],
                         onTapPressed: _requestService,
-                        // onAbrirDetallesPressed: (
-                        //   String? categoriaSeleccionada,
-                        // ) {
-                        //   _abrirSheetDetalladoDesdeSheet2(
-                        //     categoria: categoriaSeleccionada,
-                        //   );
-                        // },
                         onAbrirDetallesPressed: (
                           bool? isSheetVisibleSolicitarServicioTapped,
                         ) {
@@ -873,13 +911,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         proveedoresSeleccionados: _proveedoresSeleccionados,
                         onProveedorRemovido: _removerProveedor,
                         onProveedorTapped: _abrirDetalleProveedor,
-                        //selectedCategoryIndex: _selectedCategoryIndex.value,
+                        isSolicitudGuardada:
+                            _isSolicitudGuardadaFromServicioDetallado,
                       ),
                     ),
 
                     if (shouldShow)
                       Positioned(
-                        top: MediaQuery.of(context).size.height * 0.63,
+                        top: MediaQuery.of(context).size.height * 0.59,
                         right: 10,
                         child: SizedBox(
                           width: 50,
@@ -928,6 +967,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   _manejarGuardadoDesdeSheetDetallado(data);
                 },
                 selectedCategoryIndex: _selectedCategoryIndex.value,
+                isSolicitudEnviada: (isSolicitudEnviada) {
+                  _isSolicitudGuardadaOnTapped(isSolicitudEnviada);
+                },
               ),
             ),
 

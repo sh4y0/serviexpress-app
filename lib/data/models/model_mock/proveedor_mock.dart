@@ -4,8 +4,11 @@ import 'package:serviexpress_app/data/models/proveedor_model.dart';
 
 class ProveedorMock {
   static List<ProveedorModel> getProveedoresPorCategoria(String categoria) {
-    const double baseLat = -8.073506;
-    const double baseLng = -79.057020;
+    // const double baseLat = -8.073506;
+    // const double baseLng = -79.057020;
+
+    const double baseLat = -8.095322189711315;
+    const double baseLng = -79.04929526003019;
     
     switch (categoria.toLowerCase()) {
       case 'limpieza':
