@@ -18,7 +18,10 @@
 
 ## 📌 Descripción
 
-**ServiExpress** es una aplicación móvil desarrollada en Flutter que conecta usuarios con profesionales para servicios técnicos, mejorando la experiencia de contratación, seguimiento y evaluación de servicios.
+**ServiExpress** es una aplicación móvil multiplataforma creada con Flutter, diseñada para facilitar la conexión entre usuarios y profesionales técnicos de manera eficiente y segura.
+
+Con un enfoque en la experiencia del usuario, **ServiExpress** permite explorar, agendar, monitorear y calificar servicios como mantenimiento, reparaciones o instalaciones desde la comodidad del celular. Nuestra plataforma busca digitalizar el acceso a servicios técnicos, centralizando toda la gestión en una sola app y generando oportunidades para profesionales independientes.
+
 
 ---
 
@@ -28,13 +31,12 @@
 - [Uso](#uso)
 - [Características](#características)
 - [Arquitectura](#arquitectura)
-- [Configuración](#configuración)
 - [Autores](#autores)
 - [Estado del Proyecto](#estado-del-proyecto)
 
 ---
 
-## ⚙️ Instalación
+## Instalación
 
 ### Requisitos
 
@@ -66,45 +68,43 @@ flutter run
 
 ---
 
-## 🚀 Uso
+## Uso
 
-Una vez instalada:
+Una vez instalada la aplicación:
 
-1. Regístrate o inicia sesión.
-2. Explora los servicios disponibles.
-3. Agenda un servicio con el profesional que prefieras.
-4. Haz seguimiento en tiempo real.
-5. Califica la experiencia al finalizar.
+1. **Regístrate o inicia sesión** usando tu cuenta de Google o correo electrónico.
+2. **Navega por las categorías** de servicios disponibles como electricidad, plomería, tecnología, entre otros.
+3. **Consulta los perfiles profesionales**, revisando calificaciones y experiencia.
+4. **Solicita un servicio**, elige fecha y hora, y espera la confirmación del profesional.
+5. **Haz seguimiento** del servicio en tiempo real mediante notificaciones y estado del trabajo.
+6. **Califica y deja tu opinión**, ayudando a otros usuarios a tomar mejores decisiones.
 
----
+Toda la experiencia está pensada para ser rápida, transparente y segura.
 
-## ✨ Características
-
-* 📱 Interfaz moderna y responsiva (Flutter)
-* 🔥 Backend serverless (Firebase)
-* 🔐 Autenticación segura (Google, email)
-* 📍 Geolocalización en tiempo real
-* 💬 Chat entre usuario y profesional
-* 📊 Calificación y feedback post-servicio
 
 ---
 
-## 🏗️ Arquitectura
+## Características
 
-* **Frontend:** Flutter + Riverpod
-* **Backend:** Firebase (Authentication, Firestore, Storage Cloud Firestore, FMC)
-* **Patrones:** Clean Architecture, MVVM
+* 📱 **Interfaz intuitiva:** basada en los principios de Material Design y diseñada para ser accesible a usuarios de todas las edades.
+* 🔥 **Backend escalable:** gracias a Firebase, permite integrar funcionalidades avanzadas como notificaciones push, almacenamiento y analytics en tiempo real.
+* 🔐 **Autenticación confiable:** compatible con login social (Google) y tradicional por correo electrónico, con validación y protección de sesiones.
+* 📍 **Ubicación dinámica:** uso de servicios de geolocalización para encontrar profesionales cercanos y calcular tiempo estimado de llegada.
+* 💬 **Sistema de mensajería interna:** permite coordinar detalles con el profesional sin salir de la app.
+* 📊 **Sistema de reputación:** cada servicio puede ser calificado y comentado, fomentando la mejora continua y la confianza.
 
----
-
-## 🔧 Configuración
-
-1. Crea un proyecto en Firebase y descarga `google-services.json` y `GoogleService-Info.plist`.
-2. Añade las claves API necesarias en tu archivo `.env` o en `firebase_options.dart`.
 
 ---
 
-## 👥 Autores
+## Arquitectura
+
+* **Frontend (Flutter + Riverpod):** Permite una gestión eficiente del estado, modularidad y pruebas. Usa widgets desacoplados y código reutilizable.
+* **Backend (Firebase):** Se utilizan servicios como Authentication, Firestore, Cloud Functions, y Cloud Messaging, evitando la necesidad de un servidor propio.
+* **Patrones de diseño:** Aplicamos principios de Clean Architecture y MVVM (Model-View-ViewModel) para separar responsabilidades y escalar con facilidad.
+
+---
+
+## Autores
 
 <div align="center">
   <table cellspacing="50">
@@ -161,10 +161,10 @@ Una vez instalada:
 
 
 
-## 📌 Estado del Proyecto
+## Estado del Proyecto
 
-🚧 En desarrollo activo
-🎯 Próximas funcionalidades:
+En desarrollo activo
+Próximas funcionalidades:
 
 * Mejora en perfil profesional
 * Mejora de seguimiento en tiempo real
