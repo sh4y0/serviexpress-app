@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
@@ -74,8 +73,6 @@ class DraggableSheetSolicitarServicioState
       }
     });
   }
-
-  
 
   // void resetSheet() {
   //   if (mounted) {
@@ -320,9 +317,11 @@ class DraggableSheetSolicitarServicioState
                                                 // widget.onAbrirDetallesPressed(
                                                 //   catSeleccionada,
                                                 // );
-                                                bool? isSheetVisibleSolicitarServicio = true;
+                                                bool?
+                                                isSheetVisibleSolicitarServicio =
+                                                    true;
                                                 widget.onAbrirDetallesPressed(
-                                                   isSheetVisibleSolicitarServicio,
+                                                  isSheetVisibleSolicitarServicio,
                                                 );
                                               },
                                             ),
