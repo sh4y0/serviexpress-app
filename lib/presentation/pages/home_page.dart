@@ -14,6 +14,8 @@ import 'package:serviexpress_app/presentation/messaging/notifiaction/notificatio
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
+import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
@@ -62,9 +64,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final List<ProveedorModel> _proveedoresSeleccionados = [];
   bool _isSolicitudGuardadaFromServicioDetallado = false;
 
+  
+
+  int _selectedIndex = 0;
+  late final List<Widget Function()> _screens;
+
   @override
   void initState() {
     super.initState();
+    _screens = [
+      () => _buildHomePage(),
+      () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
+      () => const ProfileScreen(isProvider: false,),
+    ];
     _setupToken();
     _setupLocation();
     _loadMarkerIcon();
@@ -594,264 +606,109 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // Widget _buildSkeletonPlaceholder() {
-  //   return Skeletonizer(
-  //     enabled: true,
-  //     effect: const ShimmerEffect(
-  //       baseColor: Color.fromRGBO(38, 48, 137, 1),
-  //       highlightColor: Color.fromRGBO(58, 68, 157, 1),
-  //       duration: Duration(milliseconds: 1200),
-  //     ),
-  //     child: Scaffold(
-  //       backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
-  //       body: Stack(
-  //         children: [
-  //           Container(
-  //             width: double.infinity,
-  //             height: double.infinity,
-  //             color: const Color.fromRGBO(38, 48, 137, 1),
-  //           ),
-
-  //           Positioned(
-  //             left: 0,
-  //             right: 0,
-  //             bottom: 0,
-  //             child: Container(
-  //               decoration: BoxDecoration(
-  //                 color: const Color.fromRGBO(22, 26, 80, 1),
-  //                 borderRadius: const BorderRadius.only(
-  //                   topLeft: Radius.circular(24),
-  //                   topRight: Radius.circular(24),
-  //                 ),
-  //                 boxShadow: [
-  //                   BoxShadow(
-  //                     color: const Color.fromRGBO(
-  //                       38,
-  //                       48,
-  //                       137,
-  //                       1,
-  //                     ).withOpacity(0.5),
-  //                     blurRadius: 10,
-  //                     spreadRadius: 1,
-  //                     offset: const Offset(0, -2),
-  //                   ),
-  //                 ],
-  //               ),
-  //               clipBehavior: Clip.antiAlias,
-  //               child: Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 15),
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     const SizedBox(height: 20),
-
-  //                     Container(
-  //                       height: 16,
-  //                       width: 150,
-  //                       decoration: BoxDecoration(
-  //                         color: const Color.fromRGBO(38, 48, 137, 1),
-  //                         borderRadius: BorderRadius.circular(4),
-  //                       ),
-  //                     ),
-
-  //                     const SizedBox(height: 12),
-
-  //                     SizedBox(
-  //                       height: 40,
-  //                       child: Row(
-  //                         children: List.generate(
-  //                           3,
-  //                           (index) => Container(
-  //                             margin: const EdgeInsets.only(right: 12),
-  //                             width: 80,
-  //                             height: 36,
-  //                             decoration: BoxDecoration(
-  //                               color: const Color.fromRGBO(38, 48, 137, 1),
-  //                               borderRadius: BorderRadius.circular(18),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-
-  //                     const SizedBox(height: 16),
-
-  //                     Container(
-  //                       height: 60,
-  //                       width: double.infinity,
-  //                       decoration: BoxDecoration(
-  //                         color: const Color.fromRGBO(38, 48, 137, 1),
-  //                         borderRadius: BorderRadius.circular(16),
-  //                       ),
-  //                       child: Padding(
-  //                         padding: const EdgeInsets.all(12),
-  //                         child: Row(
-  //                           children: [
-  //                             Container(
-  //                               width: 24,
-  //                               height: 24,
-  //                               decoration: BoxDecoration(
-  //                                 color: const Color.fromRGBO(58, 68, 157, 1),
-  //                                 borderRadius: BorderRadius.circular(4),
-  //                               ),
-  //                             ),
-  //                             const SizedBox(width: 12),
-  //                             Expanded(
-  //                               child: Container(
-  //                                 height: 16,
-  //                                 decoration: BoxDecoration(
-  //                                   color: const Color.fromRGBO(58, 68, 157, 1),
-  //                                   borderRadius: BorderRadius.circular(4),
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ),
-
-  //                     const SizedBox(height: 16),
-
-  //                     Container(
-  //                       width: double.infinity,
-  //                       height: 48,
-  //                       decoration: BoxDecoration(
-  //                         color: const Color.fromRGBO(38, 48, 137, 1),
-  //                         borderRadius: BorderRadius.circular(12),
-  //                       ),
-  //                     ),
-
-  //                     const SizedBox(height: 20),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildHomePage() {
     final double topPaddingHeight =
         60.0 + 25.0 + MediaQuery.of(context).padding.top;
     final double bottomSheetInitialHeight =
         MediaQuery.of(context).size.height * 0.34;
+    return Stack(
+      children: [
+        ValueListenableBuilder<Circle?>(
+          valueListenable: _locationCircleNotifier,
+          builder: (context, locationCircle, _) {
+            final Set<Circle> circles =
+                locationCircle != null ? {locationCircle} : {};
+            return ValueListenableBuilder<Set<Marker>>(
+              valueListenable: _markersNotifier,
+              builder: (context, markers, _) {
+                return GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: const CameraPosition(
+                    target: _center,
+                    zoom: _zoomLevelFar,
+                  ),
+                  circles: circles,
+                  markers: markers,
+                  zoomControlsEnabled: false,
+                  compassEnabled: false,
+                  myLocationEnabled: false,
+                  myLocationButtonEnabled: false,
+                  mapToolbarEnabled: false,
+                  onCameraMove: _onCameraMove,
+                  onCameraIdle: _onCameraIdle,
+                  padding: EdgeInsets.only(
+                    top: topPaddingHeight,
+                    bottom: bottomSheetInitialHeight,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        SafeArea(
+          child: Container(
+            height: 60,
+            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
+            child: ValueListenableBuilder<int>(
+              valueListenable: _selectedCategoryIndex,
+              builder: (context, selectedIndex, _) {
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    var category = CategoryMock.getCategories()[index];
+                    final bool isSelected = index == selectedIndex;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          ValueListenableBuilder<Circle?>(
-            valueListenable: _locationCircleNotifier,
-            builder: (context, locationCircle, _) {
-              final Set<Circle> circles =
-                  locationCircle != null ? {locationCircle} : {};
-              return ValueListenableBuilder<Set<Marker>>(
-                valueListenable: _markersNotifier,
-                builder: (context, markers, _) {
-                  return GoogleMap(
-                    onMapCreated: _onMapCreated,
-                    initialCameraPosition: const CameraPosition(
-                      target: _center,
-                      zoom: _zoomLevelFar,
-                    ),
-                    circles: circles,
-                    markers: markers,
-                    zoomControlsEnabled: false,
-                    compassEnabled: false,
-                    myLocationEnabled: false,
-                    myLocationButtonEnabled: false,
-                    mapToolbarEnabled: false,
-                    onCameraMove: _onCameraMove,
-                    onCameraIdle: _onCameraIdle,
-                    padding: EdgeInsets.only(
-                      top: topPaddingHeight,
-                      bottom: bottomSheetInitialHeight,
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-          SafeArea(
-            child: Container(
-              height: 60,
-              margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SizedBox(
-                    width: constraints.maxWidth,
-                    child: ValueListenableBuilder<int>(
-                      valueListenable: _selectedCategoryIndex,
-                      builder: (context, selectedIndex, _) {
-                        return ListView.builder(
-                          padding: const EdgeInsets.all(10),
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            var category = CategoryMock.getCategories()[index];
-                            final bool isSelected = index == selectedIndex;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: MaterialButton(
-                                padding: const EdgeInsets.all(10),
-                                height: 39,
-                                minWidth: 98,
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: MaterialButton(
+                        padding: const EdgeInsets.all(10),
+                        height: 39,
+                        minWidth: 98,
+                        color:
+                            isSelected
+                                ? const Color(0xFF3645f5)
+                                : const Color(0xFF263089),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        onPressed: () {
+                          _onCategorySelected(index);
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset(
+                              category.iconPath,
+                              width: 20,
+                              height: 15,
+                              colorFilter: ColorFilter.mode(
+                                isSelected ? Colors.white : AppColor.textInput,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              category.name,
+                              style: TextStyle(
                                 color:
                                     isSelected
-                                        ? const Color(0xFF3645f5)
-                                        : const Color(0xFF263089),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                onPressed: () {
-                                  _onCategorySelected(index);
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SvgPicture.asset(
-                                      category.iconPath,
-                                      width: 20,
-                                      height: 15,
-                                      colorFilter: ColorFilter.mode(
-                                        isSelected
-                                            ? Colors.white
-                                            : AppColor.textInput,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      category.name,
-                                      style: TextStyle(
-                                        color:
-                                            isSelected
-                                                ? Colors.white
-                                                : AppColor.textInput,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                        ? Colors.white
+                                        : AppColor.textInput,
+                                fontSize: 11,
                               ),
-                            );
-                          },
-                          itemCount: CategoryMock.getCategories().length,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: CategoryMock.getCategories().length,
+                );
+              },
             ),
           ),
+        ),
 
           if (!_isSheetVisibleSolicitarServicioDetallado)
             Positioned(
@@ -915,34 +772,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             _isSolicitudGuardadaFromServicioDetallado,
                       ),
                     ),
-
                     if (shouldShow)
-                      Positioned(
-                        top: MediaQuery.of(context).size.height * 0.59,
-                        right: 10,
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: FloatingActionButton(
-                            heroTag: 'fabHomeRightsheet',
-                            shape: const CircleBorder(),
-                            backgroundColor: const Color(0xFF4a66ff),
-                            onPressed: _toggleZoom,
-                            child: SvgPicture.asset(
-                              'assets/icons/ic_current_location.svg',
-                              width: 26,
-                              height: 26,
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
-                              ),
+                    Positioned(
+                      top: MediaQuery.of(context).size.height * 0.63,
+                      right: 10,
+                      child: SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: FloatingActionButton(
+                          heroTag: 'fabHomeRightsheet',
+                          shape: const CircleBorder(),
+                          backgroundColor: const Color(0xFF4a66ff),
+                          onPressed: _toggleZoom,
+                          child: SvgPicture.asset(
+                            'assets/icons/ic_current_location.svg',
+                            width: 26,
+                            height: 26,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
                             ),
                           ),
                         ),
                       ),
-                  ],
-                );
-              },
+                    ),
+                  ]
+                );  
+              }
             ),
 
           if (_isSheetVisibleSolicitarServicio)
@@ -978,7 +834,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               color: Colors.black.withOpacity(0.3),
               dismissible: true,
               onDismiss: _handleSheetDismissedDetalleProveedor,
-            ),
+              ),
             Positioned.fill(
               child: DraggableSheetDetalleProveedor(
                 targetInitialSize: 0.55,
@@ -990,10 +846,84 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 selectedProvider: _selectedProvider,
               ),
             ),
-          ],
+          ],          
+        if (!_mapLoaded) Positioned.fill(child: _buildSkeletonPlaceholder()),
+      ],
+    );
+  }
 
-          if (!_mapLoaded) Positioned.fill(child: _buildSkeletonPlaceholder()),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      body: _screens[_selectedIndex](),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: AppColor.bgBtnNav,
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_home.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_chat.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            label: "Conversar",
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                "assets/icons/ic_person.svg",
+                colorFilter: ColorFilter.mode(
+                  _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            label: "Mi Perfil",
+          ),
         ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColor.dotColor,
+        unselectedItemColor: AppColor.bgItmNav,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        enableFeedback: true,
+        elevation: 15,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
       ),
     );
   }
