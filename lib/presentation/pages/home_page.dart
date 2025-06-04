@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,15 +8,15 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
-import 'package:serviexpress_app/data/models/fmc_message.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/messaging/service/firebase_messaging_service.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
   final String mapStyle;
@@ -29,8 +26,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   bool _isZoomedIn = false;
@@ -53,10 +49,10 @@ class _HomePageState extends State<HomePage>
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
   bool _mapLoaded = false;
   bool _ignoreNextCameraMove = false;
-  SolicitudServicioModel? _datosSolicitudGuardada;
+  ServiceModel? _datosSolicitudGuardada;
   String? _categoriaTemporalDeSheet2;
-  final GlobalKey<DraggableSheetSolicitarServicio2State> _sheet2Key =
-      GlobalKey<DraggableSheetSolicitarServicio2State>();
+  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key =
+      GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
 
   BitmapDescriptor? _providerMarkerIcon;
@@ -66,14 +62,7 @@ class _HomePageState extends State<HomePage>
 
   final List<ProveedorModel> _proveedoresSeleccionados = [];
 
-  late final StreamSubscription<RemoteMessage> _notificationSubscription;
-  List<FCMMessage> notifications = [];
-
-  AppLifecycleState? _appLifecycleState;
-
-  bool get isAppInForeground =>
-      _appLifecycleState == null ||
-      _appLifecycleState == AppLifecycleState.resumed;
+  
 
   int _selectedIndex = 0;
   late final List<Widget Function()> _screens;
@@ -87,12 +76,7 @@ class _HomePageState extends State<HomePage>
       () => const ProfileScreen(isProvider: false,),
     ];
     _setupToken();
-
-    // TESTING PURPOSES ONLY
-    _sendTestMessages();
-
-    // END TESTING PURPOSES
-
+    _setupLocation();
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
     _initializeLocation();
@@ -104,6 +88,10 @@ class _HomePageState extends State<HomePage>
 
   void _setupToken() async {
     await NotificationManager().initialize();
+  }
+
+  void _setupLocation() async {
+    await LocationMapsService().initialize();
   }
 
   void _setupKeyboardListener() {
@@ -123,86 +111,8 @@ class _HomePageState extends State<HomePage>
         BitmapDescriptor.hueBlue,
       );
     }
-    WidgetsBinding.instance.addObserver(this);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _notificationSubscription = NotificationManager().notificationStream
-          .listen((RemoteMessage message) {
-            final fcmMessage = FCMMessage.fromRemoteMessage(message);
-
-            bool exists = notifications.any(
-              (notification) =>
-                  notification.idServicio == fcmMessage.idServicio,
-            );
-            if (!exists) {
-              setState(() {
-                notifications.add(fcmMessage);
-              });
-
-              if (isAppInForeground) {
-                NotificationManager().showLocalNotification(
-                  title: fcmMessage.title ?? 'Notificación',
-                  body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-                );
-              }
-            }
-          });
-    });
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _appLifecycleState = state;
-    });
-  }
-
-  // TESTING PURPOSES ONLY
-  void _sendTestMessages() {
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    if (currentUser == null) {
-      print('⚠️ No hay usuario autenticado. No se envió el mensaje.');
-      return;
-    }
-
-    final messages = [
-      FCMMessage(
-        token: '',
-        idServicio: '123ABC',
-        senderId: currentUser.uid,
-        title: 'Mensaje de prueba',
-        body: 'Hola desde el main 👋',
-        receiverId: currentUser.uid,
-      ),
-      FCMMessage(
-        token: '',
-        idServicio: 'SEGUNDO_SERVICIO',
-        senderId: currentUser.uid,
-        title: 'SEGUNDO MENSAJE DE PRUEBA',
-        body: 'HOLA DESDE HOME 👋',
-        receiverId: currentUser.uid,
-      ),
-      FCMMessage(
-        token: '',
-        idServicio: 'TERCER_SERVICIO',
-        senderId: currentUser.uid,
-        title: 'TERCER MENSAJE DE PRUEBA',
-        body: 'HOLA DESDE HOME 👋',
-        receiverId: currentUser.uid,
-      ),
-    ];
-
-    for (var fcmMessage in messages) {
-      final enviado = FirebaseMessagingService.instance.sendFCMMessage(
-        fcmMessage,
-        fcmMessage.receiverId,
-      );
-      print('📤 ¿Mensaje enviado? $enviado');
-    }
-  }
-
-  // END TESTING PURPOSES
   Future<void> _initializeLocation() async {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
@@ -561,13 +471,13 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  void _manejarGuardadoDesdeSheetDetallado(SolicitudServicioModel data) {
+  void _manejarGuardadoDesdeSheetDetallado(ServiceModel data) {
     if (mounted) {
       setState(() {
         _datosSolicitudGuardada = data;
         _isSheetVisibleSolicitarServicio = false;
 
-        _categoriaTemporalDeSheet2 = null;
+        //_categoriaTemporalDeSheet2 = null;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -582,9 +492,9 @@ class _HomePageState extends State<HomePage>
         ),
       );
 
-      if (_sheet2Key.currentState != null) {
-        _sheet2Key.currentState!.resetSheet();
-      }
+      // if (_sheet2Key.currentState != null) {
+      //   _sheet2Key.currentState!.resetSheet();
+      // }
     }
   }
 
@@ -594,14 +504,22 @@ class _HomePageState extends State<HomePage>
   //   });
   // }
 
-  void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
+  // void _abrirSheetDetalladoDesdeSheet2({String? categoria}) {
+  //   setState(() {
+  //     if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
+  //       _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
+  //     } else {
+  //       _categoriaTemporalDeSheet2 = categoria;
+  //     }
+  //     _isSheetVisibleSolicitarServicio = true;
+  //   });
+  // }
+
+  void _abrirSheetDetalladoDesdeSheet2({
+    bool? isSheetVisibleSolicitarServicio,
+  }) {
     setState(() {
-      if (_datosSolicitudGuardada != null && _datosSolicitudGuardada!.hasData) {
-        _categoriaTemporalDeSheet2 = _datosSolicitudGuardada!.categoria;
-      } else {
-        _categoriaTemporalDeSheet2 = categoria;
-      }
-      _isSheetVisibleSolicitarServicio = true;
+      _isSheetVisibleSolicitarServicio = isSheetVisibleSolicitarServicio!;
     });
   }
 
@@ -634,141 +552,43 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _buildSkeletonPlaceholder() {
-    return Skeletonizer(
-      enabled: true,
-      effect: const ShimmerEffect(
-        baseColor: Color.fromRGBO(38, 48, 137, 1),
-        highlightColor: Color.fromRGBO(58, 68, 157, 1),
-        duration: Duration(milliseconds: 1200),
-      ),
-      child: Scaffold(
-        backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
-        body: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: const Color.fromRGBO(38, 48, 137, 1),
-            ),
+    return Scaffold(
+      backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
+      body: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            color: const Color.fromRGBO(38, 48, 137, 1),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 70,
+            child: Shimmer.fromColors(
+              baseColor: const Color.fromRGBO(200, 200, 200, 0.3),
+              highlightColor: const Color.fromRGBO(255, 255, 255, 0.6),
 
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(22, 26, 80, 1),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromRGBO(
-                        38,
-                        48,
-                        137,
-                        1,
-                      ).withOpacity(0.5),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                      offset: const Offset(0, -2),
+              child: SizedBox(
+                height: 40,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(
+                    3,
+                    (index) => Container(
+                      width: 98,
+                      height: 39,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(88, 101, 242, 0.6),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
-                  ],
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-
-                      Container(
-                        height: 16,
-                        width: 150,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      SizedBox(
-                        height: 40,
-                        child: Row(
-                          children: List.generate(
-                            3,
-                            (index) => Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              width: 80,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: const Color.fromRGBO(38, 48, 137, 1),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Container(
-                        height: 60,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 24,
-                                height: 24,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(58, 68, 157, 1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Container(
-                                  height: 16,
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromRGBO(58, 68, 157, 1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Container(
-                        width: double.infinity,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(38, 48, 137, 1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -898,11 +718,14 @@ class _HomePageState extends State<HomePage>
                       maxSheetSize: 0.95,
                       snapPoints: const [0.34, 0.95],
                       onTapPressed: _requestService,
-                      onAbrirDetallesPressed: (String? categoriaSeleccionada) {
-                        _abrirSheetDetalladoDesdeSheet2(
-                          categoria: categoriaSeleccionada,
-                        );
-                      },
+                      onAbrirDetallesPressed: (
+                          bool? isSheetVisibleSolicitarServicioTapped,
+                        ) {
+                          _abrirSheetDetalladoDesdeSheet2(
+                            isSheetVisibleSolicitarServicio:
+                                isSheetVisibleSolicitarServicioTapped,
+                          );
+                        },
                       datosSolicitudExistente: _datosSolicitudGuardada,
                       proveedoresSeleccionados: _proveedoresSeleccionados,
                       onProveedorRemovido: _removerProveedor,
@@ -948,37 +771,65 @@ class _HomePageState extends State<HomePage>
               snapPoints: const [0.0, 0.95],
               onDismiss: _handleSheetDismissedSolicitarServicio,
               initialData:
-                  _datosSolicitudGuardada != null &&
-                          _datosSolicitudGuardada!.hasData
-                      ? _datosSolicitudGuardada
-                      : SolicitudServicioModel(
-                        categoria: _categoriaTemporalDeSheet2,
-                      ),
+                  _datosSolicitudGuardada ??
+                    ServiceModel(
+                      categoria: _categoriaTemporalDeSheet2,
+                      id: '',
+                      descripcion: '',
+                      estado: '',
+                      clientId: '',
+                      workerId: '',
+                    ),
               onGuardarSolicitudCallback: (data) {
                 _manejarGuardadoDesdeSheetDetallado(data);
               },
+              selectedCategoryIndex: _selectedCategoryIndex.value,
             ),
           ),
 
-        if (_isSheetVisibleDetalleProveedor) ...[
-          ModalBarrier(
-            color: Colors.black.withOpacity(0.3),
-            dismissible: true,
-            onDismiss: _handleSheetDismissedDetalleProveedor,
-          ),
-          Positioned.fill(
-            child: DraggableSheetDetalleProveedor(
-              targetInitialSize: 0.55,
-              minSheetSize: 0.0,
-              maxSheetSize: 0.95,
-              snapPoints: const [0.0, 0.55, 0.95],
+          if (_isSheetVisibleSolicitarServicio)
+            Positioned.fill(
+              child: DraggableSheetSolicitarServicioDetallado(
+                targetInitialSize: 0.95,
+                minSheetSize: 0.0,
+                maxSheetSize: 0.95,
+                snapPoints: const [0.0, 0.95],
+                onDismiss: _handleSheetDismissedSolicitarServicio,
+                initialData:
+                    _datosSolicitudGuardada ??
+                    ServiceModel(
+                      categoria: _categoriaTemporalDeSheet2,
+                      id: '',
+                      descripcion: '',
+                      estado: '',
+                      clientId: '',
+                      workerId: '',
+                    ),
+                onGuardarSolicitudCallback: (data) {
+                  _manejarGuardadoDesdeSheetDetallado(data);
+                },
+                selectedCategoryIndex: _selectedCategoryIndex.value,
+              ),
+            ),
+
+          if (_isSheetVisibleDetalleProveedor) ...[
+            ModalBarrier(
+              color: Colors.black.withOpacity(0.3),
+              dismissible: true,
               onDismiss: _handleSheetDismissedDetalleProveedor,
-              onProveedorAgregado: _agregarProveedor,
-              selectedProvider: _selectedProvider,
+              ),
+            Positioned.fill(
+              child: DraggableSheetDetalleProveedor(
+                targetInitialSize: 0.55,
+                minSheetSize: 0.0,
+                maxSheetSize: 0.95,
+                snapPoints: const [0.0, 0.55, 0.95],
+                onDismiss: _handleSheetDismissedDetalleProveedor,
+                onProveedorAgregado: _agregarProveedor,
+                selectedProvider: _selectedProvider,
+              ),
             ),
-          ),
-        ],
-
+          ],          
         if (!_mapLoaded) Positioned.fill(child: _buildSkeletonPlaceholder()),
       ],
     );
@@ -1066,8 +917,6 @@ class _HomePageState extends State<HomePage>
     _locationCircleNotifier.dispose();
     _circleRadiusNotifier.dispose();
     _markersNotifier.dispose();
-    _notificationSubscription.cancel();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 }

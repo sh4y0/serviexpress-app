@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/service.dart';
 
 class CardDesing extends StatelessWidget {
-  final Map<String, dynamic> cliente;
-  const CardDesing({super.key, required this.cliente});
+  final ServiceComplete service;
+  const CardDesing({super.key, required this.service});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class CardDesing extends StatelessWidget {
                   Text(
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    "${cliente["name"]}",
+                    service.cliente.username,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -65,14 +66,14 @@ class CardDesing extends StatelessWidget {
                   Text(
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    cliente["description"],
+                    service.service.descripcion,
                     style: const TextStyle(color: Colors.white),
                   ),
                   const SizedBox(height: 4),
-                  Text(
+                  /*Text(
                     "${cliente["distance"]}",
                     style: const TextStyle(color: Colors.white),
-                  ),
+                  ),*/
                 ],
               ),
             ),

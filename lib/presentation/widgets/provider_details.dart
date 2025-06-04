@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/service.dart';
 
 class ProviderDetails extends StatefulWidget {
-  final Map<String, dynamic> cliente;
+  final ServiceComplete service;
   final String? mapStyle;
 
   const ProviderDetails({
     super.key,
-    required this.cliente,
+    required this.service,
     required this.mapStyle,
   });
 
@@ -28,7 +29,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Solicitud de servicio"), centerTitle: true,),
+      appBar: AppBar(title: Text(widget.service.cliente.nombreCompleto)),
       body: Stack(
         children: [
           GoogleMap(
@@ -44,7 +45,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
             maxChildSize: 0.8,
             builder: (context, scrollController) {
               return ScreenClientData(
-                cliente: widget.cliente,
+                service: widget.service,
                 scrollController: scrollController,
               );
             },
@@ -58,11 +59,11 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 class ScreenClientData extends StatefulWidget {
   const ScreenClientData({
     super.key,
-    required this.cliente,
+    required this.service,
     required this.scrollController,
   });
 
-  final Map<String, dynamic> cliente;
+  final ServiceComplete service;
   final ScrollController scrollController;
 
   @override
@@ -131,7 +132,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "${widget.cliente["name"]}",
+                              widget.service.cliente.username,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
@@ -163,13 +164,11 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                   height: 23,
                                 ),
                                 const SizedBox(width: 6),
-                                Text(
-                                  "${widget.cliente["distance"]}",
-                                  style: const TextStyle(
-                                    color: AppColor.dotColor,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
+                                /*
+                      Text(
+                        "${cliente["distance"]}",
+                        style: const TextStyle(color: Colors.white),
+                      ), */
                               ],
                             ),
                           ],
@@ -213,29 +212,51 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                           ),
                         ),
                         Text(
-                          "${widget.cliente["description"]}",
+                          widget.service.service.descripcion,
                           style: const TextStyle(color: AppColor.txtBooking),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 15),
+                  if (widget.service.service.fotos != null &&
+                      widget.service.service.fotos!.isNotEmpty)
                   SizedBox(
                     height: 90,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: (widget.cliente["images"] as List).length,
+                      itemCount: widget.service.service.fotos!.length,
                       separatorBuilder:
                           (context, index) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         return Image.asset(
-                          widget.cliente["images"][index],
+                          widget.service.service.fotos![index],
                           width: 90,
                           height: 90,
                         );
                       },
                     ),
                   ),
+
+                  widget.service.service.videos != null &&
+                          widget.service.service.videos!.isNotEmpty
+                      ? SizedBox(
+                        height: 90,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: widget.service.service.videos!.length,
+                          separatorBuilder:
+                              (context, index) => const SizedBox(width: 8),
+                          itemBuilder: (context, index) {
+                            return Image.asset(
+                              widget.service.service.videos![index],
+                              width: 90,
+                              height: 90,
+                            );
+                          },
+                        ),
+                      )
+                      : const SizedBox.shrink(),
                   const SizedBox(height: 15),
                   const Text(
                     "Ingresa el precio:",

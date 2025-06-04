@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
-import 'package:serviexpress_app/data/models/solicitud_servicio_model.dart';
+import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
 
-class DraggableSheetSolicitarServicio extends StatefulWidget {
+class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback? onDismiss;
   final double targetInitialSize;
   final double minSheetSize;
@@ -16,8 +17,9 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
   final bool isInteractionEnabled;
   final VoidCallback onTapPressed;
 
-  final SolicitudServicioModel? datosSolicitudExistente;
-  final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
+  final ServiceModel? datosSolicitudExistente;
+  //final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
+  final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
   final List<ProveedorModel> proveedoresSeleccionados;
   final Function(ProveedorModel)? onProveedorRemovido;
@@ -41,16 +43,15 @@ class DraggableSheetSolicitarServicio extends StatefulWidget {
     this.onProveedorTapped,
   });
   @override
-  State<DraggableSheetSolicitarServicio> createState() =>
-      DraggableSheetSolicitarServicio2State();
+  ConsumerState<DraggableSheetSolicitarServicio> createState() =>
+      DraggableSheetSolicitarServicioState();
 }
 
-class DraggableSheetSolicitarServicio2State
-    extends State<DraggableSheetSolicitarServicio> {
+class DraggableSheetSolicitarServicioState
+    extends ConsumerState<DraggableSheetSolicitarServicio> {
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
-  final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   late TextEditingController _descripcionController = TextEditingController();
   final FocusNode focusNodePrimero = FocusNode();
 
@@ -73,19 +74,18 @@ class DraggableSheetSolicitarServicio2State
     });
   }
 
-  void resetSheet() {
-    if (mounted) {
-      setState(() {
-        _selectedCategoryIndex.value = -1;
-      });
-    }
-  }
+  // void resetSheet() {
+  //   if (mounted) {
+  //     setState(() {
+  //       _selectedCategoryIndex.value = -1;
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
     _internalController.removeListener(_onChanged);
     _internalController.dispose();
-    _selectedCategoryIndex.dispose();
     super.dispose();
   }
 
@@ -152,7 +152,7 @@ class DraggableSheetSolicitarServicio2State
     // bool hayDatosParaEditar =
     //     widget.datosSolicitudExistente != null &&
     //     widget.datosSolicitudExistente!.hasData;
-    final categories = CategoryMock.getCategories();
+    //final categories = CategoryMock.getCategories();
 
     return LayoutBuilder(
       builder: (builder, constraints) {
@@ -299,18 +299,29 @@ class DraggableSheetSolicitarServicio2State
                                               showCursor: false,
                                               onTap: () {
                                                 focusNodePrimero.unfocus();
-                                                String? catSeleccionada;
-                                                if (_selectedCategoryIndex
-                                                        .value !=
-                                                    -1) {
-                                                  catSeleccionada =
-                                                      categories[_selectedCategoryIndex
-                                                              .value]
-                                                          .name;
-                                                }
-
+                                                // String? catSeleccionada;
+                                                // if (_selectedCategoryIndex
+                                                //         .value !=
+                                                //     -1) {
+                                                //   catSeleccionada =
+                                                //       categories[_selectedCategoryIndex
+                                                //               .value]
+                                                //           .name;
+                                                // }
+                                                // print(
+                                                //   "Cat - _selectedCategoryIndex: ${_selectedCategoryIndex.value}",
+                                                // );
+                                                // print(
+                                                //   "Cat - catSeleccionada $catSeleccionada",
+                                                // );
+                                                // widget.onAbrirDetallesPressed(
+                                                //   catSeleccionada,
+                                                // );
+                                                bool?
+                                                isSheetVisibleSolicitarServicio =
+                                                    true;
                                                 widget.onAbrirDetallesPressed(
-                                                  catSeleccionada,
+                                                  isSheetVisibleSolicitarServicio,
                                                 );
                                               },
                                             ),
@@ -326,14 +337,21 @@ class DraggableSheetSolicitarServicio2State
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // if (hayDatosParaEditar) {
-                                    //   print(
-                                    //     "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
-                                    //   );
-                                    // } else {
-
-                                    // }
+                                  onPressed: () async {
+                                    if (widget.datosSolicitudExistente !=
+                                        null) {
+                                      widget.datosSolicitudExistente!.workerId =
+                                          "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
+                                      await ServiceRepository.instance
+                                          .createService(
+                                            widget.datosSolicitudExistente!,
+                                          );
+                                      print(
+                                        "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
+                                      );
+                                    } else {
+                                      print("NO SE PUDO CREAR LA SOLICITUD");
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3645f5),
