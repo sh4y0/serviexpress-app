@@ -25,6 +25,8 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final Function(ProveedorModel)? onProveedorRemovido;
   final Function(ProveedorModel)? onProveedorTapped;
 
+  final bool isSolicitudGuardada;
+
   const DraggableSheetSolicitarServicio({
     super.key,
     this.onDismiss,
@@ -41,6 +43,7 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     required this.proveedoresSeleccionados,
     this.onProveedorRemovido,
     this.onProveedorTapped,
+    this.isSolicitudGuardada = false, 
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -206,6 +209,7 @@ class DraggableSheetSolicitarServicioState
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 12),
                               if (widget.proveedoresSeleccionados.isNotEmpty)
                                 SizedBox(
                                   height: 80,
@@ -279,10 +283,12 @@ class DraggableSheetSolicitarServicioState
                                                 color: Colors.white,
                                                 fontSize: 14,
                                               ),
-                                              decoration: const InputDecoration(
+                                              decoration: InputDecoration(
                                                 hintText:
-                                                    "Detalla el servicio que necesitas...",
-                                                hintStyle: TextStyle(
+                                                    widget.isSolicitudGuardada
+                                                        ? "Se ha guardado tu solicitud, toca aqui para editarla"
+                                                        : "Detalla el servicio que necesitas...",
+                                                hintStyle: const TextStyle(
                                                   color: Color.fromRGBO(
                                                     194,
                                                     215,

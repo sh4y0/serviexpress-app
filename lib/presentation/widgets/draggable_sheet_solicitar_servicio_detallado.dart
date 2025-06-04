@@ -20,6 +20,7 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
   final Function(ServiceModel) onGuardarSolicitudCallback;
 
   final int selectedCategoryIndex;
+  final Function(bool) isSolicitudEnviada;
 
   const DraggableSheetSolicitarServicioDetallado({
     super.key,
@@ -31,7 +32,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
     this.entryAnimationDuration = const Duration(milliseconds: 300),
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.initialData,
-    required this.onGuardarSolicitudCallback, required this.selectedCategoryIndex,
+    required this.onGuardarSolicitudCallback, required this.selectedCategoryIndex, 
+    required this.isSolicitudEnviada,
   });
   @override
   State<DraggableSheetSolicitarServicioDetallado> createState() =>
@@ -47,6 +49,7 @@ class DraggableSheetState
       GlobalKey<FormularioMultimediaState>();
 
   late ValueNotifier<int> _selectedCategoryIndex;
+
 
   @override
   void initState() {
@@ -157,8 +160,10 @@ class DraggableSheetState
     );
 
     //await ServiceRepository.instance.createService(service);
-
+    
+    widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
+    
   }
 
   @override
