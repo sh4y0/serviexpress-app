@@ -43,7 +43,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     _screens = [
       () => _buildHomeProvider(),
       () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
-      () => const ProfileScreen(isProvider: false,),
+      () => const ProfileScreen(isProvider: true,),
     ];
     _setupToken();
     _setupLocation();
