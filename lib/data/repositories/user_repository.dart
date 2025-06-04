@@ -98,4 +98,14 @@ class UserRepository {
 
     await userDoc.update({'token': token});
   }
+
+  Future<void> setUserLocation(
+    String uid,
+    double latitude,
+    double longitude,
+  ) async {
+    final userDoc = _firestore.collection('users').doc(uid);
+
+    await userDoc.update({'latitud': latitude, 'longitud': longitude});
+  }
 }

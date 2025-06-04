@@ -15,6 +15,8 @@ class UserModel {
   final String? especialidad;
   final String? descripcion;
   final String? token;
+  final double? latitud;
+  final double? longitud;
 
   UserModel({
     required this.uid,
@@ -31,6 +33,8 @@ class UserModel {
     this.especialidad,
     this.descripcion,
     this.token,
+    this.latitud,
+    this.longitud,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +56,8 @@ class UserModel {
       especialidad: json['especialidad'],
       descripcion: json['descripcion'],
       token: json['token'],
+      latitud: json['latitud']?.toDouble(),
+      longitud: json['longitud']?.toDouble(),
     );
   }
 
@@ -71,6 +77,8 @@ class UserModel {
       'especialidad': especialidad,
       'descripcion': descripcion,
       'token': token,
+      'latitud': latitud,
+      'longitud': longitud,
     };
   }
 }

@@ -9,6 +9,7 @@ import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
@@ -63,7 +64,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _setupToken();
-
+    _setupLocation();
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
     _initializeLocation();
@@ -75,6 +76,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _setupToken() async {
     await NotificationManager().initialize();
+  }
+
+  void _setupLocation() async {
+    await LocationMapsService().initialize();
   }
 
   void _setupKeyboardListener() {
@@ -331,7 +336,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _currentProviders = ProveedorMock.getProveedoresPorCategoria(
           selectedCategory,
         );
-        
       });
 
       _updateMarkers();
