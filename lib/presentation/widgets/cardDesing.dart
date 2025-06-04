@@ -53,6 +53,8 @@ class CardDesing extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     service.cliente.username,
                     style: const TextStyle(
                       color: Colors.white,

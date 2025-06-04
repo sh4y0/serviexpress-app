@@ -4,6 +4,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 class AppTheme {
   static ThemeData get themeData {
     return ThemeData(
+      fontFamily: "DMSans",
       useMaterial3: true,
       colorScheme: const ColorScheme.dark().copyWith(
         primary: AppColor.btnColor,
@@ -48,9 +49,7 @@ class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: Colors.white,
-        ),
+        style: TextButton.styleFrom(foregroundColor: Colors.white),
       ),
       extensions: const <ThemeExtension<dynamic>>[
         AppColorsExtension(
@@ -97,7 +96,9 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
 
   @override
   ThemeExtension<AppColorsExtension> lerp(
-      covariant ThemeExtension<AppColorsExtension>? other, double t) => this;
+    covariant ThemeExtension<AppColorsExtension>? other,
+    double t,
+  ) => this;
 }
 
 // Cómo usar los colores en cualquier widget:
