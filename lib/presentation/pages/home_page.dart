@@ -15,7 +15,6 @@ import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_pr
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,7 +25,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   bool _isZoomedIn = false;
@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ValueNotifier<Set<Marker>>({});
   BitmapDescriptor? _locationMarkerIcon;
   bool _isSheetVisibleSolicitarServicio = false;
+  bool _isSheetVisibleSolicitarServicioDetallado = false;
   bool _isSheetVisibleDetalleProveedor = false;
   Timer? _mapInteractionTimer;
   bool _isMapBeingMoved = false;
@@ -61,19 +62,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   MarkerId? _currentlyOpenInfoWindowMarkerId;
 
   final List<ProveedorModel> _proveedoresSeleccionados = [];
-
-  
+  bool _isSolicitudGuardadaFromServicioDetallado = false;
 
   int _selectedIndex = 0;
   late final List<Widget Function()> _screens;
+  bool _isProveedorAgregado = false;
 
   @override
   void initState() {
     super.initState();
     _screens = [
       () => _buildHomePage(),
-      () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
-      () => const ProfileScreen(isProvider: false,),
+      () => const Center(
+        child: Text("Conversar", style: TextStyle(fontSize: 25)),
+      ),
+      () => const ProfileScreen(isProvider: false),
     ];
     _setupToken();
     _setupLocation();
@@ -85,6 +88,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _setupKeyboardListener();
     });
   }
+
 
   void _setupToken() async {
     await NotificationManager().initialize();
@@ -355,6 +359,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       if (_currentProviders.isNotEmpty) {
         _adjustCameraToShowAllMarkers();
       }
+
     } else {
       setState(() {
         _currentProviders = [];
@@ -406,6 +411,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       _isSheetVisibleDetalleProveedor = true;
     });
+
   }
 
   void _handleSheetDismissedDetalleProveedor() {
@@ -523,10 +529,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
   }
 
+  void _isSolicitudGuardadaOnTapped(bool isSolicitudGuardada) {
+    _isSolicitudGuardadaFromServicioDetallado = isSolicitudGuardada;
+  }
+
   void _agregarProveedor(ProveedorModel proveedor) {
     setState(() {
       if (!_proveedoresSeleccionados.any((p) => p.id == proveedor.id)) {
         _proveedoresSeleccionados.add(proveedor);
+      }
+      if (_proveedoresSeleccionados.length == 1) {
+        _isSheetVisibleSolicitarServicioDetallado = true;
       }
     });
   }
@@ -534,6 +547,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _removerProveedor(ProveedorModel proveedor) {
     setState(() {
       _proveedoresSeleccionados.removeWhere((p) => p.id == proveedor.id);
+      if (_proveedoresSeleccionados.isEmpty) {
+        _isSheetVisibleSolicitarServicioDetallado = false;
+        _isSolicitudGuardadaFromServicioDetallado = false;
+        _isProveedorAgregado = false;
+      }
     });
   }
 
@@ -549,6 +567,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
       _isSheetVisibleDetalleProveedor = true;
     });
+  }
+
+  void isProveedorAgregado(bool proveedorAgregado) {
+      _isProveedorAgregado = proveedorAgregado;
   }
 
   Widget _buildSkeletonPlaceholder() {
@@ -632,7 +654,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             );
           },
         ),
-        SafeArea(
+        Positioned(
+          top:MediaQuery.of(context,).padding.top,
+          left: 6,
+          right: 6,
+          height: 110,
           child: Container(
             height: 60,
             margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
@@ -697,7 +723,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
         ),
 
-        if (!(_selectedCategoryIndex.value < 0))
+        // if (!_isSheetVisibleSolicitarServicioDetallado)
+        //   Positioned(
+        //     bottom: MediaQuery.of(context).size.height * 0.01,
+        //     right: 10,
+        //     child: SizedBox(
+        //       width: 50,
+        //       height: 50,
+        //       child: FloatingActionButton(
+        //         heroTag: 'fabHomeRightsheet',
+        //         shape: const CircleBorder(),
+        //         backgroundColor: const Color(0xFF4a66ff),
+        //         onPressed: _toggleZoom,
+        //         child: SvgPicture.asset(
+        //           'assets/icons/ic_current_location.svg',
+        //           width: 26,
+        //           height: 26,
+        //           colorFilter: const ColorFilter.mode(
+        //             Colors.white,
+        //             BlendMode.srcIn,
+        //           ),
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+
+        //if (_isSheetVisibleSolicitarServicioDetallado)
           ValueListenableBuilder<bool>(
             valueListenable: _shouldShowSheet,
             builder: (context, shouldShow, child) {
@@ -713,29 +764,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     top: 0,
                     child: DraggableSheetSolicitarServicio(
                       key: _sheet2Key,
-                      targetInitialSize: 0.34,
-                      minSheetSize: 0.34,
+                      targetInitialSize: 0.30,
+                      minSheetSize: 0.30,
                       maxSheetSize: 0.95,
-                      snapPoints: const [0.34, 0.95],
+                      snapPoints: const [0.30, 0.95],
                       onTapPressed: _requestService,
                       onAbrirDetallesPressed: (
-                          bool? isSheetVisibleSolicitarServicioTapped,
-                        ) {
-                          _abrirSheetDetalladoDesdeSheet2(
-                            isSheetVisibleSolicitarServicio:
-                                isSheetVisibleSolicitarServicioTapped,
-                          );
-                        },
+                        bool? isSheetVisibleSolicitarServicioTapped,
+                      ) {
+                        _abrirSheetDetalladoDesdeSheet2(
+                          isSheetVisibleSolicitarServicio:
+                              isSheetVisibleSolicitarServicioTapped,
+                        );
+                      },
                       datosSolicitudExistente: _datosSolicitudGuardada,
                       proveedoresSeleccionados: _proveedoresSeleccionados,
                       onProveedorRemovido: _removerProveedor,
                       onProveedorTapped: _abrirDetalleProveedor,
+                      isSolicitudGuardada:
+                          _isSolicitudGuardadaFromServicioDetallado,
+                      isProveedorAgregado : _isProveedorAgregado
                     ),
                   ),
-
                   if (shouldShow)
                     Positioned(
-                      top: MediaQuery.of(context).size.height * 0.63,
+                      top: MediaQuery.of(context).size.height * 0.52,
                       right: 10,
                       child: SizedBox(
                         width: 50,
@@ -772,64 +825,45 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               onDismiss: _handleSheetDismissedSolicitarServicio,
               initialData:
                   _datosSolicitudGuardada ??
-                    ServiceModel(
-                      categoria: _categoriaTemporalDeSheet2,
-                      id: '',
-                      descripcion: '',
-                      estado: '',
-                      clientId: '',
-                      workerId: '',
-                    ),
+                  ServiceModel(
+                    categoria: _categoriaTemporalDeSheet2,
+                    id: '',
+                    descripcion: '',
+                    estado: '',
+                    clientId: '',
+                    workerId: '',
+                  ),
               onGuardarSolicitudCallback: (data) {
                 _manejarGuardadoDesdeSheetDetallado(data);
               },
               selectedCategoryIndex: _selectedCategoryIndex.value,
+              isSolicitudEnviada: (isSolicitudEnviada) {
+                _isSolicitudGuardadaOnTapped(isSolicitudEnviada);
+              },
             ),
           ),
 
-          if (_isSheetVisibleSolicitarServicio)
-            Positioned.fill(
-              child: DraggableSheetSolicitarServicioDetallado(
-                targetInitialSize: 0.95,
-                minSheetSize: 0.0,
-                maxSheetSize: 0.95,
-                snapPoints: const [0.0, 0.95],
-                onDismiss: _handleSheetDismissedSolicitarServicio,
-                initialData:
-                    _datosSolicitudGuardada ??
-                    ServiceModel(
-                      categoria: _categoriaTemporalDeSheet2,
-                      id: '',
-                      descripcion: '',
-                      estado: '',
-                      clientId: '',
-                      workerId: '',
-                    ),
-                onGuardarSolicitudCallback: (data) {
-                  _manejarGuardadoDesdeSheetDetallado(data);
-                },
-                selectedCategoryIndex: _selectedCategoryIndex.value,
-              ),
-            ),
-
-          if (_isSheetVisibleDetalleProveedor) ...[
-            ModalBarrier(
-              color: Colors.black.withOpacity(0.3),
-              dismissible: true,
+        if (_isSheetVisibleDetalleProveedor) ...[
+          ModalBarrier(
+            color: Colors.black.withOpacity(0.3),
+            dismissible: true,
+            onDismiss: _handleSheetDismissedDetalleProveedor,
+          ),
+          Positioned.fill(
+            child: DraggableSheetDetalleProveedor(
+              targetInitialSize: 0.55,
+              minSheetSize: 0.0,
+              maxSheetSize: 0.95,
+              snapPoints: const [0.0, 0.55, 0.95],
               onDismiss: _handleSheetDismissedDetalleProveedor,
-              ),
-            Positioned.fill(
-              child: DraggableSheetDetalleProveedor(
-                targetInitialSize: 0.55,
-                minSheetSize: 0.0,
-                maxSheetSize: 0.95,
-                snapPoints: const [0.0, 0.55, 0.95],
-                onDismiss: _handleSheetDismissedDetalleProveedor,
-                onProveedorAgregado: _agregarProveedor,
-                selectedProvider: _selectedProvider,
-              ),
+              onProveedorAgregado: _agregarProveedor,
+              selectedProvider: _selectedProvider,
+              isProveedorAgregado: (proveedorAgregado) {
+                isProveedorAgregado(proveedorAgregado);
+              },
             ),
-          ],          
+          ),
+        ],
         if (!_mapLoaded) Positioned.fill(child: _buildSkeletonPlaceholder()),
       ],
     );
@@ -919,4 +953,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _markersNotifier.dispose();
     super.dispose();
   }
+  
+  
 }

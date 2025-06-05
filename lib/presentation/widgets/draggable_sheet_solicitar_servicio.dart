@@ -25,6 +25,9 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final Function(ProveedorModel)? onProveedorRemovido;
   final Function(ProveedorModel)? onProveedorTapped;
 
+  final bool isSolicitudGuardada;
+  final bool isProveedorAgregado;
+
   const DraggableSheetSolicitarServicio({
     super.key,
     this.onDismiss,
@@ -41,6 +44,8 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     required this.proveedoresSeleccionados,
     this.onProveedorRemovido,
     this.onProveedorTapped,
+    this.isSolicitudGuardada = false, 
+    this.isProveedorAgregado = false
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -196,16 +201,17 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                               Padding(
+                                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                                 child: Text(
-                                  'Proveedores que seleccionaste:',
-                                  style: TextStyle(
+                                  widget.isProveedorAgregado ? 'Proveedores que seleccionaste:' : '',
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 12),
                               if (widget.proveedoresSeleccionados.isNotEmpty)
                                 SizedBox(
                                   height: 80,
@@ -279,10 +285,12 @@ class DraggableSheetSolicitarServicioState
                                                 color: Colors.white,
                                                 fontSize: 14,
                                               ),
-                                              decoration: const InputDecoration(
+                                              decoration: InputDecoration(
                                                 hintText:
-                                                    "Detalla el servicio que necesitas...",
-                                                hintStyle: TextStyle(
+                                                    widget.isSolicitudGuardada
+                                                        ? "Se ha guardado tu solicitud, toca aqui para editarla"
+                                                        : "Detalla el servicio que necesitas...",
+                                                hintStyle: const TextStyle(
                                                   color: Color.fromRGBO(
                                                     194,
                                                     215,
@@ -299,24 +307,6 @@ class DraggableSheetSolicitarServicioState
                                               showCursor: false,
                                               onTap: () {
                                                 focusNodePrimero.unfocus();
-                                                // String? catSeleccionada;
-                                                // if (_selectedCategoryIndex
-                                                //         .value !=
-                                                //     -1) {
-                                                //   catSeleccionada =
-                                                //       categories[_selectedCategoryIndex
-                                                //               .value]
-                                                //           .name;
-                                                // }
-                                                // print(
-                                                //   "Cat - _selectedCategoryIndex: ${_selectedCategoryIndex.value}",
-                                                // );
-                                                // print(
-                                                //   "Cat - catSeleccionada $catSeleccionada",
-                                                // );
-                                                // widget.onAbrirDetallesPressed(
-                                                //   catSeleccionada,
-                                                // );
                                                 bool?
                                                 isSheetVisibleSolicitarServicio =
                                                     true;
