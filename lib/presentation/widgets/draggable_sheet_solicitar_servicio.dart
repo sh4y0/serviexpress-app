@@ -26,6 +26,7 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final Function(ProveedorModel)? onProveedorTapped;
 
   final bool isSolicitudGuardada;
+  final bool isProveedorAgregado;
 
   const DraggableSheetSolicitarServicio({
     super.key,
@@ -44,6 +45,7 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     this.onProveedorRemovido,
     this.onProveedorTapped,
     this.isSolicitudGuardada = false, 
+    this.isProveedorAgregado = false
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -199,11 +201,11 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                               Padding(
+                                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                                 child: Text(
-                                  'Proveedores que seleccionaste:',
-                                  style: TextStyle(
+                                  widget.isProveedorAgregado ? 'Proveedores que seleccionaste:' : '',
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
                                   ),
@@ -305,24 +307,6 @@ class DraggableSheetSolicitarServicioState
                                               showCursor: false,
                                               onTap: () {
                                                 focusNodePrimero.unfocus();
-                                                // String? catSeleccionada;
-                                                // if (_selectedCategoryIndex
-                                                //         .value !=
-                                                //     -1) {
-                                                //   catSeleccionada =
-                                                //       categories[_selectedCategoryIndex
-                                                //               .value]
-                                                //           .name;
-                                                // }
-                                                // print(
-                                                //   "Cat - _selectedCategoryIndex: ${_selectedCategoryIndex.value}",
-                                                // );
-                                                // print(
-                                                //   "Cat - catSeleccionada $catSeleccionada",
-                                                // );
-                                                // widget.onAbrirDetallesPressed(
-                                                //   catSeleccionada,
-                                                // );
                                                 bool?
                                                 isSheetVisibleSolicitarServicio =
                                                     true;

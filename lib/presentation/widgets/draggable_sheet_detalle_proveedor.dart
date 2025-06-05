@@ -13,6 +13,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final Curve entryAnimationCurve;
   final Function(ProveedorModel)? onProveedorAgregado;
   final ProveedorModel? selectedProvider;
+  final Function(bool) isProveedorAgregado;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -24,7 +25,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.entryAnimationDuration = const Duration(milliseconds: 200),
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.onProveedorAgregado,
-    this.selectedProvider,
+    this.selectedProvider, required this.isProveedorAgregado,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -128,6 +129,7 @@ class _DraggableSheetDetalleProveedorState
       descripcion: widget.selectedProvider?.descripcion,
       imagenUrl: '',
     );
+    widget.isProveedorAgregado(true);
     widget.onProveedorAgregado?.call(proveedor);
     hide();
   }
