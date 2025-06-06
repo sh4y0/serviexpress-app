@@ -93,6 +93,8 @@ class AuthRepository {
         password: password,
       );
 
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+
       final User? user = result.user;
       if (user == null) {
         return const Failure(UnknownError("No se pudo crear el usuario."));

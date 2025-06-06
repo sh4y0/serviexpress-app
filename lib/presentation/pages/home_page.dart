@@ -6,9 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
-import 'package:serviexpress_app/data/models/proveedor_model.dart';
-import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
@@ -25,8 +25,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late GoogleMapController mapController;
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   bool _isZoomedIn = false;
@@ -57,11 +56,11 @@ class _HomePageState extends State<HomePage>
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
 
   BitmapDescriptor? _providerMarkerIcon;
-  List<ProveedorModel> _currentProviders = [];
-  ProveedorModel? _selectedProvider;
+  List<UserModel> _currentProviders = [];
+  late final UserModel _selectedProvider;
   MarkerId? _currentlyOpenInfoWindowMarkerId;
 
-  final List<ProveedorModel> _proveedoresSeleccionados = [];
+  final List<UserModel> _proveedoresSeleccionados = [];
   bool _isSolicitudGuardadaFromServicioDetallado = false;
 
   int _selectedIndex = 0;
@@ -88,7 +87,6 @@ class _HomePageState extends State<HomePage>
       _setupKeyboardListener();
     });
   }
-
 
   void _setupToken() async {
     await NotificationManager().initialize();
@@ -311,17 +309,17 @@ class _HomePageState extends State<HomePage>
     }
 
     for (var provider in _currentProviders) {
-      final markerId = MarkerId('provider_${provider.id}');
+      final markerId = MarkerId('provider_${provider.uid}');
       final providerMarker = Marker(
-        markerId: MarkerId('provider_${provider.id}'),
-        position: provider.ubicacion!,
+        markerId: MarkerId('provider_${provider.uid}'),
+        position: LatLng(provider.latitud!, provider.longitud!),
         icon:
             _providerMarkerIcon ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         anchor: const Offset(0.5, 1.0),
         zIndex: 1,
         infoWindow: InfoWindow(
-          title: provider.nombre,
+          title: provider.nombreCompleto,
           snippet: '⭐ ${provider.calificacion} - ${provider.descripcion}',
         ),
         onTap: () {
@@ -329,8 +327,8 @@ class _HomePageState extends State<HomePage>
           _currentlyOpenInfoWindowMarkerId = markerId;
           _showCustomSheet(
             Marker(
-              markerId: MarkerId('provider_${provider.id}'),
-              position: provider.ubicacion!,
+              markerId: MarkerId('provider_${provider.uid}'),
+              position: LatLng(provider.latitud!, provider.longitud!),
             ),
           );
         },
@@ -341,17 +339,18 @@ class _HomePageState extends State<HomePage>
     _markersNotifier.value = newMarkers;
   }
 
-  void _onCategorySelected(int index) {
+  void _onCategorySelected(int index) async {
     _selectedCategoryIndex.value = index;
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
-      String selectedCategory =
-          CategoryMock.getCategories()[index].name.toLowerCase();
+      String selectedCategory = CategoryMock.getCategories()[index].name;
+
+      final providers = await UserRepository.instance.findByCategory(
+        selectedCategory,
+      );
 
       setState(() {
-        _currentProviders = ProveedorMock.getProveedoresPorCategoria(
-          selectedCategory,
-        );
+        _currentProviders = providers;
       });
 
       _updateMarkers();
@@ -359,7 +358,6 @@ class _HomePageState extends State<HomePage>
       if (_currentProviders.isNotEmpty) {
         _adjustCameraToShowAllMarkers();
       }
-
     } else {
       setState(() {
         _currentProviders = [];
@@ -371,16 +369,16 @@ class _HomePageState extends State<HomePage>
   void _adjustCameraToShowAllMarkers() {
     if (_currentProviders.isEmpty) return;
 
-    double minLat = _currentProviders.first.ubicacion!.latitude;
-    double maxLat = _currentProviders.first.ubicacion!.latitude;
-    double minLng = _currentProviders.first.ubicacion!.longitude;
-    double maxLng = _currentProviders.first.ubicacion!.longitude;
+    double minLat = _currentProviders.first.latitud!;
+    double maxLat = _currentProviders.first.latitud!;
+    double minLng = _currentProviders.first.longitud!;
+    double maxLng = _currentProviders.first.longitud!;
 
     for (var provider in _currentProviders) {
-      minLat = math.min(minLat, provider.ubicacion!.latitude);
-      maxLat = math.max(maxLat, provider.ubicacion!.latitude);
-      minLng = math.min(minLng, provider.ubicacion!.longitude);
-      maxLng = math.max(maxLng, provider.ubicacion!.longitude);
+      minLat = math.min(minLat, provider.latitud!);
+      maxLat = math.max(maxLat, provider.latitud!);
+      minLng = math.min(minLng, provider.longitud!);
+      maxLng = math.max(maxLng, provider.longitud!);
     }
 
     if (_currentPositionNotifier.value != null) {
@@ -411,7 +409,6 @@ class _HomePageState extends State<HomePage>
     setState(() {
       _isSheetVisibleDetalleProveedor = true;
     });
-
   }
 
   void _handleSheetDismissedDetalleProveedor() {
@@ -533,9 +530,9 @@ class _HomePageState extends State<HomePage>
     _isSolicitudGuardadaFromServicioDetallado = isSolicitudGuardada;
   }
 
-  void _agregarProveedor(ProveedorModel proveedor) {
+  void _agregarProveedor(UserModel proveedor) {
     setState(() {
-      if (!_proveedoresSeleccionados.any((p) => p.id == proveedor.id)) {
+      if (!_proveedoresSeleccionados.any((p) => p.uid == proveedor.uid)) {
         _proveedoresSeleccionados.add(proveedor);
       }
       if (_proveedoresSeleccionados.length == 1) {
@@ -544,9 +541,9 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  void _removerProveedor(ProveedorModel proveedor) {
+  void _removerProveedor(UserModel proveedor) {
     setState(() {
-      _proveedoresSeleccionados.removeWhere((p) => p.id == proveedor.id);
+      _proveedoresSeleccionados.removeWhere((p) => p.uid == proveedor.uid);
       if (_proveedoresSeleccionados.isEmpty) {
         _isSheetVisibleSolicitarServicioDetallado = false;
         _isSolicitudGuardadaFromServicioDetallado = false;
@@ -555,22 +552,29 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  void _abrirDetalleProveedor(ProveedorModel proveedor) {
+  void _abrirDetalleProveedor(UserModel proveedor) {
     setState(() {
-      _selectedProvider = ProveedorModel(
-        id: proveedor.id,
-        nombre: proveedor.nombre,
-        categoria: proveedor.categoria,
+      _selectedProvider = UserModel(
+        uid: proveedor.uid,
+        nombreCompleto: proveedor.nombreCompleto,
+        especialidad: proveedor.especialidad,
         calificacion: proveedor.calificacion,
         descripcion: proveedor.descripcion,
         imagenUrl: proveedor.imagenUrl,
+        username: proveedor.username,
+        email: proveedor.email,
+        dni: proveedor.dni,
+        telefono: proveedor.telefono,
+        nombres: proveedor.nombres,
+        apellidoPaterno: proveedor.apellidoPaterno,
+        apellidoMaterno: proveedor.apellidoMaterno,
       );
       _isSheetVisibleDetalleProveedor = true;
     });
   }
 
   void isProveedorAgregado(bool proveedorAgregado) {
-      _isProveedorAgregado = proveedorAgregado;
+    _isProveedorAgregado = proveedorAgregado;
   }
 
   Widget _buildSkeletonPlaceholder() {
@@ -655,7 +659,7 @@ class _HomePageState extends State<HomePage>
           },
         ),
         Positioned(
-          top:MediaQuery.of(context,).padding.top,
+          top: MediaQuery.of(context).padding.top,
           left: 6,
           right: 6,
           height: 110,
@@ -749,71 +753,70 @@ class _HomePageState extends State<HomePage>
         //   ),
 
         //if (_isSheetVisibleSolicitarServicioDetallado)
-          ValueListenableBuilder<bool>(
-            valueListenable: _shouldShowSheet,
-            builder: (context, shouldShow, child) {
-              return Stack(
-                children: [
-                  AnimatedPositioned(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    left: 0,
-                    right: 0,
-                    bottom:
-                        shouldShow ? 0 : -MediaQuery.of(context).size.height,
-                    top: 0,
-                    child: DraggableSheetSolicitarServicio(
-                      key: _sheet2Key,
-                      targetInitialSize: 0.30,
-                      minSheetSize: 0.30,
-                      maxSheetSize: 0.95,
-                      snapPoints: const [0.30, 0.95],
-                      onTapPressed: _requestService,
-                      onAbrirDetallesPressed: (
-                        bool? isSheetVisibleSolicitarServicioTapped,
-                      ) {
-                        _abrirSheetDetalladoDesdeSheet2(
-                          isSheetVisibleSolicitarServicio:
-                              isSheetVisibleSolicitarServicioTapped,
-                        );
-                      },
-                      datosSolicitudExistente: _datosSolicitudGuardada,
-                      proveedoresSeleccionados: _proveedoresSeleccionados,
-                      onProveedorRemovido: _removerProveedor,
-                      onProveedorTapped: _abrirDetalleProveedor,
-                      isSolicitudGuardada:
-                          _isSolicitudGuardadaFromServicioDetallado,
-                      isProveedorAgregado : _isProveedorAgregado
-                    ),
+        ValueListenableBuilder<bool>(
+          valueListenable: _shouldShowSheet,
+          builder: (context, shouldShow, child) {
+            return Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  left: 0,
+                  right: 0,
+                  bottom: shouldShow ? 0 : -MediaQuery.of(context).size.height,
+                  top: 0,
+                  child: DraggableSheetSolicitarServicio(
+                    key: _sheet2Key,
+                    targetInitialSize: 0.30,
+                    minSheetSize: 0.30,
+                    maxSheetSize: 0.95,
+                    snapPoints: const [0.30, 0.95],
+                    onTapPressed: _requestService,
+                    onAbrirDetallesPressed: (
+                      bool? isSheetVisibleSolicitarServicioTapped,
+                    ) {
+                      _abrirSheetDetalladoDesdeSheet2(
+                        isSheetVisibleSolicitarServicio:
+                            isSheetVisibleSolicitarServicioTapped,
+                      );
+                    },
+                    datosSolicitudExistente: _datosSolicitudGuardada,
+                    proveedoresSeleccionados: _proveedoresSeleccionados,
+                    onProveedorRemovido: _removerProveedor,
+                    onProveedorTapped: _abrirDetalleProveedor,
+                    isSolicitudGuardada:
+                        _isSolicitudGuardadaFromServicioDetallado,
+                    isProveedorAgregado: _isProveedorAgregado,
                   ),
-                  if (shouldShow)
-                    Positioned(
-                      top: MediaQuery.of(context).size.height * 0.52,
-                      right: 10,
-                      child: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: FloatingActionButton(
-                          heroTag: 'fabHomeRightsheet',
-                          shape: const CircleBorder(),
-                          backgroundColor: const Color(0xFF4a66ff),
-                          onPressed: _toggleZoom,
-                          child: SvgPicture.asset(
-                            'assets/icons/ic_current_location.svg',
-                            width: 26,
-                            height: 26,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
-                            ),
+                ),
+                if (shouldShow)
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.52,
+                    right: 10,
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: FloatingActionButton(
+                        heroTag: 'fabHomeRightsheet',
+                        shape: const CircleBorder(),
+                        backgroundColor: const Color(0xFF4a66ff),
+                        onPressed: _toggleZoom,
+                        child: SvgPicture.asset(
+                          'assets/icons/ic_current_location.svg',
+                          width: 26,
+                          height: 26,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
                           ),
                         ),
                       ),
                     ),
-                ],
-              );
-            },
-          ),
+                  ),
+              ],
+            );
+          },
+        ),
 
         if (_isSheetVisibleSolicitarServicio)
           Positioned.fill(
@@ -953,6 +956,4 @@ class _HomePageState extends State<HomePage>
     _markersNotifier.dispose();
     super.dispose();
   }
-  
-  
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
@@ -21,9 +21,9 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   //final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
-  final List<ProveedorModel> proveedoresSeleccionados;
-  final Function(ProveedorModel)? onProveedorRemovido;
-  final Function(ProveedorModel)? onProveedorTapped;
+  final List<UserModel> proveedoresSeleccionados;
+  final Function(UserModel)? onProveedorRemovido;
+  final Function(UserModel)? onProveedorTapped;
 
   final bool isSolicitudGuardada;
   final bool isProveedorAgregado;
@@ -44,8 +44,8 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     required this.proveedoresSeleccionados,
     this.onProveedorRemovido,
     this.onProveedorTapped,
-    this.isSolicitudGuardada = false, 
-    this.isProveedorAgregado = false
+    this.isSolicitudGuardada = false,
+    this.isProveedorAgregado = false,
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -201,10 +201,15 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                               Padding(
-                                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 8.0,
+                                  bottom: 4.0,
+                                ),
                                 child: Text(
-                                  widget.isProveedorAgregado ? 'Proveedores que seleccionaste:' : '',
+                                  widget.isProveedorAgregado
+                                      ? 'Proveedores que seleccionaste:'
+                                      : '',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
