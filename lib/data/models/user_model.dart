@@ -17,6 +17,9 @@ class UserModel {
   final String? token;
   final double? latitud;
   final double? longitud;
+  final String? imagenUrl;
+  final double? calificacion;
+  final List<dynamic>? resenias;
 
   UserModel({
     required this.uid,
@@ -35,6 +38,9 @@ class UserModel {
     this.token,
     this.latitud,
     this.longitud,
+    this.imagenUrl,
+    this.calificacion,
+    this.resenias,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +64,12 @@ class UserModel {
       token: json['token'],
       latitud: json['latitud']?.toDouble(),
       longitud: json['longitud']?.toDouble(),
+      imagenUrl: json['imagenUrl'],
+      calificacion: json['calificacion']?.toDouble(),
+      resenias:
+          json['resenias'] is List
+              ? json['resenias']
+              : (json['resenias'] as List<dynamic>?) ?? [],
     );
   }
 
@@ -79,6 +91,9 @@ class UserModel {
       'token': token,
       'latitud': latitud,
       'longitud': longitud,
+      'imagenUrl': imagenUrl ?? '',
+      'calificacion': calificacion ?? 0.0,
+      'resenias': resenias is List ? resenias : (resenias ?? []),
     };
   }
 }

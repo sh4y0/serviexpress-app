@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/data/models/proveedor_model.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 
 class DraggableSheetDetalleProveedor extends StatefulWidget {
   final VoidCallback? onDismiss;
@@ -11,8 +11,8 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final List<double> snapPoints;
   final Duration entryAnimationDuration;
   final Curve entryAnimationCurve;
-  final Function(ProveedorModel)? onProveedorAgregado;
-  final ProveedorModel? selectedProvider;
+  final Function(UserModel)? onProveedorAgregado;
+  final UserModel? selectedProvider;
   final Function(bool) isProveedorAgregado;
 
   const DraggableSheetDetalleProveedor({
@@ -25,7 +25,8 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.entryAnimationDuration = const Duration(milliseconds: 200),
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.onProveedorAgregado,
-    this.selectedProvider, required this.isProveedorAgregado,
+    this.selectedProvider,
+    required this.isProveedorAgregado,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -121,13 +122,20 @@ class _DraggableSheetDetalleProveedorState
   }
 
   void _agregarProveedor() {
-    final proveedor = ProveedorModel(
-      id: widget.selectedProvider!.id,
-      nombre: widget.selectedProvider!.nombre,
-      calificacion: widget.selectedProvider!.calificacion,
-      categoria: widget.selectedProvider!.categoria,
+    final proveedor = UserModel(
+      uid: widget.selectedProvider!.uid,
+      nombres: widget.selectedProvider!.nombres,
+      calificacion: widget.selectedProvider?.calificacion,
+      especialidad: widget.selectedProvider!.especialidad,
       descripcion: widget.selectedProvider?.descripcion,
-      imagenUrl: '',
+      imagenUrl: widget.selectedProvider?.imagenUrl,
+      username: widget.selectedProvider!.username,
+      email: widget.selectedProvider!.email,
+      dni: widget.selectedProvider!.dni,
+      telefono: widget.selectedProvider!.telefono,
+      apellidoPaterno: widget.selectedProvider!.apellidoPaterno,
+      apellidoMaterno: widget.selectedProvider!.apellidoMaterno,
+      nombreCompleto: widget.selectedProvider!.nombreCompleto,
     );
     widget.isProveedorAgregado(true);
     widget.onProveedorAgregado?.call(proveedor);
@@ -211,7 +219,7 @@ class _DraggableSheetDetalleProveedorState
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.selectedProvider!.nombre,
+                                      widget.selectedProvider!.nombreCompleto,
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 18,
@@ -238,7 +246,8 @@ class _DraggableSheetDetalleProveedorState
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      widget.selectedProvider?.descripcion ?? '',
+                                      widget.selectedProvider?.descripcion ??
+                                          '',
                                       style: const TextStyle(
                                         color: Colors.white70,
                                         fontSize: 12,
@@ -251,8 +260,8 @@ class _DraggableSheetDetalleProveedorState
                           ),
 
                           const SizedBox(height: 16),
-                          //const SizedBox(height: 24),
 
+                          //const SizedBox(height: 24),
                           const Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
