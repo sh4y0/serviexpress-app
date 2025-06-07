@@ -1000,6 +1000,4 @@ class _HomePageState extends State<HomePage>
     _markersNotifier.dispose();
     super.dispose();
   }
-  
-  
 }
