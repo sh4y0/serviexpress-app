@@ -67,6 +67,7 @@ class _HomePageState extends State<HomePage>
   int _selectedIndex = 0;
   late final List<Widget Function()> _screens;
   bool _isProveedorAgregado = false;
+  bool _categoriaError = false;
 
   @override
   void initState() {
@@ -342,7 +343,10 @@ class _HomePageState extends State<HomePage>
   }
 
   void _onCategorySelected(int index) {
-    _selectedCategoryIndex.value = index;
+    setState(() {
+      _selectedCategoryIndex.value = index;
+      _categoriaError = false;
+    });
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory =
@@ -655,71 +659,94 @@ class _HomePageState extends State<HomePage>
           },
         ),
         Positioned(
-          top:MediaQuery.of(context,).padding.top,
+          top: MediaQuery.of(context,).padding.top,
           left: 6,
           right: 6,
-          height: 110,
-          child: Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
-            child: ValueListenableBuilder<int>(
-              valueListenable: _selectedCategoryIndex,
-              builder: (context, selectedIndex, _) {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    var category = CategoryMock.getCategories()[index];
-                    final bool isSelected = index == selectedIndex;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: MaterialButton(
-                        padding: const EdgeInsets.all(10),
-                        height: 39,
-                        minWidth: 98,
-                        color:
-                            isSelected
-                                ? const Color(0xFF3645f5)
-                                : const Color(0xFF263089),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        onPressed: () {
-                          _onCategorySelected(index);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: _selectedCategoryIndex,
+                        builder: (context, selectedIndex, _) {
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: CategoryMock.getCategories().length,
+                            itemBuilder: (context, index) {
+                              var category = CategoryMock.getCategories()[index];
+                              final bool isSelected = index == selectedIndex;
+                              final bool showErrorBorder = _categoriaError && selectedIndex == -1;
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  decoration: showErrorBorder
+                                      ? BoxDecoration(
+                                          border: Border.all(color: Colors.redAccent, width: 1.5),
+                                          borderRadius: BorderRadius.circular(6),
+                                        )
+                                      : null,
+                                  child: MaterialButton(
+                                    padding: const EdgeInsets.all(10),
+                                    height: 39,
+                                    minWidth: 98,
+                                    color: isSelected
+                                        ? const Color(0xFF3645f5)
+                                        : const Color(0xFF263089),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    onPressed: () {
+                                      _onCategorySelected(index);
+                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SvgPicture.asset(
+                                          category.iconPath,
+                                          width: 20,
+                                          height: 15,
+                                          colorFilter: ColorFilter.mode(
+                                            isSelected ? Colors.white : AppColor.textInput,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          category.name,
+                                          style: TextStyle(
+                                            color: isSelected ? Colors.white : AppColor.textInput,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              category.iconPath,
-                              width: 20,
-                              height: 15,
-                              colorFilter: ColorFilter.mode(
-                                isSelected ? Colors.white : AppColor.textInput,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              category.name,
-                              style: TextStyle(
-                                color:
-                                    isSelected
-                                        ? Colors.white
-                                        : AppColor.textInput,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                    if (_categoriaError)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          'Selecciona una categoría',
+                          style: TextStyle(color: Colors.red, fontSize: 13),
                         ),
                       ),
-                    );
-                  },
-                  itemCount: CategoryMock.getCategories().length,
-                );
-              },
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -752,6 +779,10 @@ class _HomePageState extends State<HomePage>
           ValueListenableBuilder<bool>(
             valueListenable: _shouldShowSheet,
             builder: (context, shouldShow, child) {
+              final bool hayProveedores = _isProveedorAgregado && _proveedoresSeleccionados.isNotEmpty;
+              final double minSheetSize = hayProveedores ? 0.37 : 0.23;
+              final double maxSheetSize = hayProveedores ? 0.37 : 0.23;
+              final List<double> snapPoints = hayProveedores ? [0.20, 0.37] : [0.35];
               return Stack(
                 children: [
                   AnimatedPositioned(
@@ -759,16 +790,30 @@ class _HomePageState extends State<HomePage>
                     curve: Curves.easeInOut,
                     left: 0,
                     right: 0,
-                    bottom:
-                        shouldShow ? 0 : -MediaQuery.of(context).size.height,
+                    bottom: shouldShow ? 0 : -MediaQuery.of(context).size.height,
                     top: 0,
                     child: DraggableSheetSolicitarServicio(
                       key: _sheet2Key,
-                      targetInitialSize: 0.30,
-                      minSheetSize: 0.30,
-                      maxSheetSize: 0.95,
-                      snapPoints: const [0.30, 0.95],
-                      onTapPressed: _requestService,
+                      targetInitialSize: minSheetSize,
+                      minSheetSize: minSheetSize,
+                      maxSheetSize: maxSheetSize,
+                      snapPoints: snapPoints,
+                      onTapPressed: () {
+                        if (_selectedCategoryIndex.value == -1) {
+                          setState(() {
+                            _categoriaError = true;
+                          });
+                          return;
+                        }
+                        _requestService();
+                      },
+                      onCategoriaError: () {
+                        setState(() {
+                          _categoriaError = true;
+                        });
+                      },
+                      categoriaError: _categoriaError,
+                      selectedCategoryIndex: _selectedCategoryIndex.value,
                       onAbrirDetallesPressed: (
                         bool? isSheetVisibleSolicitarServicioTapped,
                       ) {
@@ -783,12 +828,14 @@ class _HomePageState extends State<HomePage>
                       onProveedorTapped: _abrirDetalleProveedor,
                       isSolicitudGuardada:
                           _isSolicitudGuardadaFromServicioDetallado,
-                      isProveedorAgregado : _isProveedorAgregado
+                      isProveedorAgregado: _isProveedorAgregado,
                     ),
                   ),
                   if (shouldShow)
                     Positioned(
-                      top: MediaQuery.of(context).size.height * 0.52,
+                      bottom: (_isProveedorAgregado && _proveedoresSeleccionados.isNotEmpty)
+                          ? MediaQuery.of(context).size.height * 0.35
+                          : MediaQuery.of(context).size.height * 0.22,
                       right: 10,
                       child: SizedBox(
                         width: 50,
@@ -818,7 +865,7 @@ class _HomePageState extends State<HomePage>
         if (_isSheetVisibleSolicitarServicio)
           Positioned.fill(
             child: DraggableSheetSolicitarServicioDetallado(
-              targetInitialSize: 0.95,
+              targetInitialSize: 0.77,//Mod
               minSheetSize: 0.0,
               maxSheetSize: 0.95,
               snapPoints: const [0.0, 0.95],

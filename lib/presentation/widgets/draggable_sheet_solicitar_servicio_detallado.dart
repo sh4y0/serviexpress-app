@@ -124,6 +124,11 @@ class DraggableSheetState
       return;
     }
 
+    if (_formMultimediaKey.currentState!.descripcionText.trim().isEmpty) {
+      _formMultimediaKey.currentState!.mostrarErrorDescripcion();
+      return;
+    }
+
     String? categoriaSeleccionada;
     if (_selectedCategoryIndex.value != -1 &&
         _selectedCategoryIndex.value < CategoryMock.getCategories().length) {
@@ -134,13 +139,6 @@ class DraggableSheetState
     final String descripcion = _formMultimediaKey.currentState!.descripcionText;
     final List<File> fotos = _formMultimediaKey.currentState!.images;
     final List<File> videos = _formMultimediaKey.currentState!.videos;
-
-    /*final data = SolicitudServicioModel(
-      categoria: categoriaSeleccionada,
-      descripcion: descripcion,
-      fotos: fotos.toList(),
-      videos: videos.toList(),
-    );*/
 
     String id = ServiceRepository.instance.generateServiceId();
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -159,11 +157,8 @@ class DraggableSheetState
       videosFiles: videos,
     );
 
-    //await ServiceRepository.instance.createService(service);
-    
     widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
-    
   }
 
   @override
