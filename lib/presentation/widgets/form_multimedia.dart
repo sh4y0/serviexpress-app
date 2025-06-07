@@ -256,7 +256,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
                                     child: Container(
                                       padding: const EdgeInsets.all(2),
                                       decoration: BoxDecoration(
-                                        color: Colors.red.withOpacity(0.8),
+                                        color: Colors.red.withAlpha((0.8 * 255).toInt()),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
@@ -309,7 +309,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
                                     child: Container(
                                       padding: const EdgeInsets.all(2),
                                       decoration: BoxDecoration(
-                                        color: Colors.red.withOpacity(0.8),
+                                        color: Colors.red.withAlpha((0.8 * 255).toInt()),
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(

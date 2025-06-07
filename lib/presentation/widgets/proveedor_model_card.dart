@@ -25,7 +25,7 @@ class ProveedorModelCard extends StatelessWidget {
             color: const Color(0xFF0c0d23),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFF3645f5).withOpacity(0.3),
+              color: const Color(0xFF3645f5).withAlpha((0.3 * 255).toInt()),
               width: 1,
             ),
           ),

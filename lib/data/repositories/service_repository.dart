@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:logging/logging.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
@@ -10,6 +11,7 @@ import 'package:serviexpress_app/presentation/messaging/service/firebase_messagi
 import 'package:uuid/uuid.dart';
 
 class ServiceRepository {
+  final Logger _log = Logger('ServiceRepository'); 
   ServiceRepository._privateConstructor();
   static final ServiceRepository instance =
       ServiceRepository._privateConstructor();
@@ -134,7 +136,7 @@ class ServiceRepository {
       /*return Failure(
         UnknownError("Error al obtener el servicio: ${e.toString()}"),
       );*/
-      print('Error al obtener el servicio: ${e.toString()}');
+      _log.severe('Error al obtener el servicio: ${e.toString()}');
     }
     return null;
   }
