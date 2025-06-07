@@ -27,6 +27,10 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
 
   final bool isSolicitudGuardada;
   final bool isProveedorAgregado;
+  final bool categoriaError;
+  final VoidCallback? onCategoriaError;
+
+  final int selectedCategoryIndex;
 
   const DraggableSheetSolicitarServicio({
     super.key,
@@ -44,8 +48,11 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     required this.proveedoresSeleccionados,
     this.onProveedorRemovido,
     this.onProveedorTapped,
-    this.isSolicitudGuardada = false, 
-    this.isProveedorAgregado = false
+    this.isSolicitudGuardada = false,
+    this.isProveedorAgregado = false,
+    this.categoriaError = false,
+    this.onCategoriaError,
+    this.selectedCategoryIndex = -1,
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -57,6 +64,7 @@ class DraggableSheetSolicitarServicioState
   final sheetKeyInDraggable = GlobalKey();
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
+  bool _descripcionError = false;
   late TextEditingController _descripcionController = TextEditingController();
   final FocusNode focusNodePrimero = FocusNode();
 
@@ -163,12 +171,12 @@ class DraggableSheetSolicitarServicioState
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
           key: sheetKeyInDraggable,
-          initialChildSize: widget.minSheetSize,
+          initialChildSize: widget.targetInitialSize,
           maxChildSize: widget.maxSheetSize,
           minChildSize: widget.minSheetSize,
-          expand: true,
+          expand: false,
           snap: true,
-          snapSizes: widget.snapPoints,
+          //snapSizes: widget.snapPoints,
           controller: _internalController,
           builder: (context, scrollController) {
             return AbsorbPointer(
@@ -189,94 +197,102 @@ class DraggableSheetSolicitarServicioState
                     topRight: Radius.circular(24),
                   ),
                 ),
-                child: CustomScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
+                child: SingleChildScrollView(
                   controller: scrollController,
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                               Padding(
-                                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                                child: Text(
-                                  widget.isProveedorAgregado ? 'Proveedores que seleccionaste:' : '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (widget.isProveedorAgregado)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
+                              child: Text(
+                                'Proveedores que seleccionaste:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              if (widget.proveedoresSeleccionados.isNotEmpty)
-                                SizedBox(
-                                  height: 80,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount:
-                                        widget.proveedoresSeleccionados.length,
-                                    itemBuilder: (context, index) {
-                                      final proveedor =
-                                          widget
-                                              .proveedoresSeleccionados[index];
-                                      return ProveedorModelCard(
-                                        proveedor: proveedor,
-                                        onTap:
-                                            () => widget.onProveedorTapped
-                                                ?.call(proveedor),
-                                        onRemove:
-                                            () => widget.onProveedorRemovido
-                                                ?.call(proveedor),
-                                      );
-                                    },
+                            ),
+                          if (widget.isProveedorAgregado)
+                            const SizedBox(height: 8),
+                          if (widget.isProveedorAgregado &&
+                              widget.proveedoresSeleccionados.isNotEmpty)
+                            SizedBox(
+                              height: 70,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    widget.proveedoresSeleccionados.length,
+                                itemBuilder: (context, index) {
+                                  final proveedor =
+                                      widget.proveedoresSeleccionados[index];
+                                  return ProveedorModelCard(
+                                    proveedor: proveedor,
+                                    onTap:
+                                        () => widget.onProveedorTapped?.call(
+                                          proveedor,
+                                        ),
+                                    onRemove:
+                                        () => widget.onProveedorRemovido?.call(
+                                          proveedor,
+                                        ),
+                                  );
+                                },
+                              ),
+                            ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 5, bottom: 12),
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(38, 48, 137, 1),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(
+                                    (0.1 * 255).toInt(),
                                   ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-                              Container(
-                                margin: const EdgeInsets.only(
-                                  top: 12,
-                                  bottom: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(38, 48, 137, 1),
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(
-                                        (0.1 * 255).toInt(),
-                                      ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 5,
-                                            ),
-                                            child: SvgCache.getIconSvg(
-                                              'assets/icons/ic_message_form.svg',
-                                              color: const Color.fromRGBO(
-                                                194,
-                                                215,
-                                                255,
-                                                0.6,
-                                              ),
-                                            ),
+                              ],
+                              border:
+                                  (_descripcionError &&
+                                          !widget.isSolicitudGuardada)
+                                      ? Border.all(
+                                        color: Colors.red,
+                                        width: 1.5,
+                                      )
+                                      : null,
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 5),
+                                        child: SvgCache.getIconSvg(
+                                          'assets/icons/ic_message_form.svg',
+                                          color: const Color.fromRGBO(
+                                            194,
+                                            215,
+                                            255,
+                                            0.6,
                                           ),
-                                          Expanded(
-                                            child: TextField(
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            TextField(
                                               controller:
                                                   _descripcionController,
                                               focusNode: focusNodePrimero,
@@ -314,60 +330,89 @@ class DraggableSheetSolicitarServicioState
                                                   isSheetVisibleSolicitarServicio,
                                                 );
                                               },
+                                              onChanged: (_) {
+                                                if (_descripcionController.text
+                                                    .trim()
+                                                    .isNotEmpty) {
+                                                  if (_descripcionError) {
+                                                    setState(() {
+                                                      _descripcionError = false;
+                                                    });
+                                                  }
+                                                }
+                                              },
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    if (widget.datosSolicitudExistente !=
-                                        null) {
-                                      widget.datosSolicitudExistente!.workerId =
-                                          "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
-                                      await ServiceRepository.instance
-                                          .createService(
-                                            widget.datosSolicitudExistente!,
-                                          );
-                                      print(
-                                        "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
-                                      );
-                                    } else {
-                                      print("NO SE PUDO CREAR LA SOLICITUD");
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3645f5),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Solicitar Servicio',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
+                          if (_descripcionError && !widget.isSolicitudGuardada)
+                            const Text(
+                              "Ingrese la solicitud",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          const SizedBox(height: 10),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (widget.onCategoriaError != null && widget.selectedCategoryIndex == -1) {
+                                  widget.onCategoriaError!();
+                                  return;
+                                }
+                                if (_descripcionController.text.trim().isEmpty) {
+                                  setState(() {
+                                    _descripcionError = true;
+                                  });
+                                  return;
+                                } else {
+                                  setState(() {
+                                    _descripcionError = false;
+                                  });
+                                }
+                                if (widget.datosSolicitudExistente != null) {
+                                  widget.datosSolicitudExistente!.workerId =
+                                      "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
+                                  await ServiceRepository.instance
+                                      .createService(
+                                        widget.datosSolicitudExistente!,
+                                      );
+                                  print(
+                                    "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
+                                  );
+                                } else {
+                                  print("NO SE PUDO CREAR LA SOLICITUD");
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF3645f5),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Solicitar Servicio',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             );
