@@ -23,7 +23,6 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    mapController.setMapStyle(widget.mapStyle);
   }
 
   @override
@@ -33,6 +32,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
       body: Stack(
         children: [
           GoogleMap(
+            style: widget.mapStyle,
             initialCameraPosition: const CameraPosition(
               target: LatLng(-8.1052, -79.0264),
               zoom: 15,

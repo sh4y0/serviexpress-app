@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
@@ -18,7 +19,6 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback onTapPressed;
 
   final ServiceModel? datosSolicitudExistente;
-  //final Function(String? categoriaSeleccionada) onAbrirDetallesPressed;
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
   final List<UserModel> proveedoresSeleccionados;
@@ -54,11 +54,16 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
 
 class DraggableSheetSolicitarServicioState
     extends ConsumerState<DraggableSheetSolicitarServicio> {
+  final Logger _log = Logger('DraggableSheetSolicitarServicioState');
   final sheetKeyInDraggable = GlobalKey();
-  late DraggableScrollableController _internalController;
-  bool _isDismissing = false;
-  late TextEditingController _descripcionController = TextEditingController();
   final FocusNode focusNodePrimero = FocusNode();
+  
+  late DraggableScrollableController _internalController;
+  late TextEditingController _descripcionController = TextEditingController();
+  
+  bool _isDismissing = false;
+  
+  
 
   @override
   void initState() {
@@ -78,14 +83,6 @@ class DraggableSheetSolicitarServicioState
       }
     });
   }
-
-  // void resetSheet() {
-  //   if (mounted) {
-  //     setState(() {
-  //       _selectedCategoryIndex.value = -1;
-  //     });
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -154,11 +151,6 @@ class DraggableSheetSolicitarServicioState
 
   @override
   Widget build(BuildContext context) {
-    // bool hayDatosParaEditar =
-    //     widget.datosSolicitudExistente != null &&
-    //     widget.datosSolicitudExistente!.hasData;
-    //final categories = CategoryMock.getCategories();
-
     return LayoutBuilder(
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
@@ -341,11 +333,13 @@ class DraggableSheetSolicitarServicioState
                                           .createService(
                                             widget.datosSolicitudExistente!,
                                           );
-                                      print(
+                                      _log.info(
                                         "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
                                       );
                                     } else {
-                                      print("NO SE PUDO CREAR LA SOLICITUD");
+                                      _log.info(
+                                        "NO SE PUDO CREAR LA SOLICITUD",
+                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

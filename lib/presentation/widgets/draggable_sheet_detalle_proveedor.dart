@@ -236,7 +236,7 @@ class _DraggableSheetDetalleProveedorState
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '${widget.selectedProvider!.calificacion} (120+ review)',
+                                          '${widget.selectedProvider!.calificacion}',
                                           style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 12,
@@ -273,14 +273,14 @@ class _DraggableSheetDetalleProveedorState
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(width: 3),
-                              Text(
-                                '(120+ review)',
-                                style: TextStyle(
-                                  color: Color(0xff3d4d8a),
-                                  fontSize: 12,
-                                ),
-                              ),
+                              // SizedBox(width: 3),
+                              // Text(
+                              //   '(120+ review)',
+                              //   style: TextStyle(
+                              //     color: Color(0xff3d4d8a),
+                              //     fontSize: 12,
+                              //   ),
+                              // ),
                             ],
                           ),
 

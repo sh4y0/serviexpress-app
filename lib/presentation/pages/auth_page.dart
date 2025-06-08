@@ -70,11 +70,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     super.initState();
     _preloadFuture = Future.wait([
       MapStyleLoader.loadStyle(),
-      _precacheSvgs(context),
+      _precacheSvgs(),
     ]);
   }
 
-  Future<void> _precacheSvgs(BuildContext context) async {
+  Future<void> _precacheSvgs() async {
     final svgAssets = [
       _AppIcons.person,
       _AppIcons.pass,
@@ -113,8 +113,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
         case Success(data: final data):
           LoadingScreen.hide();
           if (mounted && data is AuthResult) {
-            await UserPreferences.saveUserId(data.userModel.uid);
-            final role = await UserPreferences.getRoleName();
+            final role = data.userModel.rol;
 
             if (data.needsProfileCompletion) {
               if (mounted) {
@@ -143,6 +142,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     //     _isLogin = true;
                     //   });
                     // }
+                    UserPreferences.saveUserId(data.userModel.uid);
                   },
                 );
               }
