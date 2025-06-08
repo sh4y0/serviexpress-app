@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
@@ -37,13 +39,17 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       _appLifecycleState == null ||
       _appLifecycleState == AppLifecycleState.resumed;
 
+  final Logger _log = Logger('_HomeProviderState');
+
   @override
   void initState() {
     super.initState();
     _screens = [
       () => _buildHomeProvider(),
-      () => const Center(child: Text("Conversar", style: TextStyle(fontSize: 25))),
-      () => const ProfileScreen(isProvider: true,),
+      () => const Center(
+        child: Text("Conversar", style: TextStyle(fontSize: 25)),
+      ),
+      () => const ProfileScreen(isProvider: true),
     ];
     _setupToken();
     _setupLocation();
@@ -61,6 +67,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           setState(() {
             _services[fcmMessage.idServicio] = service!;
             notifications.add(fcmMessage);
+            _log.info('Nueva notificación recibida: ${fcmMessage.idServicio}');
           });
 
           if (isAppInForeground) {
@@ -91,99 +98,101 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     await LocationMapsService().initialize();
   }
 
-  Widget _buildHomeProvider(){
+  Future<String> _getUserId(String senderId) async {
+    final username = await UserRepository.instance.getUserName(senderId);
+    return username;
+  }
+
+  Widget _buildHomeProvider() {
     return Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: AppColor.backgroudGradient,
-            ),
-          ),
-          if (notifications.isNotEmpty)
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 15,
-                ),
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    if (notification is ScrollStartNotification) {
-                    } else if (notification is ScrollEndNotification) {}
-                    return true;
-                  },
-                  child: SizedBox(
-                    //height: MediaQuery.of(context).size.height * 0.60,
-                    child: ListView.builder(
-                      itemCount: notifications.length,
-                      itemBuilder: (context, index) {
-                        final cliente = notifications[index];
-                        final serviceForCliente =
-                            _services[cliente.idServicio]!;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Dismissible(
-                            key: Key(cliente.idServicio + index.toString()),
-                            direction: DismissDirection.endToStart,
-                            onDismissed: (direction) {
-                              setState(() {
-                                notifications.removeAt(index);
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "${cliente.idServicio} fue eliminado",
+      children: [
+        Container(
+          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+        ),
+        if (notifications.isNotEmpty)
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollStartNotification) {
+                  } else if (notification is ScrollEndNotification) {}
+                  return true;
+                },
+                child: SizedBox(
+                  //height: MediaQuery.of(context).size.height * 0.60,
+                  child: ListView.builder(
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final cliente = notifications[index];
+                      final serviceForCliente = _services[cliente.idServicio]!;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Dismissible(
+                          key: Key(cliente.idServicio + index.toString()),
+                          direction: DismissDirection.endToStart,
+                          onDismissed: (direction) async {
+                            final userName = await _getUserId(cliente.senderId);
+
+                            setState(() {
+                              notifications.removeAt(index);
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "La solicitud de $userName fue eliminada",
+                                ),
+                              ),
+                            );
+                          },
+                          background: Container(
+                            padding: const EdgeInsets.only(right: 20),
+                            alignment: Alignment.centerRight,
+                            decoration: BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                  pageBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => ProviderDetails(
+                                        service: serviceForCliente,
+                                        mapStyle: MapStyleLoader.cachedStyle,
+                                      ),
+                                  transitionsBuilder: _transition,
+                                  transitionDuration: const Duration(
+                                    milliseconds: 300,
                                   ),
                                 ),
                               );
                             },
-                            background: Container(
-                              padding: const EdgeInsets.only(right: 20),
-                              alignment: Alignment.centerRight,
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder:
-                                        (
-                                          context,
-                                          animation,
-                                          secondaryAnimation,
-                                        ) => ProviderDetails(
-                                          service: serviceForCliente,
-                                          mapStyle: MapStyleLoader.cachedStyle,
-                                        ),
-                                    transitionsBuilder: _transition,
-                                    transitionDuration: const Duration(
-                                      milliseconds: 300,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: CardDesing(service: service!),
-                            ),
+                            child: CardDesing(service: service!),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
             ),
-        ],
-      );
-  }  
+          ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
