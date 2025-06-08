@@ -71,6 +71,8 @@ class DraggableSheetSolicitarServicioState
   bool _isDismissing = false;
   bool _descripcionError = false;
 
+  final List<String> proveedoresSeleccionadosId = [];
+
   @override
   void initState() {
     super.initState();
@@ -354,7 +356,7 @@ class DraggableSheetSolicitarServicioState
                                           ),
                                         ],
                                       ),
-                                    ),                                                                       
+                                    ),
                                   ],
                                 ),
                               ),
@@ -364,36 +366,72 @@ class DraggableSheetSolicitarServicioState
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () async {
+                                    _log.info(
+                                      "ENTRE AL BOTÓN DE SOLICITAR SERVICIO",
+                                    );
+                                    _log.info(
+                                      "selectedCategoryIndex: ${widget.selectedCategoryIndex}",
+                                    );
+                                    _log.info(
+                                      "onCategoriaError: ${widget.onCategoriaError}",
+                                    );
+
                                     if (widget.onCategoriaError != null &&
                                         widget.selectedCategoryIndex == -1) {
+                                      _log.info(
+                                        "ENTRE A NO SELECCIONÓ CATEGORÍA",
+                                      );
                                       widget.onCategoriaError!();
                                       return;
                                     }
-                                    if (_descripcionController.text
-                                        .trim()
-                                        .isEmpty) {
-                                      setState(() {
-                                        _descripcionError = true;
-                                      });
-                                      return;
-                                    } else {
-                                      setState(() {
-                                        _descripcionError = false;
-                                      });
-                                    }
+                                    // if (_descripcionController.text
+                                    //     .trim()
+                                    //     .isEmpty) {
+                                    //   _log.info(
+                                    //     "Descripción ingresada: '${_descripcionController.text.trim()}'",
+                                    //   );
+
+                                    //   setState(() {
+                                    //     _descripcionError = true;
+                                    //   });
+                                    //   return;
+                                    // } else {
+                                    //   setState(() {
+                                    //     _descripcionError = false;
+                                    //   });
+                                    // }
                                     if (widget.datosSolicitudExistente !=
                                         null) {
-                                      widget.datosSolicitudExistente!.workerId =
-                                          "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
+                                      _log.info(
+                                        "ENTRE A DATOS SOLICITUD EXISTENTE",
+                                      );
+                                      if (widget
+                                          .proveedoresSeleccionados
+                                          .isNotEmpty) {
+                                        for (var proveedor
+                                            in widget
+                                                .proveedoresSeleccionados) {
+                                          _log.info(
+                                            "ENTRE AL FOR DE PROVEEDORES SELECCIONADOS",
+                                          );
+                                          proveedoresSeleccionadosId.add(
+                                            proveedor.uid,
+                                          );
+                                        }
+                                      }
+                                      _log.info("ENTRE A CREAR LA SOLICITUD");
                                       await ServiceRepository.instance
                                           .createService(
+                                            proveedoresSeleccionadosId,
                                             widget.datosSolicitudExistente!,
                                           );
-                                      print(
+                                      _log.info(
                                         "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
                                       );
                                     } else {
-                                      print("NO SE PUDO CREAR LA SOLICITUD");
+                                      _log.severe(
+                                        "NO SE PUDO CREAR LA SOLICITUD",
+                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

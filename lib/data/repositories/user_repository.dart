@@ -126,4 +126,23 @@ class UserRepository {
       return [];
     }
   }
+
+  Future<String> getUserName(String uid) async {
+    final doc = await _firestore.collection('users').doc(uid).get();
+
+    if (!doc.exists) {
+      return "";
+    }
+
+    final data = doc.data();
+    if (data == null) {
+      return "";
+    }
+
+    final user = UserModel.fromJson(data);
+
+    final username = user.username;
+
+    return username;
+  }
 }
