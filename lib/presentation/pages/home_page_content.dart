@@ -7,9 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
-import 'package:serviexpress_app/data/models/model_mock/proveedor_mock.dart';
-import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
@@ -42,7 +42,7 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
   final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key = GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
-  final List<ProveedorModel> _proveedoresSeleccionados = [];
+  final List<UserModel> _proveedoresSeleccionados = [];
   final MapMovementController _movementController = MapMovementController();
 
   BitmapDescriptor? _locationMarkerIcon;
@@ -60,10 +60,11 @@ class _HomePageContentState extends State<HomePageContent> {
 
   late GoogleMapController mapController;
   ServiceModel? _datosSolicitudGuardada;
-  ProveedorModel? _selectedProvider;
+  UserModel? _selectedProvider;
   Timer? _mapInteractionTimer;
-  List<ProveedorModel> _currentProviders = [];
+  List<UserModel> _currentProviders = [];
   MarkerId? _currentlyOpenInfoWindowMarkerId;
+  
 
   @override
   void initState() {
@@ -298,17 +299,17 @@ class _HomePageContentState extends State<HomePageContent> {
     }
 
     for (var provider in _currentProviders) {
-      final markerId = MarkerId('provider_${provider.id}');
+      final markerId = MarkerId('provider_${provider.uid}');
       final providerMarker = Marker(
-        markerId: MarkerId('provider_${provider.id}'),
-        position: provider.ubicacion!,
+        markerId: MarkerId('provider_${provider.uid}'),
+        position: LatLng(provider.latitud!, provider.longitud!),
         icon:
             _providerMarkerIcon ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         anchor: const Offset(0.5, 1.0),
         zIndex: 1,
         infoWindow: InfoWindow(
-          title: provider.nombre,
+          title: provider.nombreCompleto,
           snippet: '⭐ ${provider.calificacion} - ${provider.descripcion}',
         ),
         onTap: () {
@@ -316,8 +317,8 @@ class _HomePageContentState extends State<HomePageContent> {
           _currentlyOpenInfoWindowMarkerId = markerId;
           _showCustomSheet(
             Marker(
-              markerId: MarkerId('provider_${provider.id}'),
-              position: provider.ubicacion!,
+              markerId: MarkerId('provider_${provider.uid}'),
+              position: LatLng(provider.latitud!, provider.longitud!),
             ),
           );
         },
@@ -328,17 +329,18 @@ class _HomePageContentState extends State<HomePageContent> {
     _markersNotifier.value = newMarkers;
   }
 
-  void _onCategorySelected(int index) {
+  void _onCategorySelected(int index) async {
     _selectedCategoryIndex.value = index;
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
-      String selectedCategory =
-          CategoryMock.getCategories()[index].name.toLowerCase();
+      String selectedCategory = CategoryMock.getCategories()[index].name;
+
+      final providers = await UserRepository.instance.findByCategory(
+        selectedCategory,
+      );
 
       setState(() {
-        _currentProviders = ProveedorMock.getProveedoresPorCategoria(
-          selectedCategory,
-        );
+        _currentProviders = providers;
       });
 
       _updateMarkers();
@@ -362,16 +364,16 @@ class _HomePageContentState extends State<HomePageContent> {
   void _adjustCameraToShowAllMarkers() {
     if (_currentProviders.isEmpty) return;
 
-    double minLat = _currentProviders.first.ubicacion!.latitude;
-    double maxLat = _currentProviders.first.ubicacion!.latitude;
-    double minLng = _currentProviders.first.ubicacion!.longitude;
-    double maxLng = _currentProviders.first.ubicacion!.longitude;
+    double minLat = _currentProviders.first.latitud!;
+    double maxLat = _currentProviders.first.latitud!;
+    double minLng = _currentProviders.first.longitud!;
+    double maxLng = _currentProviders.first.longitud!;
 
     for (var provider in _currentProviders) {
-      minLat = math.min(minLat, provider.ubicacion!.latitude);
-      maxLat = math.max(maxLat, provider.ubicacion!.latitude);
-      minLng = math.min(minLng, provider.ubicacion!.longitude);
-      maxLng = math.max(maxLng, provider.ubicacion!.longitude);
+      minLat = math.min(minLat, provider.latitud!);
+      maxLat = math.max(maxLat, provider.latitud!);
+      minLng = math.min(minLng, provider.longitud!);
+      maxLng = math.max(maxLng, provider.longitud!);
     }
 
     if (_currentPositionNotifier.value != null) {
@@ -502,17 +504,17 @@ class _HomePageContentState extends State<HomePageContent> {
     _isSolicitudGuardadaFromServicioDetallado = isSolicitudGuardada;
   }
 
-  void _agregarProveedor(ProveedorModel proveedor) {
+  void _agregarProveedor(UserModel proveedor) {
     setState(() {
-      if (!_proveedoresSeleccionados.any((p) => p.id == proveedor.id)) {
+      if (!_proveedoresSeleccionados.any((p) => p.uid == proveedor.uid)) {
         _proveedoresSeleccionados.add(proveedor);
       }
     });
   }
 
-  void _removerProveedor(ProveedorModel proveedor) {
+  void _removerProveedor(UserModel proveedor) {
     setState(() {
-      _proveedoresSeleccionados.removeWhere((p) => p.id == proveedor.id);
+      _proveedoresSeleccionados.removeWhere((p) => p.uid == proveedor.uid);
       if (_proveedoresSeleccionados.isEmpty) {
         _isSolicitudGuardadaFromServicioDetallado = false;
         _isProveedorAgregado = false;
@@ -520,15 +522,22 @@ class _HomePageContentState extends State<HomePageContent> {
     });
   }
 
-  void _abrirDetalleProveedor(ProveedorModel proveedor) {
+  void _abrirDetalleProveedor(UserModel proveedor) {
     setState(() {
-      _selectedProvider = ProveedorModel(
-        id: proveedor.id,
-        nombre: proveedor.nombre,
-        categoria: proveedor.categoria,
+      _selectedProvider = UserModel(
+        uid: proveedor.uid,
+        nombreCompleto: proveedor.nombreCompleto,
+        especialidad: proveedor.especialidad,
         calificacion: proveedor.calificacion,
         descripcion: proveedor.descripcion,
         imagenUrl: proveedor.imagenUrl,
+        username: proveedor.username,
+        email: proveedor.email,
+        dni: proveedor.dni,
+        telefono: proveedor.telefono,
+        nombres: proveedor.nombres,
+        apellidoPaterno: proveedor.apellidoPaterno,
+        apellidoMaterno: proveedor.apellidoMaterno,
       );
       _isSheetVisibleDetalleProveedor = true;
     });
