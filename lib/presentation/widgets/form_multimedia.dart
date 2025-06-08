@@ -20,6 +20,7 @@ class FormularioMultimediaState extends State<FormMultimedia> {
   final List<File> _images = [];
   final List<File> _videos = [];
   bool _isExpanded = false;
+  bool _descripcionError = false;
 
   String get descripcionText => descripcionController.text;
   List<File> get images => _images;
@@ -141,6 +142,12 @@ class FormularioMultimediaState extends State<FormMultimedia> {
         _videos.isNotEmpty;
   }
 
+  void mostrarErrorDescripcion() {
+    setState(() {
+      _descripcionError = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -155,6 +162,10 @@ class FormularioMultimediaState extends State<FormMultimedia> {
             offset: const Offset(0, 4),
           ),
         ],
+        border:
+            _descripcionError
+                ? Border.all(color: Colors.red, width: 1.5)
+                : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -218,12 +229,34 @@ class FormularioMultimediaState extends State<FormMultimedia> {
               ],
             ),
           ),
+          if (_descripcionError)
+            const Padding(
+              padding: EdgeInsets.only(left: 16, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Ingresa los detalles',
+                  style: TextStyle(color: Colors.red, fontSize: 13),
+                ),
+              ),
+            ),
 
           if (_isExpanded && (_images.isNotEmpty || _videos.isNotEmpty))
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 children: [
+                  if (_descripcionError)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16, bottom: 4),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Ingresa los detalles',
+                          style: TextStyle(color: Colors.red, fontSize: 13),
+                        ),
+                      ),
+                    ),
                   if (_images.isNotEmpty)
                     SizedBox(
                       height: 100,

@@ -27,6 +27,10 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
 
   final bool isSolicitudGuardada;
   final bool isProveedorAgregado;
+  final bool categoriaError;
+  final VoidCallback? onCategoriaError;
+
+  final int selectedCategoryIndex;
 
   const DraggableSheetSolicitarServicio({
     super.key,
@@ -46,6 +50,9 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     this.onProveedorTapped,
     this.isSolicitudGuardada = false,
     this.isProveedorAgregado = false,
+    this.categoriaError = false,
+    this.onCategoriaError,
+    this.selectedCategoryIndex = -1,
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -57,13 +64,12 @@ class DraggableSheetSolicitarServicioState
   final Logger _log = Logger('DraggableSheetSolicitarServicioState');
   final sheetKeyInDraggable = GlobalKey();
   final FocusNode focusNodePrimero = FocusNode();
-  
+
   late DraggableScrollableController _internalController;
   late TextEditingController _descripcionController = TextEditingController();
-  
+
   bool _isDismissing = false;
-  
-  
+  bool _descripcionError = false;
 
   @override
   void initState() {
@@ -155,12 +161,12 @@ class DraggableSheetSolicitarServicioState
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
           key: sheetKeyInDraggable,
-          initialChildSize: widget.minSheetSize,
+          initialChildSize: widget.targetInitialSize,
           maxChildSize: widget.maxSheetSize,
           minChildSize: widget.minSheetSize,
-          expand: true,
+          expand: false,
           snap: true,
-          snapSizes: widget.snapPoints,
+          //snapSizes: widget.snapPoints,
           controller: _internalController,
           builder: (context, scrollController) {
             return AbsorbPointer(
@@ -193,25 +199,28 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 8.0,
-                                  bottom: 4.0,
-                                ),
-                                child: Text(
-                                  widget.isProveedorAgregado
-                                      ? 'Proveedores que seleccionaste:'
-                                      : '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
+                              if (widget.isProveedorAgregado)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8.0,
+                                    bottom: 4.0,
+                                  ),
+                                  child: Text(
+                                    widget.isProveedorAgregado
+                                        ? 'Proveedores que seleccionaste:'
+                                        : '',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              if (widget.proveedoresSeleccionados.isNotEmpty)
+                              if (widget.isProveedorAgregado)
+                                const SizedBox(height: 8),
+                              if (widget.isProveedorAgregado &&
+                                  widget.proveedoresSeleccionados.isNotEmpty)
                                 SizedBox(
-                                  height: 80,
+                                  height: 70,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount:
@@ -234,7 +243,7 @@ class DraggableSheetSolicitarServicioState
                                 ),
                               Container(
                                 margin: const EdgeInsets.only(
-                                  top: 12,
+                                  top: 5,
                                   bottom: 12,
                                 ),
                                 decoration: BoxDecoration(
@@ -249,6 +258,14 @@ class DraggableSheetSolicitarServicioState
                                       offset: const Offset(0, 4),
                                     ),
                                   ],
+                                  border:
+                                      (_descripcionError &&
+                                              !widget.isSolicitudGuardada)
+                                          ? Border.all(
+                                            color: Colors.red,
+                                            width: 1.5,
+                                          )
+                                          : null,
                                 ),
                                 child: Column(
                                   children: [
@@ -273,58 +290,97 @@ class DraggableSheetSolicitarServicioState
                                             ),
                                           ),
                                           Expanded(
-                                            child: TextField(
-                                              controller:
-                                                  _descripcionController,
-                                              focusNode: focusNodePrimero,
-                                              maxLines: null,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
-                                              decoration: InputDecoration(
-                                                hintText:
-                                                    widget.isSolicitudGuardada
-                                                        ? "Se ha guardado tu solicitud, toca aqui para editarla"
-                                                        : "Detalla el servicio que necesitas...",
-                                                hintStyle: const TextStyle(
-                                                  color: Color.fromRGBO(
-                                                    194,
-                                                    215,
-                                                    255,
-                                                    0.6,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                TextField(
+                                                  controller:
+                                                      _descripcionController,
+                                                  focusNode: focusNodePrimero,
+                                                  maxLines: null,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
                                                   ),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
+                                                  decoration: InputDecoration(
+                                                    hintText:
+                                                        widget.isSolicitudGuardada
+                                                            ? "Se ha guardado tu solicitud, toca aqui para editarla"
+                                                            : "Detalla el servicio que necesitas...",
+                                                    hintStyle: const TextStyle(
+                                                      color: Color.fromRGBO(
+                                                        194,
+                                                        215,
+                                                        255,
+                                                        0.6,
+                                                      ),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                    border: InputBorder.none,
+                                                    enabledBorder:
+                                                        InputBorder.none,
+                                                    focusedBorder:
+                                                        InputBorder.none,
+                                                  ),
+                                                  showCursor: false,
+                                                  onTap: () {
+                                                    focusNodePrimero.unfocus();
+                                                    bool?
+                                                    isSheetVisibleSolicitarServicio =
+                                                        true;
+                                                    widget.onAbrirDetallesPressed(
+                                                      isSheetVisibleSolicitarServicio,
+                                                    );
+                                                  },
+                                                  onChanged: (_) {
+                                                    if (_descripcionController
+                                                        .text
+                                                        .trim()
+                                                        .isNotEmpty) {
+                                                      if (_descripcionError) {
+                                                        setState(() {
+                                                          _descripcionError =
+                                                              false;
+                                                        });
+                                                      }
+                                                    }
+                                                  },
                                                 ),
-                                                border: InputBorder.none,
-                                                enabledBorder: InputBorder.none,
-                                                focusedBorder: InputBorder.none,
-                                              ),
-                                              showCursor: false,
-                                              onTap: () {
-                                                focusNodePrimero.unfocus();
-                                                bool?
-                                                isSheetVisibleSolicitarServicio =
-                                                    true;
-                                                widget.onAbrirDetallesPressed(
-                                                  isSheetVisibleSolicitarServicio,
-                                                );
-                                              },
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
+                                    ),                                                                       
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
 
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () async {
+                                    if (widget.onCategoriaError != null &&
+                                        widget.selectedCategoryIndex == -1) {
+                                      widget.onCategoriaError!();
+                                      return;
+                                    }
+                                    if (_descripcionController.text
+                                        .trim()
+                                        .isEmpty) {
+                                      setState(() {
+                                        _descripcionError = true;
+                                      });
+                                      return;
+                                    } else {
+                                      setState(() {
+                                        _descripcionError = false;
+                                      });
+                                    }
                                     if (widget.datosSolicitudExistente !=
                                         null) {
                                       widget.datosSolicitudExistente!.workerId =
@@ -333,13 +389,11 @@ class DraggableSheetSolicitarServicioState
                                           .createService(
                                             widget.datosSolicitudExistente!,
                                           );
-                                      _log.info(
+                                      print(
                                         "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
                                       );
                                     } else {
-                                      _log.info(
-                                        "NO SE PUDO CREAR LA SOLICITUD",
-                                      );
+                                      print("NO SE PUDO CREAR LA SOLICITUD");
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
