@@ -34,13 +34,18 @@ class _HomePageContentState extends State<HomePageContent> {
   static const double _zoomLevelFar = 14.0;
   static const double _zoomLevelClose = 18.0;
 
-  final ValueNotifier<LatLng?> _currentPositionNotifier = ValueNotifier<LatLng?>(null);
-  final ValueNotifier<Circle?> _locationCircleNotifier = ValueNotifier<Circle?>(null);
+  final ValueNotifier<LatLng?> _currentPositionNotifier =
+      ValueNotifier<LatLng?>(null);
+  final ValueNotifier<Circle?> _locationCircleNotifier = ValueNotifier<Circle?>(
+    null,
+  );
   final ValueNotifier<double> _circleRadiusNotifier = ValueNotifier<double>(40);
-  final ValueNotifier<Set<Marker>> _markersNotifier = ValueNotifier<Set<Marker>>({});
+  final ValueNotifier<Set<Marker>> _markersNotifier =
+      ValueNotifier<Set<Marker>>({});
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier<bool>(true);
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
-  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key = GlobalKey<DraggableSheetSolicitarServicioState>();
+  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key =
+      GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   final List<UserModel> _proveedoresSeleccionados = [];
   final MapMovementController _movementController = MapMovementController();
@@ -54,6 +59,7 @@ class _HomePageContentState extends State<HomePageContent> {
   bool _isMapBeingMoved = false;
   bool _isSolicitudGuardadaFromServicioDetallado = false;
   bool _isProveedorAgregado = false;
+  bool _categoriaError = false;
 
   String? _categoriaTemporalDeSheet2;
   String? _activeProgrammaticOperationId;
@@ -64,7 +70,6 @@ class _HomePageContentState extends State<HomePageContent> {
   Timer? _mapInteractionTimer;
   List<UserModel> _currentProviders = [];
   MarkerId? _currentlyOpenInfoWindowMarkerId;
-  
 
   @override
   void initState() {
@@ -330,7 +335,10 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   void _onCategorySelected(int index) async {
-    _selectedCategoryIndex.value = index;
+    setState(() {
+      _selectedCategoryIndex.value = index;
+      _categoriaError = false;
+    });
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory = CategoryMock.getCategories()[index].name;
@@ -590,75 +598,118 @@ class _HomePageContentState extends State<HomePageContent> {
         Positioned(
           top: MediaQuery.of(context).padding.top,
           left: 6,
-          right: 6,
-          height: 110,
-          child: Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
-            child: ValueListenableBuilder<int>(
-              valueListenable: _selectedCategoryIndex,
-              builder: (context, selectedIndex, _) {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    var category = CategoryMock.getCategories()[index];
-                    final bool isSelected = index == selectedIndex;
+          right: 6,        
+          child: Column(            
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: _selectedCategoryIndex,
+                        builder: (context, selectedIndex, _) {
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              var category =
+                                  CategoryMock.getCategories()[index];
+                              final bool isSelected = index == selectedIndex;
+                              final bool showErrorBorder =
+                                  _categoriaError && selectedIndex == -1;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: MaterialButton(
-                        padding: const EdgeInsets.all(10),
-                        height: 39,
-                        minWidth: 98,
-                        color:
-                            isSelected
-                                ? const Color(0xFF3645f5)
-                                : const Color(0xFF263089),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        onPressed: () {
-                          _onCategorySelected(index);
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  decoration:
+                                      showErrorBorder
+                                          ? BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.redAccent,
+                                              width: 1.5,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          )
+                                          : null,
+                                  child: MaterialButton(
+                                    padding: const EdgeInsets.all(10),
+                                    height: 39,
+                                    minWidth: 98,
+                                    color:
+                                        isSelected
+                                            ? const Color(0xFF3645f5)
+                                            : const Color(0xFF263089),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    onPressed: () {
+                                      _onCategorySelected(index);
+                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SvgPicture.asset(
+                                          category.iconPath,
+                                          width: 20,
+                                          height: 15,
+                                          colorFilter: ColorFilter.mode(
+                                            isSelected
+                                                ? Colors.white
+                                                : AppColor.textInput,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          category.name,
+                                          style: TextStyle(
+                                            color:
+                                                isSelected
+                                                    ? Colors.white
+                                                    : AppColor.textInput,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            itemCount: CategoryMock.getCategories().length,
+                          );
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              category.iconPath,
-                              width: 20,
-                              height: 15,
-                              colorFilter: ColorFilter.mode(
-                                isSelected ? Colors.white : AppColor.textInput,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              category.name,
-                              style: TextStyle(
-                                color:
-                                    isSelected
-                                        ? Colors.white
-                                        : AppColor.textInput,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                    if (_categoriaError)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          "Selecciona una categoria",
+                          style: TextStyle(color: Colors.redAccent),
                         ),
                       ),
-                    );
-                  },
-                  itemCount: CategoryMock.getCategories().length,
-                );
-              },
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
 
         ValueListenableBuilder<bool>(
           valueListenable: _shouldShowSheet,
           builder: (context, shouldShow, child) {
+            final bool hayProveedores =
+                _isProveedorAgregado && _proveedoresSeleccionados.isNotEmpty;
+            final double minSheetSize = hayProveedores ? 0.37 : 0.23;
+            final double maxSheetSize = hayProveedores ? 0.37 : 0.23;
+            final List<double> snapPoints =
+                hayProveedores ? [0.20, 0.37] : [0.35];
             return Stack(
               children: [
                 AnimatedPositioned(
@@ -670,11 +721,26 @@ class _HomePageContentState extends State<HomePageContent> {
                   top: 0,
                   child: DraggableSheetSolicitarServicio(
                     key: _sheet2Key,
-                    targetInitialSize: 0.30,
-                    minSheetSize: 0.30,
-                    maxSheetSize: 0.95,
-                    snapPoints: const [0.30, 0.95],
-                    onTapPressed: _requestService,
+                    targetInitialSize: minSheetSize,
+                    minSheetSize: minSheetSize,
+                    maxSheetSize: maxSheetSize,
+                    snapPoints: snapPoints,
+                    onTapPressed: () {
+                      if (_selectedCategoryIndex.value == -1) {
+                        setState(() {
+                          _categoriaError = true;
+                        });
+                        return;
+                      }
+                      _requestService();
+                    },
+                    onCategoriaError: () {
+                      setState(() {
+                        _categoriaError = true;
+                      });
+                    },
+                    categoriaError: _categoriaError,
+                    selectedCategoryIndex: _selectedCategoryIndex.value,
                     onAbrirDetallesPressed: (
                       bool? isSheetVisibleSolicitarServicioTapped,
                     ) {
@@ -694,7 +760,11 @@ class _HomePageContentState extends State<HomePageContent> {
                 ),
                 if (shouldShow)
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.60,
+                    bottom:
+                        (_isProveedorAgregado &&
+                                _proveedoresSeleccionados.isNotEmpty)
+                            ? MediaQuery.of(context).size.height * 0.35
+                            : MediaQuery.of(context).size.height * 0.22,
                     right: 10,
                     child: SizedBox(
                       width: 50,
