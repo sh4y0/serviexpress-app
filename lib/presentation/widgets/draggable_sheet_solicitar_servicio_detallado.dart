@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
@@ -40,11 +41,10 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
       DraggableSheetState();
 }
 
-class DraggableSheetState
-    extends State<DraggableSheetSolicitarServicioDetallado> {
+class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado> {
+  final Logger _log = Logger('DraggableSheetState');
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
-  //final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   final GlobalKey<FormularioMultimediaState> _formMultimediaKey =
       GlobalKey<FormularioMultimediaState>();
 
@@ -56,19 +56,6 @@ class DraggableSheetState
     super.initState();
     _internalController = DraggableScrollableController();
     _internalController.addListener(_onChanged);
-
-    // if (widget.initialData != null) {
-    //   if (widget.initialData!.categoria != null) {
-    //     final categories = CategoryMock.getCategories();
-    //     int initialIndex = categories.indexWhere(
-    //       (cat) => cat.name == widget.initialData!.categoria,
-    //     );
-    //     if (initialIndex != -1) {
-    //       _selectedCategoryIndex.value = initialIndex;
-    //     }
-    //   }
-    // }
-
     _selectedCategoryIndex = ValueNotifier<int>(widget.selectedCategoryIndex);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -143,7 +130,7 @@ class DraggableSheetState
     String id = ServiceRepository.instance.generateServiceId();
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
-      print('Usuario no autenticado');
+      _log.info('Usuario no autenticado');
     }
 
     final ServiceModel service = ServiceModel(
@@ -156,7 +143,7 @@ class DraggableSheetState
       fotosFiles: fotos,
       videosFiles: videos,
     );
-
+    
     widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
   }
