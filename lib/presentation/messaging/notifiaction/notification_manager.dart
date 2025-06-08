@@ -81,6 +81,7 @@ class NotificationManager {
       channelDescription: 'Canal de notificaciones para mensajes generales',
       importance: Importance.max,
       priority: Priority.high,
+      icon: '@mipmap/ic_notification',
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);

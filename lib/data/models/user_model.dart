@@ -65,7 +65,7 @@ class UserModel {
       latitud: json['latitud']?.toDouble(),
       longitud: json['longitud']?.toDouble(),
       imagenUrl: json['imagenUrl'],
-      calificacion: json['calificacion']?.toDouble(),
+      calificacion: json['calificacion']?.toDouble() ?? 0.0,
       resenias:
           json['resenias'] is List
               ? json['resenias']
