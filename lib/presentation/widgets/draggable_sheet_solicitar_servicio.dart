@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:serviexpress_app/data/models/proveedor_model.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
@@ -21,9 +21,9 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final ServiceModel? datosSolicitudExistente;
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
-  final List<ProveedorModel> proveedoresSeleccionados;
-  final Function(ProveedorModel)? onProveedorRemovido;
-  final Function(ProveedorModel)? onProveedorTapped;
+  final List<UserModel> proveedoresSeleccionados;
+  final Function(UserModel)? onProveedorRemovido;
+  final Function(UserModel)? onProveedorTapped;
 
   final bool isSolicitudGuardada;
   final bool isProveedorAgregado;
