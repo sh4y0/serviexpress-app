@@ -166,7 +166,7 @@ class DraggableSheetSolicitarServicioState
           minChildSize: widget.minSheetSize,
           expand: false,
           snap: true,
-          snapSizes: widget.snapPoints,
+          //snapSizes: widget.snapPoints,
           controller: _internalController,
           builder: (context, scrollController) {
             return AbsorbPointer(
@@ -354,65 +354,10 @@ class DraggableSheetSolicitarServicioState
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: ElevatedButton(
-                                        onPressed: () async {
-                                          if (widget.datosSolicitudExistente !=
-                                              null) {
-                                            widget
-                                                    .datosSolicitudExistente!
-                                                    .workerId =
-                                                "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
-                                            await ServiceRepository.instance
-                                                .createService(
-                                                  widget
-                                                      .datosSolicitudExistente!,
-                                                );
-                                            _log.info(
-                                              "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
-                                            );
-                                          } else {
-                                            _log.info(
-                                              "NO SE PUDO CREAR LA SOLICITUD",
-                                            );
-                                          }
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(
-                                            0xFF3645f5,
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 16,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          'Solicitar Servicio',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    ),                                                                       
                                   ],
                                 ),
                               ),
-                              if (_descripcionError &&
-                                  !widget.isSolicitudGuardada)
-                                const Text(
-                                  "Ingrese la solicitud",
-                                  style: TextStyle(color: Colors.red),
-                                ),
                               const SizedBox(height: 10),
 
                               SizedBox(
