@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 
 class LocationMapsService {
+  final Logger _log = Logger('LocationMapsService');
   static final LocationMapsService _instance = LocationMapsService._internal();
   factory LocationMapsService() => _instance;
   LocationMapsService._internal();
@@ -29,7 +31,7 @@ class LocationMapsService {
         longitud,
       );
     } catch (e) {
-      print("Error al inicializar el servicio de ubicación: $e");
+      _log.severe("Error al inicializar el servicio de ubicación: $e");
     }
   }
 }

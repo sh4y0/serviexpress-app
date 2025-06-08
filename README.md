@@ -158,9 +158,6 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
   </table>
 </div>
 
-
-
-
 ## Estado del Proyecto
 
 En desarrollo activo

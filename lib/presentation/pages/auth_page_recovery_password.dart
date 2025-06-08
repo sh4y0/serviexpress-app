@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
@@ -28,6 +30,8 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
   @override
   Widget build(BuildContext context) {
     ref.listen<ResultState>(authViewModelProvider, (previous, next) async {
+      final navigator = Navigator.of(context, rootNavigator: true);
+
       switch (next) {
         case Idle():
           LoadingScreen.hide();
@@ -37,16 +41,16 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
           break;
         case Success():
           LoadingScreen.hide();
-          Alerts.instance
-              .showSuccessAlert(
-                context,
-                "Se ha enviado un correo de recuperación a tu correo electrónico.",
-              )
-              .then((_) {
-                if (mounted) {
-                  Navigator.pushReplacementNamed(context, AppRoutes.login);
-                }
-              });
+          unawaited(
+            Alerts.instance
+                .showSuccessAlert(
+                  navigator.context,
+                  "Se ha enviado un correo de recuperación a tu correo electrónico.",
+                )
+                .then((_) {
+                  navigator.pushReplacementNamed(AppRoutes.login);
+                }),
+          );
           break;
         case Failure(:final error):
           LoadingScreen.hide();
