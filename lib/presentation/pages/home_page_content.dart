@@ -12,17 +12,22 @@ import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
+import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class HomePageContent extends StatefulWidget {
   final String mapStyle;
+  final VoidCallback onMenuPressed;
   final void Function(bool isMapLoaded) onMapLoaded;
+
   const HomePageContent({
     super.key,
     required this.mapStyle,
     required this.onMapLoaded,
+    required this.onMenuPressed,
   });
 
   @override
@@ -34,16 +39,22 @@ class _HomePageContentState extends State<HomePageContent> {
   static const double _zoomLevelFar = 14.0;
   static const double _zoomLevelClose = 18.0;
 
-  final ValueNotifier<LatLng?> _currentPositionNotifier = ValueNotifier<LatLng?>(null);
-  final ValueNotifier<Circle?> _locationCircleNotifier = ValueNotifier<Circle?>(null);
+  final ValueNotifier<LatLng?> _currentPositionNotifier =
+      ValueNotifier<LatLng?>(null);
+  final ValueNotifier<Circle?> _locationCircleNotifier = ValueNotifier<Circle?>(
+    null,
+  );
   final ValueNotifier<double> _circleRadiusNotifier = ValueNotifier<double>(40);
-  final ValueNotifier<Set<Marker>> _markersNotifier = ValueNotifier<Set<Marker>>({});
+  final ValueNotifier<Set<Marker>> _markersNotifier =
+      ValueNotifier<Set<Marker>>({});
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier<bool>(true);
   final ValueNotifier<double> _keyboardHeight = ValueNotifier<double>(0.0);
-  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key = GlobalKey<DraggableSheetSolicitarServicioState>();
+  final GlobalKey<DraggableSheetSolicitarServicioState> _sheet2Key =
+      GlobalKey<DraggableSheetSolicitarServicioState>();
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier<int>(-1);
   final List<UserModel> _proveedoresSeleccionados = [];
   final MapMovementController _movementController = MapMovementController();
+  bool _hasShownMarkerTutorial = false;
 
   BitmapDescriptor? _locationMarkerIcon;
   BitmapDescriptor? _providerMarkerIcon;
@@ -54,6 +65,7 @@ class _HomePageContentState extends State<HomePageContent> {
   bool _isMapBeingMoved = false;
   bool _isSolicitudGuardadaFromServicioDetallado = false;
   bool _isProveedorAgregado = false;
+  bool _categoriaError = false;
 
   String? _categoriaTemporalDeSheet2;
   String? _activeProgrammaticOperationId;
@@ -64,7 +76,15 @@ class _HomePageContentState extends State<HomePageContent> {
   Timer? _mapInteractionTimer;
   List<UserModel> _currentProviders = [];
   MarkerId? _currentlyOpenInfoWindowMarkerId;
-  
+
+  final List<TargetFocus> _targets = [];
+  bool _shouldShowSecondTutorialStep = false;
+  bool _pendingSecondTutorial = false;
+  bool _isTappedSolicitarServicio = false;
+  final GlobalKey _firstCategoryKey = GlobalKey();
+  final GlobalKey _locationButtonKey = GlobalKey();
+  TutorialCoachMark? _tutorialCoachMark;
+  final GlobalKey _describirServicioKey = GlobalKey();
 
   @override
   void initState() {
@@ -77,6 +97,83 @@ class _HomePageContentState extends State<HomePageContent> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupKeyboardListener();
     });
+  }
+
+  void _showFirstTutorialStep() {
+    _initFirstTutorialTarget();
+    TutorialCoachMark(
+      targets: _targets,
+      textSkip: "SALTAR",
+      paddingFocus: 2,
+      opacityShadow: 0.8,
+      onFinish: () {
+        setState(() {
+          _shouldShowSecondTutorialStep = true;
+        });
+      },
+      onClickTarget: (target) {
+        debugPrint('onClickTarget: $target');
+        _onCategorySelected(0);
+        setState(() {
+          _shouldShowSecondTutorialStep = true;
+        });
+      },
+      onClickTargetWithTapPosition: (target, tapDetails) {
+        debugPrint("target: $target");
+        debugPrint(
+          "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}",
+        );
+      },
+      onClickOverlay: (target) {
+        debugPrint('onClickOverlay: $target');
+      },
+      onSkip: () {
+        setState(() {
+          _shouldShowSecondTutorialStep = true;
+        });
+        return true;
+      },
+    ).show(context: context);
+  }
+
+  void _initFirstTutorialTarget() {
+    _targets.clear();
+    _targets.add(
+      TargetFocus(
+        identify: "first-category-item-key",
+        keyTarget: _firstCategoryKey,
+        alignSkip: Alignment.topRight,
+        shape: ShapeLightFocus.RRect,
+        radius: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Selección de Categoría",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 15.0,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "¡Comencemos por aquí! Pulsa esta categoría para ver a los proveedores de servicios en el mapa",
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _setupLocation() async {
@@ -115,7 +212,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
       final newPosition = LatLng(position.latitude, position.longitude);
       _currentPositionNotifier.value = newPosition;
-      _updateLocationCircle();
+      //_updateLocationCircle();
       _updateMarkers();
     } catch (e) {
       debugPrint('Error al inicializar la ubicación: $e');
@@ -128,6 +225,12 @@ class _HomePageContentState extends State<HomePageContent> {
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         widget.onMapLoaded(true);
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _showFirstTutorialStep();
+          }
+        });
       }
     });
   }
@@ -135,8 +238,8 @@ class _HomePageContentState extends State<HomePageContent> {
   void _loadMarkerIcon() async {
     try {
       _locationMarkerIcon = await BitmapDescriptor.asset(
-        const ImageConfiguration(size: Size(24, 24)),
-        'assets/icons/ic_location.png',
+        const ImageConfiguration(size: Size(25, 25)),
+        'assets/icons/ic_location_red.png',
       );
       _updateMarkers();
     } catch (e) {
@@ -229,7 +332,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
       if (shouldUpdate) {
         _currentPositionNotifier.value = newPosition;
-        _updateLocationCircle();
+        //_updateLocationCircle();
         _updateMarkers();
 
         if (forceUpdate) {
@@ -259,21 +362,6 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-  void _updateLocationCircle() {
-    final currentPosition = _currentPositionNotifier.value;
-    if (currentPosition != null) {
-      _locationCircleNotifier.value = Circle(
-        circleId: const CircleId('currentLocation'),
-        center: currentPosition,
-        radius: _circleRadiusNotifier.value,
-        strokeWidth: 2,
-        strokeColor: const Color.fromRGBO(74, 102, 255, 0.5),
-        fillColor: const Color.fromRGBO(74, 102, 255, 0.2),
-        zIndex: 1,
-      );
-    }
-  }
-
   void _updateMarkers() {
     final currentPosition = _currentPositionNotifier.value;
     Set<Marker> newMarkers = {};
@@ -292,10 +380,17 @@ class _HomePageContentState extends State<HomePageContent> {
               position: currentPosition,
             );
           });
+
           _animateCameraBasedOnZoomState();
         },
       );
       newMarkers.add(locationMarker);
+    }
+
+    if (currentPosition != null && _isTappedSolicitarServicio) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startLocationAnimation(currentPosition);
+      });
     }
 
     for (var provider in _currentProviders) {
@@ -308,13 +403,17 @@ class _HomePageContentState extends State<HomePageContent> {
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         anchor: const Offset(0.5, 1.0),
         zIndex: 1,
-        infoWindow: InfoWindow(
-          title: provider.nombreCompleto,
-          snippet: '⭐ ${provider.calificacion} - ${provider.descripcion}',
-        ),
+        // infoWindow: InfoWindow(
+        //   title: provider.nombreCompleto,
+        //   snippet: '⭐ ${provider.calificacion} - ${provider.descripcion}',
+        // ),
         onTap: () {
           _selectedProvider = provider;
           _currentlyOpenInfoWindowMarkerId = markerId;
+          Marker(
+            markerId: MarkerId('provider_${provider.uid}'),
+            position: LatLng(provider.latitud!, provider.longitud!),
+          );
           _showCustomSheet(
             Marker(
               markerId: MarkerId('provider_${provider.uid}'),
@@ -329,8 +428,35 @@ class _HomePageContentState extends State<HomePageContent> {
     _markersNotifier.value = newMarkers;
   }
 
+  void _startLocationAnimation(LatLng position) async {
+    try {
+      await AnimationProvider.startAnimation(
+        context,
+        mapController,
+        position,
+        _locationMarkerIcon,
+        onComplete: () {
+          if (mounted) {
+            setState(() {
+              _isTappedSolicitarServicio = false;
+            });
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isTappedSolicitarServicio = false;
+        });
+      }
+    }
+  }
+
   void _onCategorySelected(int index) async {
-    _selectedCategoryIndex.value = index;
+    setState(() {
+      _selectedCategoryIndex.value = index;
+      _categoriaError = false;
+    });
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory = CategoryMock.getCategories()[index].name;
@@ -341,6 +467,16 @@ class _HomePageContentState extends State<HomePageContent> {
 
       setState(() {
         _currentProviders = providers;
+
+        if (_shouldShowSecondTutorialStep && _currentProviders.isNotEmpty) {
+          _pendingSecondTutorial = true;
+          _shouldShowSecondTutorialStep = false;
+        } else {
+          Future.delayed(
+            const Duration(milliseconds: 500),
+            _showFallbackTutorial,
+          );
+        }
       });
 
       _updateMarkers();
@@ -445,6 +581,15 @@ class _HomePageContentState extends State<HomePageContent> {
     if (_activeProgrammaticOperationId != null) {
       _movementController.endProgrammaticMove(_activeProgrammaticOperationId!);
       _activeProgrammaticOperationId = null;
+
+      if (_pendingSecondTutorial) {
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted && _currentProviders.isNotEmpty) {
+            _attemptToShowMarkersTutorial();
+          }
+        });
+        _pendingSecondTutorial = false;
+      }
       return;
     }
 
@@ -455,6 +600,305 @@ class _HomePageContentState extends State<HomePageContent> {
         _shouldShowSheet.value = true;
       }
     });
+  }
+
+  Future<void> _attemptToShowMarkersTutorial() async {
+    if (_hasShownMarkerTutorial || _currentProviders.isEmpty || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _hasShownMarkerTutorial = true;
+    });
+
+    final mediaQuery = MediaQuery.of(context);
+    final topPadding = mediaQuery.padding.top + 150;
+    final bottomSheetHeight = mediaQuery.size.height * 0.24;
+    final screenHeight = mediaQuery.size.height;
+
+    for (final provider in _currentProviders) {
+      try {
+        final latLng = LatLng(provider.latitud!, provider.longitud!);
+        final screenCoordinate = await mapController.getScreenCoordinate(
+          latLng,
+        );
+
+        final bool isVisible =
+            screenCoordinate.y > topPadding &&
+            screenCoordinate.y > (screenHeight - bottomSheetHeight);
+
+        if (isVisible) {
+          _showTutorialForMarkerAt(screenCoordinate);
+          return;
+        } else {
+          _showFallbackTutorial();
+        }
+      } catch (e) {
+        debugPrint(
+          "LogServiExpress - Error al obtener la coordenada para un marcador: $e",
+        );
+      }
+    }
+
+    _showFallbackTutorial();
+  }
+
+  void _showTutorialForMarkerAt(ScreenCoordinate markerCoordinate) {
+    const double highlightSize = 120.0;
+    final double centerX = markerCoordinate.x / 2;
+    final double centerY = markerCoordinate.y / 2;
+
+    final targetPosition = TargetPosition(
+      const Size(highlightSize, highlightSize),
+      Offset(centerX / 2, centerY / 2),
+    );
+
+    final target = TargetFocus(
+      identify: "marker-focus-tutorial",
+      targetPosition: targetPosition,
+      shape: ShapeLightFocus.Circle,
+      radius: 15,
+      contents: [
+        TargetContent(
+          align: ContentAlign.bottom,
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Proveedor de Servicio",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 15.0,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Los íconos azules representan proveedores de la categoría seleccionada. Cuando recibas cotizaciones, podrás tocar un ícono para ver los detalles y decidir si aceptas o rechazas al proveedor.",
+                  style: TextStyle(color: Colors.white, fontSize: 14.0),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      _tutorialCoachMark?.finish();
+                      _showLocationButtonTutorial();
+                    },
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    label: const Text(
+                      "Siguiente",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: [target],
+      textSkip: "FINALIZAR",
+      paddingFocus: 5,
+      opacityShadow: 0.8,
+    );
+
+    _tutorialCoachMark?.show(context: context);
+  }
+
+  void _showLocationButtonTutorial() {
+    _targets.clear();
+    _targets.add(
+      TargetFocus(
+        identify: "location-button-key",
+        keyTarget: _locationButtonKey,
+        shape: ShapeLightFocus.Circle,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Encuentra tu Ubicación",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Pulsa este botón para centrar el mapa en tu ubicación actual y ver los proveedores más cercanos.",
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: _targets,
+      onFinish: () {
+        setState(() {
+          _attemptToShowMarkersTutorial();
+          _shouldShowSecondTutorialStep = false;
+        });
+      },
+      onClickTarget: (target) {
+        debugPrint('onClickTarget: $target');
+        _toggleZoom();
+        Future.delayed(
+          const Duration(seconds: 2),
+          _showFourthTutorialStep,
+        );
+      },
+      textSkip: "FINALIZAR",
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+    );
+    _tutorialCoachMark?.show(context: context);
+  }
+
+  void _showFourthTutorialStep() {
+    _targets.clear();
+    _targets.add(
+      TargetFocus(
+        identify: "describir-servicio-key",
+        keyTarget: _describirServicioKey,
+        shape: ShapeLightFocus.RRect,
+        radius: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Describe tu Servicio",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "¿Qué servicio necesitas? Escríbelo aquí?",
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: _targets,
+      onClickTarget: (target) {
+        _requestService();
+      },
+      textSkip: "FINALIZAR",
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+    );
+    _tutorialCoachMark?.show(context: context);
+  }
+
+  void _showFallbackTutorial() {
+    final screenSize = MediaQuery.of(context).size;
+    const double tutorialSize = 120.0;
+    final double centerX = screenSize.width / 2;
+    final double centerY = screenSize.height / 2;
+    final targetPosition = TargetPosition(
+      const Size(tutorialSize, tutorialSize),
+      Offset(centerX - tutorialSize / 2, centerY - tutorialSize / 2),
+    );
+
+    final target = TargetFocus(
+      identify: "fallback-tutorial",
+      targetPosition: targetPosition,
+      shape: ShapeLightFocus.Circle,
+      radius: 15,
+      contents: [
+        TargetContent(
+          align: ContentAlign.bottom,
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Proveedores en el Mapa",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 18.0,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Aun no hay proveedores disponibles en esta categoría",
+                  style: TextStyle(color: Colors.white, fontSize: 14.0),
+                ),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      _tutorialCoachMark?.finish();
+                      _showLocationButtonTutorial();
+                    },
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    label: const Text(
+                      "Siguiente",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: [target],
+      textSkip: "FINALIZAR",
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+    );
+
+    _tutorialCoachMark?.show(context: context);
   }
 
   void _requestService() {
@@ -502,6 +946,16 @@ class _HomePageContentState extends State<HomePageContent> {
 
   void _isSolicitudGuardadaOnTapped(bool isSolicitudGuardada) {
     _isSolicitudGuardadaFromServicioDetallado = isSolicitudGuardada;
+  }
+
+  void _isSolicitudServicioOnTapped(bool? isSolicitarServicio) {
+    setState(() {
+      _isTappedSolicitarServicio = isSolicitarServicio ?? false;
+    });
+
+    if (_isTappedSolicitarServicio) {
+      _updateMarkers();
+    }
   }
 
   void _agregarProveedor(UserModel proveedor) {
@@ -587,71 +1041,140 @@ class _HomePageContentState extends State<HomePageContent> {
             );
           },
         ),
+
         Positioned(
           top: MediaQuery.of(context).padding.top,
           left: 6,
           right: 6,
-          height: 110,
-          child: Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
-            child: ValueListenableBuilder<int>(
-              valueListenable: _selectedCategoryIndex,
-              builder: (context, selectedIndex, _) {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    var category = CategoryMock.getCategories()[index];
-                    final bool isSelected = index == selectedIndex;
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 25),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 40),
+                    SizedBox(
+                      height: 60,
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: _selectedCategoryIndex,
+                        builder: (context, selectedIndex, _) {
+                          return ListView.builder(
+                            padding: const EdgeInsets.only(
+                              top: 10,
+                              right: 10,
+                              bottom: 10,
+                            ),
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              var category =
+                                  CategoryMock.getCategories()[index];
+                              final bool isSelected = index == selectedIndex;
+                              final bool showErrorBorder =
+                                  _categoriaError && selectedIndex == -1;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: MaterialButton(
-                        padding: const EdgeInsets.all(10),
-                        height: 39,
-                        minWidth: 98,
-                        color:
-                            isSelected
-                                ? const Color(0xFF3645f5)
-                                : const Color(0xFF263089),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        onPressed: () {
-                          _onCategorySelected(index);
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: Container(
+                                  decoration:
+                                      showErrorBorder
+                                          ? BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.redAccent,
+                                              width: 1.5,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          )
+                                          : null,
+                                  child: MaterialButton(
+                                    key: index == 0 ? _firstCategoryKey : null,
+                                    padding: const EdgeInsets.all(10),
+                                    height: 39,
+                                    minWidth: 98,
+                                    color:
+                                        isSelected
+                                            ? const Color(0xFF3645f5)
+                                            : const Color(0xFF263089),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    onPressed: () {
+                                      _onCategorySelected(index);
+                                    },
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SvgPicture.asset(
+                                          category.iconPath,
+                                          width: 20,
+                                          height: 15,
+                                          colorFilter: ColorFilter.mode(
+                                            isSelected
+                                                ? Colors.white
+                                                : AppColor.textInput,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          category.name,
+                                          style: TextStyle(
+                                            color:
+                                                isSelected
+                                                    ? Colors.white
+                                                    : AppColor.textInput,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            itemCount: CategoryMock.getCategories().length,
+                          );
                         },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              category.iconPath,
-                              width: 20,
-                              height: 15,
-                              colorFilter: ColorFilter.mode(
-                                isSelected ? Colors.white : AppColor.textInput,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              category.name,
-                              style: TextStyle(
-                                color:
-                                    isSelected
-                                        ? Colors.white
-                                        : AppColor.textInput,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                    if (_categoriaError)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          "Selecciona una categoria",
+                          style: TextStyle(color: Colors.redAccent),
                         ),
                       ),
-                    );
-                  },
-                  itemCount: CategoryMock.getCategories().length,
-                );
-              },
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Positioned(
+          top: 0,
+          left: 0,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: widget.onMenuPressed,
+                customBorder: const CircleBorder(),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF303F9F),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 5),
+                    ],
+                  ),
+                  child: const Icon(Icons.menu, color: Colors.white),
+                ),
+              ),
             ),
           ),
         ),
@@ -659,6 +1182,12 @@ class _HomePageContentState extends State<HomePageContent> {
         ValueListenableBuilder<bool>(
           valueListenable: _shouldShowSheet,
           builder: (context, shouldShow, child) {
+            final bool hayProveedores =
+                _isProveedorAgregado && _proveedoresSeleccionados.isNotEmpty;
+            final double minSheetSize = hayProveedores ? 0.40 : 0.21;
+            final double maxSheetSize = hayProveedores ? 0.40 : 0.21;
+            final List<double> snapPoints =
+                hayProveedores ? [0.21, 0.40] : [0.35];
             return Stack(
               children: [
                 AnimatedPositioned(
@@ -670,11 +1199,27 @@ class _HomePageContentState extends State<HomePageContent> {
                   top: 0,
                   child: DraggableSheetSolicitarServicio(
                     key: _sheet2Key,
-                    targetInitialSize: 0.30,
-                    minSheetSize: 0.30,
-                    maxSheetSize: 0.95,
-                    snapPoints: const [0.30, 0.95],
-                    onTapPressed: _requestService,
+                    detallarServicioKey: _describirServicioKey,
+                    targetInitialSize: minSheetSize,
+                    minSheetSize: minSheetSize,
+                    maxSheetSize: maxSheetSize,
+                    snapPoints: snapPoints,
+                    onTapPressed: () {
+                      if (_selectedCategoryIndex.value == -1) {
+                        setState(() {
+                          _categoriaError = true;
+                        });
+                        return;
+                      }
+                      _requestService();
+                    },
+                    onCategoriaError: () {
+                      setState(() {
+                        _categoriaError = true;
+                      });
+                    },
+                    categoriaError: _categoriaError,
+                    selectedCategoryIndex: _selectedCategoryIndex.value,
                     onAbrirDetallesPressed: (
                       bool? isSheetVisibleSolicitarServicioTapped,
                     ) {
@@ -690,16 +1235,22 @@ class _HomePageContentState extends State<HomePageContent> {
                     isSolicitudGuardada:
                         _isSolicitudGuardadaFromServicioDetallado,
                     isProveedorAgregado: _isProveedorAgregado,
+                    onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
                   ),
                 ),
                 if (shouldShow)
                   Positioned(
-                    top: MediaQuery.of(context).size.height * 0.60,
+                    bottom:
+                        (_isProveedorAgregado &&
+                                _proveedoresSeleccionados.isNotEmpty)
+                            ? MediaQuery.of(context).size.height * 0.35
+                            : MediaQuery.of(context).size.height * 0.22,
                     right: 10,
                     child: SizedBox(
                       width: 50,
                       height: 50,
                       child: FloatingActionButton(
+                        key: _locationButtonKey,
                         heroTag: 'fabHomeRightsheet',
                         shape: const CircleBorder(),
                         backgroundColor: const Color(0xFF4a66ff),
@@ -757,10 +1308,10 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
           Positioned.fill(
             child: DraggableSheetDetalleProveedor(
-              targetInitialSize: 0.55,
+              targetInitialSize: 0.57,
               minSheetSize: 0.0,
               maxSheetSize: 0.95,
-              snapPoints: const [0.0, 0.55, 0.95],
+              snapPoints: const [0.0, 0.57, 0.95],
               onDismiss: _handleSheetDismissedDetalleProveedor,
               onProveedorAgregado: _agregarProveedor,
               selectedProvider: _selectedProvider,
