@@ -8,15 +8,17 @@ class ServiceModel {
   String descripcion;
   String estado;
   String clientId;
-  String workerId;
+  String? workerId;
   double? precio;
   List<String>? fotos;
   List<String>? videos;
+  String? audio;
   DateTime? fechaCreacion;
   DateTime? fechaFinalizacion;
   List<File>? fotosFiles;
   List<File>? videosFiles;
   List<File>? audioFiles;
+  List<String>? workersId;
 
   ServiceModel({
     required this.id,
@@ -24,16 +26,18 @@ class ServiceModel {
     required this.descripcion,
     required this.estado,
     required this.clientId,
-    required this.workerId,
+    this.workerId,
     this.precio,
     this.fotos,
     this.videos,
+    this.audio,
     this.fechaCreacion,
     this.fechaFinalizacion,
 
     this.fotosFiles,
     this.videosFiles,
     this.audioFiles,
+    this.workersId,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
@@ -43,11 +47,12 @@ class ServiceModel {
       descripcion: json['descripcion'] ?? '',
       estado: json['estado'] ?? '',
       clientId: json['clientId'] ?? '',
-      workerId: json['workerId'],
+      workerId: json['workerId'] ?? '',
       precio:
           json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fotos: json['fotos'] != null ? List<String>.from(json['fotos']) : null,
       videos: json['videos'] != null ? List<String>.from(json['videos']) : null,
+      audio: json['audio'] as String?,
       fechaCreacion:
           json['fechaCreacion'] != null
               ? (json['fechaCreacion'] as Timestamp).toDate()
@@ -55,6 +60,10 @@ class ServiceModel {
       fechaFinalizacion:
           json['fechaFinalizacion'] != null
               ? (json['fechaFinalizacion'] as Timestamp).toDate()
+              : null,
+      workersId:
+          json['workersId'] != null
+              ? List<String>.from(json['workersId'])
               : null,
     );
   }
@@ -70,12 +79,14 @@ class ServiceModel {
       'precio': precio,
       'fotos': fotos,
       'videos': videos,
+      'audio': audio,
       'fechaCreacion':
           fechaCreacion != null ? Timestamp.fromDate(fechaCreacion!) : null,
       'fechaFinalizacion':
           fechaFinalizacion != null
               ? Timestamp.fromDate(fechaFinalizacion!)
               : null,
+      'workersId': workersId,
     };
   }
 }

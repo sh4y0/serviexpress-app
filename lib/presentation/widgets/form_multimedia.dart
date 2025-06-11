@@ -462,6 +462,17 @@ class FormularioMultimediaState extends State<FormMultimedia>
                       ],
                     ),
           ),
+          if (_descripcionError)
+            const Padding(
+              padding: EdgeInsets.only(left: 16, bottom: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Ingresa los detalles',
+                  style: TextStyle(color: Colors.red, fontSize: 13),
+                ),
+              ),
+            ),
 
           // if (_descripcionError)
           //   const Padding(
