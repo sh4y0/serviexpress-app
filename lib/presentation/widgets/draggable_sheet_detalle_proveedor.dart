@@ -144,6 +144,44 @@ class _DraggableSheetDetalleProveedorState
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> reviews = [
+      {
+        "avatar": "assets/images/new_user.png",
+        "name": "Allan Sagastegui",
+        "subtitle": "Usuario Nuevo",
+        "rating": 5.0,
+        "comment": "Se solicitó un servicio acelerado y la entrega fue muy rápida.",
+      },
+      {
+        "avatar": "assets/images/new_user.png",
+        "name": "María López",
+        "subtitle": "Cliente frecuente",
+        "rating": 4.5,
+        "comment": "Muy buen trabajo, atención cordial y resultados excelentes.",
+      },
+      {
+        "avatar": "assets/images/new_user.png",
+        "name": "Carlos Pérez",
+        "subtitle": "Usuario Nuevo",
+        "rating": 4.0,
+        "comment": "El servicio fue bueno, aunque hubo un pequeño retraso.",
+      },
+      {
+        "avatar": "assets/images/new_user.png",
+        "name": "Fernanda Ruiz",
+        "subtitle": "Cliente frecuente",
+        "rating": 5.0,
+        "comment": "Excelente atención y profesionalismo. Lo recomiendo totalmente.",
+      },
+      {
+        "avatar": "assets/images/new_user.png",
+        "name": "Javier Torres",
+        "subtitle": "Usuario Nuevo",
+        "rating": 4.8,
+        "comment": "Muy satisfecho con el servicio recibido, volveré a contratar.",
+      },
+    ];
+
     return LayoutBuilder(
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
@@ -286,88 +324,95 @@ class _DraggableSheetDetalleProveedorState
 
                           const SizedBox(height: 16),
 
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0c0d23),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          SizedBox(
+                            height: 140,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: reviews.length,
+                              separatorBuilder: (context, index) => const SizedBox(width: 12),
+                              itemBuilder: (context, index){
+                                final review = reviews[index];
+                                return Container(
+                                width: 320,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0c0d23),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.grey,
-                                      ),
-                                      child: ClipOval(
-                                        child: Image.asset(
-                                          'assets/images/new_user.png',
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-
-                                    const Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Allan Sagastegui',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Usuario Nuevo',
-                                            style: TextStyle(
-                                              color: AppColor.textInput,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    const Row(
+                                    Row(
                                       children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 16,
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          '5.0',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.grey,
                                           ),
+                                          child: ClipOval(
+                                            child: Image.asset(review["avatar"],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                              
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(review["name"],
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Text(review["subtitle"],
+                                                style: const TextStyle(
+                                                  color: AppColor.textInput,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                              
+                                         Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(review["rating"].toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
+                                    const SizedBox(height: 12),
+                              
+                                     Text(review["comment"],
+                                      style: const TextStyle(
+                                        color: AppColor.textInput,
+                                        fontSize: 14,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-
-                                const Text(
-                                  'Se solicito un servicio acelerado y la entrega del proveedor fue muy rapida y antes de lo esperado.',
-                                  style: TextStyle(
-                                    color: AppColor.textInput,
-                                    fontSize: 14,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ],
+                              );
+                              },                              
                             ),
                           ),
 

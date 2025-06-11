@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
@@ -53,9 +54,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final options = [
-      {"icon": Icons.edit, "title": "Editar Perfil"},
-      {"icon": Icons.notifications, "title": "Notificaciones"},
-      {"icon": Icons.settings, "title": "Preferencias"},
+      {
+        "iconPath": "assets/icons/ic_privacidad.svg",
+        "title": "Privacidad",
+        "trailing": "",
+      },
+      {
+        "iconPath": "assets/icons/ic_notify.svg",
+        "title": "Notificaciones",
+        "trailing": "ON",
+      },
+      {
+        "iconPath": "assets/icons/ic_idioma.svg",
+        "title": "Idioma",
+        "trailing": "English",
+      },
+    ];
+
+    final options2 = [
+      {
+        "iconPath": "assets/icons/ic_verification_mov.svg",
+        "title": "Verificacion móvil",
+      },
+      {
+        "iconPath": "assets/icons/ic_historial.svg",
+        "title": "Historial de actividad",
+        //"route": AppRoutes.cambioRol,
+      },
       widget.isProvider
           ? {
             "icon": Icons.published_with_changes,
@@ -67,158 +92,298 @@ class _ProfileScreenState extends State<ProfileScreen> {
             "title": "Cambiar a Trabajador",
             "route": AppRoutes.homeProvider,
           },
-      {"icon": Icons.help_outline, "title": "Ayuda"},
     ];
     return Scaffold(
-      backgroundColor: AppColor.bgMsgUser,
+      backgroundColor: AppColor.bgVerification,
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 20, left: 20),
-              child: Text(
-                "Perfil",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
             Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.bottomCenter,
               children: [
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 50,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColor.btnOpen,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                Positioned(
-                  top: 50,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        const CircleAvatar(
-                          radius: 50,
-                          backgroundImage: AssetImage(
-                            "assets/images/profile_default.png",
-                          ),
-                          backgroundColor: Colors.white,
-                        ),
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: AppColor.bgAll,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            const CircleAvatar(
+                              radius: 70,
+                              backgroundImage: AssetImage(
+                                "assets/images/avatar.png",
+                              ),
+                              backgroundColor: Colors.white,
+                            ),
+                            Positioned(
+                              child: GestureDetector(
+                                onTap: () {},
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 5,
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: SvgPicture.asset(
+                                    "assets/icons/ic_edit.svg",
+                                  ),
                                 ),
                               ),
-                              padding: const EdgeInsets.all(4),
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        "Jeffer G".toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "youremail@domain.com",
+                            style: TextStyle(
+                              color: AppColor.txtEmailPhone,
+                              fontSize: 16,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 155,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Text(
-                      "Jeffer G".toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
+                          SizedBox(width: 5),
+                          Text(
+                            "|",
+                            style: TextStyle(
+                              color: AppColor.txtEmailPhone,
+                              fontSize: 16,
+                            ),
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "+01 234 567 89",
+                            style: TextStyle(
+                              color: AppColor.txtEmailPhone,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 45),
+            const SizedBox(height: 20),
             Expanded(
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  if (index < options.length) {
-                    final option = options[index];
-                    return Container(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Container(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 6,
                       ),
-                      decoration: BoxDecoration(
-                        // ignore: deprecated_member_use
-                        color: Colors.white.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          option["icon"] as IconData,
-                          color: Colors.white,
-                        ),
-                        title: Text(
-                          option["title"] as String,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        onTap: () async {
-                          final route = option["route"];
-                          final mapStyle = await MapStyleLoader.loadStyle();
-                          if (route != null) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              route as String,
-                              (route) => false,
-                              arguments: mapStyle,
+                      color: AppColor.bgItmProfile,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          if (index < options.length) {
+                            final option = options[index];
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                splashColor: Colors.grey.withOpacity(0.3),
+                                highlightColor: Colors.grey.withOpacity(0.18),
+                                onTap: () async {
+                                  final route = option["route"];
+                                  if (route != null) {
+                                    if (route == AppRoutes.home) {
+                                      final mapStyle =
+                                          await MapStyleLoader.loadStyle();
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        route,
+                                        (route) => false,
+                                        arguments: mapStyle,
+                                      );
+                                    } else {
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        route,
+                                        (route) => false,
+                                      );
+                                    }
+                                  }
+                                },
+                                child: ListTile(
+                                  leading: SvgPicture.asset(
+                                    option["iconPath"] as String,
+                                    width: 24,
+                                    height: 24,
+                                    color: Colors.white,
+                                  ),
+                                  title: Text(
+                                    option["title"] as String,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  trailing: Text(
+                                    option["trailing"] as String,
+                                    style: const TextStyle(
+                                      color: AppColor.txtTrailing,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             );
+                          } else {
+                            return const SizedBox.shrink();
                           }
                         },
+                        separatorBuilder:
+                            (context, index) => const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                        itemCount: options.length,
                       ),
-                    );
-                  } else {
-                    return ListTile(
-                      leading: const Icon(Icons.logout, color: Colors.red),
-                      title: const Text(
-                        "Cerrar sesión",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      onTap: () => _logout(context),
-                    );
-                  }
-                },
-                separatorBuilder:
-                    (context, index) => const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
                     ),
-                itemCount: options.length + 1,
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      color: AppColor.bgItmProfile,
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          if (index < options2.length) {
+                            final option = options2[index];
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                splashColor: Colors.grey.withOpacity(0.3),
+                                highlightColor: Colors.grey.withOpacity(0.18),
+                                onTap: () async {
+                                  if (option["route"] != null) {
+                                    if (option["route"] == AppRoutes.home) {
+                                      final mapStyle =
+                                          await MapStyleLoader.loadStyle();
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        option["route"] as String,
+                                        (route) => false,
+                                        arguments: mapStyle,
+                                      );
+                                    } else {
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        option["route"] as String,
+                                        (route) => false,
+                                      );
+                                    }
+                                  }
+                                },
+                                child: ListTile(
+                                  leading:
+                                      option["iconPath"] != null
+                                          ? SvgPicture.asset(
+                                            option["iconPath"] as String,
+                                            width: 24,
+                                            height: 24,
+                                            color: Colors.white,
+                                          )
+                                          : Icon(
+                                            option["icon"] as IconData,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                  title: Text(
+                                    option["title"] as String,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                        separatorBuilder:
+                            (context, index) => const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                        itemCount: options2.length,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      color: AppColor.bgItmProfile,
+                      child: Column(
+                        children: [
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              splashColor: Colors.grey.withOpacity(0.3),
+                              highlightColor: Colors.grey.withOpacity(0.18),
+                              onTap: () {},
+                              child: ListTile(
+                                leading: SvgPicture.asset(
+                                  "assets/icons/ic_delete_account.svg",
+                                ),
+                                title: const Text(
+                                  "Eliminar cuenta",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              splashColor: Colors.grey.withOpacity(0.3),
+                              highlightColor: Colors.grey.withOpacity(0.18),
+                              onTap: () => _logout(context),
+                              child: ListTile(
+                                leading: SvgPicture.asset(
+                                  "assets/icons/ic_exit.svg",
+                                ),
+                                title: const Text(
+                                  "Cerrar sesión",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
