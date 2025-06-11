@@ -12,7 +12,6 @@ import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
-import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
