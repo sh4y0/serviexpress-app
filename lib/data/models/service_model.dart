@@ -16,6 +16,7 @@ class ServiceModel {
   DateTime? fechaFinalizacion;
   List<File>? fotosFiles;
   List<File>? videosFiles;
+  List<File>? audioFiles;
 
   ServiceModel({
     required this.id,
@@ -32,6 +33,7 @@ class ServiceModel {
 
     this.fotosFiles,
     this.videosFiles,
+    this.audioFiles,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {

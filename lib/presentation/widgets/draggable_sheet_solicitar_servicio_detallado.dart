@@ -33,7 +33,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
     this.entryAnimationDuration = const Duration(milliseconds: 300),
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.initialData,
-    required this.onGuardarSolicitudCallback, required this.selectedCategoryIndex, 
+    required this.onGuardarSolicitudCallback,
+    required this.selectedCategoryIndex,
     required this.isSolicitudEnviada,
   });
   @override
@@ -41,7 +42,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
       DraggableSheetState();
 }
 
-class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado> {
+class DraggableSheetState
+    extends State<DraggableSheetSolicitarServicioDetallado> {
   final Logger _log = Logger('DraggableSheetState');
   late DraggableScrollableController _internalController;
   bool _isDismissing = false;
@@ -49,7 +51,6 @@ class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado
       GlobalKey<FormularioMultimediaState>();
 
   late ValueNotifier<int> _selectedCategoryIndex;
-
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado
           widget.initialData!.descripcion,
           widget.initialData!.fotosFiles ?? [],
           widget.initialData!.videosFiles ?? [],
+          widget.initialData!.audioFiles ?? [],
         );
       }
     });
@@ -111,6 +113,11 @@ class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado
       return;
     }
 
+    if (_formMultimediaKey.currentState!.descripcionText.trim().isEmpty) {
+      _formMultimediaKey.currentState!.mostrarErrorDescripcion();
+      return;
+    }
+
     String? categoriaSeleccionada;
     if (_selectedCategoryIndex.value != -1 &&
         _selectedCategoryIndex.value < CategoryMock.getCategories().length) {
@@ -121,13 +128,7 @@ class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado
     final String descripcion = _formMultimediaKey.currentState!.descripcionText;
     final List<File> fotos = _formMultimediaKey.currentState!.images;
     final List<File> videos = _formMultimediaKey.currentState!.videos;
-
-    /*final data = SolicitudServicioModel(
-      categoria: categoriaSeleccionada,
-      descripcion: descripcion,
-      fotos: fotos.toList(),
-      videos: videos.toList(),
-    );*/
+    final List<File> audio = _formMultimediaKey.currentState!.audios;
 
     String id = ServiceRepository.instance.generateServiceId();
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -144,11 +145,11 @@ class DraggableSheetState extends State<DraggableSheetSolicitarServicioDetallado
       workerId: '',
       fotosFiles: fotos,
       videosFiles: videos,
+      audioFiles: audio,
     );
-    
+
     widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
-    
   }
 
   @override

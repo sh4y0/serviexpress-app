@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
@@ -27,6 +26,13 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
 
   final bool isSolicitudGuardada;
   final bool isProveedorAgregado;
+  final bool categoriaError;
+  final VoidCallback? onCategoriaError;
+  final Function(bool? isPressedSolicitarServicio)? onPressedSolicitarServicio;
+
+  final GlobalKey? detallarServicioKey;
+
+  final int selectedCategoryIndex;
 
   const DraggableSheetSolicitarServicio({
     super.key,
@@ -46,6 +52,11 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     this.onProveedorTapped,
     this.isSolicitudGuardada = false,
     this.isProveedorAgregado = false,
+    this.categoriaError = false,
+    this.onCategoriaError,
+    this.selectedCategoryIndex = -1,
+    this.onPressedSolicitarServicio,
+    this.detallarServicioKey,
   });
   @override
   ConsumerState<DraggableSheetSolicitarServicio> createState() =>
@@ -54,16 +65,14 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
 
 class DraggableSheetSolicitarServicioState
     extends ConsumerState<DraggableSheetSolicitarServicio> {
-  final Logger _log = Logger('DraggableSheetSolicitarServicioState');
   final sheetKeyInDraggable = GlobalKey();
   final FocusNode focusNodePrimero = FocusNode();
-  
+
   late DraggableScrollableController _internalController;
   late TextEditingController _descripcionController = TextEditingController();
-  
+
   bool _isDismissing = false;
-  
-  
+  bool _descripcionError = false;
 
   @override
   void initState() {
@@ -155,12 +164,12 @@ class DraggableSheetSolicitarServicioState
       builder: (builder, constraints) {
         return DraggableScrollableSheet(
           key: sheetKeyInDraggable,
-          initialChildSize: widget.minSheetSize,
+          initialChildSize: widget.targetInitialSize,
           maxChildSize: widget.maxSheetSize,
           minChildSize: widget.minSheetSize,
-          expand: true,
+          expand: false,
           snap: true,
-          snapSizes: widget.snapPoints,
+          //snapSizes: widget.snapPoints,
           controller: _internalController,
           builder: (context, scrollController) {
             return AbsorbPointer(
@@ -193,25 +202,29 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 8.0,
-                                  bottom: 4.0,
-                                ),
-                                child: Text(
-                                  widget.isProveedorAgregado
-                                      ? 'Proveedores que seleccionaste:'
-                                      : '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
+                              if (widget.isProveedorAgregado)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 8.0,
+                                    bottom: 4.0,
+                                  ),
+                                  child: Text(
+                                    widget.isProveedorAgregado
+                                        ? 'Tu solicitud será enviada a:'
+                                        : '',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              if (widget.proveedoresSeleccionados.isNotEmpty)
+                              if (widget.isProveedorAgregado)
+                                const SizedBox(height: 8),
+                              if (widget.isProveedorAgregado &&
+                                  widget.proveedoresSeleccionados.isNotEmpty)
                                 SizedBox(
-                                  height: 80,
+                                  height: 70,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount:
@@ -234,12 +247,12 @@ class DraggableSheetSolicitarServicioState
                                 ),
                               Container(
                                 margin: const EdgeInsets.only(
-                                  top: 12,
+                                  top: 15,
                                   bottom: 12,
                                 ),
                                 decoration: BoxDecoration(
                                   color: const Color.fromRGBO(38, 48, 137, 1),
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(8),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withAlpha(
@@ -249,6 +262,21 @@ class DraggableSheetSolicitarServicioState
                                       offset: const Offset(0, 4),
                                     ),
                                   ],
+                                  border:
+                                      _descripcionError &&
+                                              !widget.isSolicitudGuardada
+                                          ? Border.all(
+                                            color: Colors.red,
+                                            width: 1.5,
+                                          )
+                                          : null,
+                                  // (_descripcionError &&
+                                  //         !widget.isSolicitudGuardada)
+                                  //     ? Border.all(
+                                  //       color: Colors.red,
+                                  //       width: 1.5,
+                                  //     )
+                                  //     : null,
                                 ),
                                 child: Column(
                                   children: [
@@ -264,53 +292,83 @@ class DraggableSheetSolicitarServicioState
                                             ),
                                             child: SvgCache.getIconSvg(
                                               'assets/icons/ic_message_form.svg',
-                                              color: const Color.fromRGBO(
-                                                194,
-                                                215,
-                                                255,
-                                                0.6,
-                                              ),
+                                              color:
+                                                  _descripcionError && !widget.isSolicitudGuardada
+                                                      ? Colors.red
+                                                      : const Color.fromRGBO(
+                                                        194,
+                                                        215,
+                                                        255,
+                                                        0.6,
+                                                      ),
                                             ),
                                           ),
                                           Expanded(
-                                            child: TextField(
-                                              controller:
-                                                  _descripcionController,
-                                              focusNode: focusNodePrimero,
-                                              maxLines: null,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
-                                              decoration: InputDecoration(
-                                                hintText:
-                                                    widget.isSolicitudGuardada
-                                                        ? "Se ha guardado tu solicitud, toca aqui para editarla"
-                                                        : "Detalla el servicio que necesitas...",
-                                                hintStyle: const TextStyle(
-                                                  color: Color.fromRGBO(
-                                                    194,
-                                                    215,
-                                                    255,
-                                                    0.6,
+                                            child: Column(
+                                              key: widget.detallarServicioKey,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                TextField(
+                                                  controller:
+                                                      _descripcionController,
+                                                  focusNode: focusNodePrimero,
+                                                  maxLines: null,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
                                                   ),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
+                                                  decoration: InputDecoration(
+                                                    hintText:
+                                                        widget.isSolicitudGuardada
+                                                            ? "Toca aqui para editar tu solicitud..."
+                                                            : "Describe el servicio que necesitas...",
+                                                    hintStyle: TextStyle(
+                                                      color:
+                                                          _descripcionError && !widget.isSolicitudGuardada
+                                                              ? Colors.red
+                                                              : const Color.fromRGBO(
+                                                                194,
+                                                                215,
+                                                                255,
+                                                                0.6,
+                                                              ),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                    border: InputBorder.none,
+                                                    enabledBorder:
+                                                        InputBorder.none,
+                                                    focusedBorder:
+                                                        InputBorder.none,
+                                                  ),
+                                                  showCursor: false,
+                                                  onTap: () {
+                                                    focusNodePrimero.unfocus();
+                                                    bool?
+                                                    isSheetVisibleSolicitarServicio =
+                                                        true;
+                                                    widget.onAbrirDetallesPressed(
+                                                      isSheetVisibleSolicitarServicio,
+                                                    );
+                                                  },
+                                                  // onChanged: (_) {
+
+                                                  //   if (_descripcionController
+                                                  //       .text
+                                                  //       .trim()
+                                                  //       .isNotEmpty) {
+                                                  //     if (_descripcionError) {
+                                                  //       setState(() {
+                                                  //         _descripcionError =
+                                                  //             false;
+                                                  //       });
+                                                  //     }
+                                                  //   }
+                                                  // },
                                                 ),
-                                                border: InputBorder.none,
-                                                enabledBorder: InputBorder.none,
-                                                focusedBorder: InputBorder.none,
-                                              ),
-                                              showCursor: false,
-                                              onTap: () {
-                                                focusNodePrimero.unfocus();
-                                                bool?
-                                                isSheetVisibleSolicitarServicio =
-                                                    true;
-                                                widget.onAbrirDetallesPressed(
-                                                  isSheetVisibleSolicitarServicio,
-                                                );
-                                              },
+                                              ],
                                             ),
                                           ),
                                         ],
@@ -319,12 +377,43 @@ class DraggableSheetSolicitarServicioState
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
 
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: () async {
+                                    if (widget.onCategoriaError != null &&
+                                        widget.selectedCategoryIndex == -1) {
+                                      widget.onCategoriaError!();
+                                      return;
+                                    }
+
+                                    if (!widget.isSolicitudGuardada) {
+                                      setState(() {
+                                        _descripcionError = true;
+                                      });
+                                      return;
+                                    } else {
+                                      setState(() {
+                                        _descripcionError = false;
+                                      });
+                                    }
+
+                                    // if (_descripcionController.text.trim().isEmpty) {
+                                    //   setState(() {
+                                    //     _descripcionError = true;
+                                    //     });
+                                    //   return;
+
+                                    // } else {
+                                    //   setState(() {
+                                    //     _descripcionError = false;
+                                    //   });
+                                    // }
+
+                                    widget.onPressedSolicitarServicio!(true);
+
                                     if (widget.datosSolicitudExistente !=
                                         null) {
                                       widget.datosSolicitudExistente!.workerId =
@@ -333,13 +422,6 @@ class DraggableSheetSolicitarServicioState
                                           .createService(
                                             widget.datosSolicitudExistente!,
                                           );
-                                      _log.info(
-                                        "ENVIANDO SOLICITUD FINAL: ${widget.datosSolicitudExistente}",
-                                      );
-                                    } else {
-                                      _log.info(
-                                        "NO SE PUDO CREAR LA SOLICITUD",
-                                      );
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -348,7 +430,7 @@ class DraggableSheetSolicitarServicioState
                                       vertical: 16,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
                                   child: const Text(

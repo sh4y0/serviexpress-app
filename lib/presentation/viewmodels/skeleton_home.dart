@@ -19,7 +19,7 @@ class SkeletonHome extends StatelessWidget {
           Positioned(
             left: 0,
             right: 0,
-            top: 70,
+            top: 110,
             child: Shimmer.fromColors(
               baseColor: const Color.fromRGBO(200, 200, 200, 0.3),
               highlightColor: const Color.fromRGBO(255, 255, 255, 0.6),
