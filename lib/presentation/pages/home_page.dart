@@ -18,10 +18,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _mapLoaded = false;
-  final DraggableScrollableController _scrollController =
-      DraggableScrollableController();
-  double _buttonOpacity = 1.0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isProvider = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupToken();
+  }
+
+  void _setupToken() async {
+    await NotificationManager().initialize();
+  }
+
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
 
   void _logout(BuildContext context) {
     showDialog(
@@ -71,96 +83,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _setupToken();
-
-    _scrollController.addListener(() {
-      double size = _scrollController.size;
-      if (size > 0.8 && _buttonOpacity == 1.0) {
-        setState(() {
-          _buttonOpacity = 0.0;
-        });
-      } else if (size <= 0.8 && _buttonOpacity == 0.0) {
-        setState(() {
-          _buttonOpacity = 1.0;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _setupToken() async {
-    await NotificationManager().initialize();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: AnimatedOpacity(
-          opacity: _buttonOpacity,
-          duration: const Duration(milliseconds: 200),
-          child:
-              _buttonOpacity == 0
-                  ? null
-                  : Builder(
-                    builder: (context) {
-                      return Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: InkWell(
-                          onTap: () {
-                            Scaffold.of(context).openDrawer();
-                          },
-                          customBorder: const CircleBorder(),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: AppColor.bgMsgUser,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: SvgPicture.asset(
-                                'assets/icons/menu.svg',
-                                width: 13,
-                                height: 13,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-        ),
-        actions: [
-          Container(
-            padding: const EdgeInsets.all(13),
-            decoration: const BoxDecoration(
-              color: AppColor.bgMsgUser,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SvgPicture.asset(
-                "assets/icons/ic_gochat.svg",
-                color: Colors.white,
-                width: 18,
-                height: 18,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
+      key: _scaffoldKey,
       drawer: Drawer(
         backgroundColor: AppColor.bgCard,
         child: Column(
@@ -243,7 +168,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_solicitar.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Solicitar servicio"),
                     onTap: () {
@@ -253,7 +181,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Historial de actividad"),
                     onTap: () {
@@ -263,7 +194,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: Text(
                       isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
@@ -287,7 +221,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_person.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Perfil"),
                     onTap: () {
@@ -307,7 +244,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ListTile(
               leading: SvgPicture.asset(
                 "assets/icons/ic_exit.svg",
-                color: Colors.white,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
               title: const Text("Cerrar Sesión"),
               onTap: () {
@@ -335,7 +275,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 }
               });
             },
-            //scrollController: _scrollController,
+            onMenuPressed: _openDrawer,
           ),
           if (!_mapLoaded) const Positioned.fill(child: SkeletonHome()),
         ],

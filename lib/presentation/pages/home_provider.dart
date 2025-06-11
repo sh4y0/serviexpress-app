@@ -10,6 +10,7 @@ import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
@@ -149,6 +150,11 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     await LocationMapsService().initialize();
   }
 
+  Future<String> _getUserId(String senderId) async {
+    final username = await UserRepository.instance.getUserName(senderId);
+    return username;
+  }
+
   Widget _buildHomeProvider() {
     return Stack(
       children: [
@@ -175,14 +181,17 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                         child: Dismissible(
                           key: Key(cliente.idServicio + index.toString()),
                           direction: DismissDirection.endToStart,
-                          onDismissed: (direction) {
+                          onDismissed: (direction) async {
+                            final userName = await _getUserId(cliente.senderId);
+
                             setState(() {
                               notifications.removeAt(index);
                             });
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  "${cliente.idServicio} fue eliminado",
+                                  "La solicitud de $userName fue eliminada",
                                 ),
                               ),
                             );
@@ -494,70 +503,70 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: AppColor.bgBtnNav,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: const EdgeInsets.all(10),
-              child: SvgPicture.asset(
-                "assets/icons/ic_home.svg",
-                colorFilter: ColorFilter.mode(
-                  _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: const EdgeInsets.all(10),
-              child: SvgPicture.asset(
-                "assets/icons/ic_chat.svg",
-                colorFilter: ColorFilter.mode(
-                  _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            label: "Conversar",
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: const EdgeInsets.all(10),
-              child: SvgPicture.asset(
-                "assets/icons/ic_person.svg",
-                colorFilter: ColorFilter.mode(
-                  _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            label: "Mi Perfil",
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: AppColor.dotColor,
-        unselectedItemColor: AppColor.bgItmNav,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        enableFeedback: true,
-        elevation: 15,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
-    );
-  }
+  // Widget _buildBottomNavigationBar() {
+  //   return Theme(
+  //     data: Theme.of(context).copyWith(
+  //       splashColor: Colors.transparent,
+  //       highlightColor: Colors.transparent,
+  //     ),
+  //     child: BottomNavigationBar(
+  //       backgroundColor: AppColor.bgBtnNav,
+  //       items: <BottomNavigationBarItem>[
+  //         BottomNavigationBarItem(
+  //           icon: Padding(
+  //             padding: const EdgeInsets.all(10),
+  //             child: SvgPicture.asset(
+  //               "assets/icons/ic_home.svg",
+  //               colorFilter: ColorFilter.mode(
+  //                 _selectedIndex == 0 ? AppColor.dotColor : AppColor.bgItmNav,
+  //                 BlendMode.srcIn,
+  //               ),
+  //             ),
+  //           ),
+  //           label: "Home",
+  //         ),
+  //         BottomNavigationBarItem(
+  //           icon: Padding(
+  //             padding: const EdgeInsets.all(10),
+  //             child: SvgPicture.asset(
+  //               "assets/icons/ic_chat.svg",
+  //               colorFilter: ColorFilter.mode(
+  //                 _selectedIndex == 1 ? AppColor.dotColor : AppColor.bgItmNav,
+  //                 BlendMode.srcIn,
+  //               ),
+  //             ),
+  //           ),
+  //           label: "Conversar",
+  //         ),
+  //         BottomNavigationBarItem(
+  //           icon: Padding(
+  //             padding: const EdgeInsets.all(10),
+  //             child: SvgPicture.asset(
+  //               "assets/icons/ic_person.svg",
+  //               colorFilter: ColorFilter.mode(
+  //                 _selectedIndex == 2 ? AppColor.dotColor : AppColor.bgItmNav,
+  //                 BlendMode.srcIn,
+  //               ),
+  //             ),
+  //           ),
+  //           label: "Mi Perfil",
+  //         ),
+  //       ],
+  //       currentIndex: _selectedIndex,
+  //       selectedItemColor: AppColor.dotColor,
+  //       unselectedItemColor: AppColor.bgItmNav,
+  //       selectedFontSize: 12,
+  //       unselectedFontSize: 12,
+  //       enableFeedback: true,
+  //       elevation: 15,
+  //       onTap: (index) {
+  //         setState(() {
+  //           _selectedIndex = index;
+  //         });
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _transition(context, animation, secondaryAnimation, child) {
     const begin = Offset(0.0, 0.1);

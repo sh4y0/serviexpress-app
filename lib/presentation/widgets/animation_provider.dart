@@ -79,7 +79,7 @@ class _AnimationProviderState extends State<AnimationProvider>
                 ],
               ),
               const SizedBox(height: 80),
-              
+
               const Text(
                 "Buscando solicitudes cerca",
                 style: TextStyle(
