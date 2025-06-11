@@ -429,27 +429,27 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   void _startLocationAnimation(LatLng position) async {
-    try {
-      await AnimationProvider.startAnimation(
-        context,
-        mapController,
-        position,
-        _locationMarkerIcon,
-        onComplete: () {
-          if (mounted) {
-            setState(() {
-              _isTappedSolicitarServicio = false;
-            });
-          }
-        },
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isTappedSolicitarServicio = false;
-        });
-      }
-    }
+    // try {
+    //   await AnimationProvider.startAnimation(
+    //     context,
+    //     mapController,
+    //     position,
+    //     _locationMarkerIcon,
+    //     onComplete: () {
+    //       if (mounted) {
+    //         setState(() {
+    //           _isTappedSolicitarServicio = false;
+    //         });
+    //       }
+    //     },
+    //   );
+    // } catch (e) {
+    //   if (mounted) {
+    //     setState(() {
+    //       _isTappedSolicitarServicio = false;
+    //     });
+    //   }
+    // }
   }
 
   void _onCategorySelected(int index) async {

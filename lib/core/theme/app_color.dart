@@ -88,10 +88,17 @@ class AppColor {
   static const Color bgStar = Color(0xFFFEA41D);
   static const Color bgStr = Color(0xFFDEB754);
 
-  //Color show 
+  //Color show
   static const Color btnOpen = Color(0xFFC2D7FF);
 
   //Color home proveedor bottomNavigation
   static const Color bgBtnNav = Color(0xFF060716);
   static const Color bgItmNav = Color(0xFF99A6BB);
+
+  //Color profile
+  static const Color bgItmProfile = Color(0xFF161B3E);
+  static const Color txtTrailing = Color(0xFF1573FE);
+  static const Color txtEmailPhone = Color(0xFFCFD6FF);
+
+  static const Color bgSwitch = Color(0xFF279509);
 }
