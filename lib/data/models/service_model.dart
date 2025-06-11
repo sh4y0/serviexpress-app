@@ -17,7 +17,7 @@ class ServiceModel {
   DateTime? fechaFinalizacion;
   List<File>? fotosFiles;
   List<File>? videosFiles;
-  File? audioFile;
+  List<File>? audioFiles;
   List<String>? workersId;
 
   ServiceModel({
@@ -36,7 +36,7 @@ class ServiceModel {
 
     this.fotosFiles,
     this.videosFiles,
-    this.audioFile,
+    this.audioFiles,
     this.workersId,
   });
 
