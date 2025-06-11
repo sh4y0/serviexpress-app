@@ -190,8 +190,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
+                                backgroundColor: AppColor.bgMsgUser,
                                 content: Text(
                                   "La solicitud de $userName fue eliminada",
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             );
@@ -209,8 +211,9 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                               size: 40,
                             ),
                           ),
-                          child: GestureDetector(
-                            onTap: () {
+                          child: CardDesing(
+                            service: serviceForCliente,
+                            onViewDetails: () {
                               Navigator.push(
                                 context,
                                 PageRouteBuilder(
@@ -230,7 +233,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                 ),
                               );
                             },
-                            child: CardDesing(service: service!),
                           ),
                         ),
                       );
