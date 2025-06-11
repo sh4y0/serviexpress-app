@@ -74,6 +74,8 @@ class DraggableSheetSolicitarServicioState
   bool _isDismissing = false;
   bool _descripcionError = false;
 
+  final List<String> proveedoresSeleccionadosId = [];
+
   @override
   void initState() {
     super.initState();
@@ -416,10 +418,20 @@ class DraggableSheetSolicitarServicioState
 
                                     if (widget.datosSolicitudExistente !=
                                         null) {
-                                      widget.datosSolicitudExistente!.workerId =
-                                          "dn9aBHCyJjbqJNZ0Lv1r0eKfMTX2";
+                                      if (widget
+                                          .proveedoresSeleccionados
+                                          .isNotEmpty) {
+                                        for (var proveedor
+                                            in widget
+                                                .proveedoresSeleccionados) {
+                                          proveedoresSeleccionadosId.add(
+                                            proveedor.uid,
+                                          );
+                                        }
+                                      }
                                       await ServiceRepository.instance
                                           .createService(
+                                            proveedoresSeleccionadosId,
                                             widget.datosSolicitudExistente!,
                                           );
                                     }
