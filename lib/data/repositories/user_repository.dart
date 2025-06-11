@@ -145,4 +145,19 @@ class UserRepository {
 
     return username;
   }
+
+  Future<UserModel?> getCurrentUser(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+
+      final data = doc.data();
+      if (data == null) {
+        return null;
+      }
+
+      return UserModel.fromJson(data);
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
 }
