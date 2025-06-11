@@ -32,6 +32,12 @@ class _StartPageState extends State<StartPage> with SingleTickerProviderStateMix
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FadeTransition(

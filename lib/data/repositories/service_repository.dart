@@ -52,13 +52,13 @@ class ServiceRepository {
         }
       }
 
-      if (service.audioFile != null) {
-        final String fileName = '${serviceId}_audio';
-        final ref = _storage.ref().child('services/audios/$fileName');
-        final uploadTask = await ref.putFile(service.audioFile!);
-        final url = await uploadTask.ref.getDownloadURL();
-        audioUrl = url;
-      }
+      // if (service.audioFiles != null) {
+      //   final String fileName = '${serviceId}_audio';
+      //   final ref = _storage.ref().child('services/audios/$fileName');
+      //   final uploadTask = await ref.putFile(service.audioFile!);
+      //   final url = await uploadTask.ref.getDownloadURL();
+      //   audioUrl = url;
+      // }
 
       final updatedService = ServiceModel(
         id: serviceId,
