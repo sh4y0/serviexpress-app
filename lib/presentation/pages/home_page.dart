@@ -168,7 +168,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_solicitar.svg",
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Solicitar servicio"),
                     onTap: () {
@@ -178,7 +181,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Historial de actividad"),
                     onTap: () {
@@ -188,7 +194,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: Text(
                       isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
@@ -212,7 +221,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_person.svg",
-                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Perfil"),
                     onTap: () {
@@ -232,7 +244,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ListTile(
               leading: SvgPicture.asset(
                 "assets/icons/ic_exit.svg",
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
               title: const Text("Cerrar Sesión"),
               onTap: () {
