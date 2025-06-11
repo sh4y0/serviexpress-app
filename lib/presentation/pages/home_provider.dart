@@ -13,7 +13,7 @@ import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
+import 'package:serviexpress_app/presentation/widgets/animation_home.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';

@@ -248,6 +248,7 @@ class DraggableSheetSolicitarServicioState
                                   ),
                                 ),
                               Container(
+                                key: widget.detallarServicioKey,
                                 margin: const EdgeInsets.only(
                                   top: 15,
                                   bottom: 12,
@@ -307,7 +308,6 @@ class DraggableSheetSolicitarServicioState
                                           ),
                                           Expanded(
                                             child: Column(
-                                              key: widget.detallarServicioKey,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
