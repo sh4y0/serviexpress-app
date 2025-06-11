@@ -101,4 +101,10 @@ class AppColor {
   static const Color txtEmailPhone = Color(0xFFCFD6FF);
 
   static const Color bgSwitch = Color(0xFF279509);
+
+  static const Color bgDistance = Color(0xFFDDE4FF);
+
+  static const Color txtDetalle = Color(0xFFBBC3D1);
+
+  static const Color txtVDetalle = Color(0xFFECF4FF);
 }
