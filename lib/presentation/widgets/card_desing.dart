@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 
 class CardDesing extends StatelessWidget {
   final ServiceComplete service;
-  const CardDesing({super.key, required this.service});
+  final VoidCallback onViewDetails;
+
+  const CardDesing({
+    super.key,
+    required this.service,
+    required this.onViewDetails,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xCC3646F5),
+        color: AppColor.bgCard,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 3)),
@@ -19,78 +26,165 @@ class CardDesing extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.bottomRight,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset(
-                  "assets/images/profile_default.png",
-                  width: 50,
-                  height: 50,
-                ),
-                const SizedBox(height: 10),
-                const Row(
+                Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star, color: AppColor.bgStr),
-                    SizedBox(width: 4),
-                    Text(
-                      "4.0",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Image.asset(
+                      "assets/images/profile_default.png",
+                      width: 50,
+                      height: 50,
+                    ),
+                    const SizedBox(height: 10),
+                    const Row(
+                      children: [
+                        Icon(Icons.star, color: AppColor.bgStr),
+                        SizedBox(width: 4),
+                        Text(
+                          "4.0",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        service.cliente.username,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            "assets/icons/ic_location.svg",
+                            width: 18,
+                            height: 18,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "U. Privada del Norte",
+                            style: TextStyle(
+                              color: AppColor.txtPrice,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            "assets/icons/ic_distance.svg",
+                            width: 20,
+                            height: 20,
+                            colorFilter: const ColorFilter.mode(
+                              AppColor.bgDistance,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            "A 1 min de ti",
+                            style: TextStyle(color: AppColor.bgDistance),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColor.txtPrice,
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: SvgPicture.asset(
+                      "assets/icons/ic_gochat.svg",
+                      width: 25,
+                      height: 25,
+                    ),
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    service.cliente.username,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    service.service.descripcion,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 4),
-                  /*Text(
-                    "${cliente["distance"]}",
-                    style: const TextStyle(color: Colors.white),
-                  ),*/
-                ],
+            const SizedBox(height: 10),
+            const Text(
+              "Detalles de servicios",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.all(10),
-              child: const Text(
-                "Ver",
-                style: TextStyle(
-                  color: AppColor.bgAll,
-                  fontWeight: FontWeight.bold,
+            const SizedBox(height: 10),
+            Text(
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              service.service.descripcion,
+              style: const TextStyle(color: AppColor.txtDetalle),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onViewDetails,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.bgMsgUser,
+                    ),
+                    child: const Text(
+                      "Ver detalles",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Acción para aceptar
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.bgAll,
+                    ),
+                    child: const Text(
+                      "Aceptar",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
