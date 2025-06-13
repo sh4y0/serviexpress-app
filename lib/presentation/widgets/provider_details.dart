@@ -42,7 +42,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: 0.30,
-            maxChildSize: 0.8,
+            maxChildSize: 0.65, //mod 8
             builder: (context, scrollController) {
               return ScreenClientData(
                 service: widget.service,
@@ -147,7 +147,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                 ),
                                 const SizedBox(width: 4),
                                 const Text(
-                                  "Moche 135",
+                                  "U. Privada del Norte",
                                   style: TextStyle(
                                     color: AppColor.txtPrice,
                                     fontWeight: FontWeight.bold,
@@ -164,11 +164,10 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                   height: 23,
                                 ),
                                 const SizedBox(width: 6),
-                                /*
-                      Text(
-                        "${cliente["distance"]}",
-                        style: const TextStyle(color: Colors.white),
-                      ), */
+                                const Text(
+                                  "A 1 min de ti",
+                                  style: TextStyle(color: AppColor.bgDistance),
+                                ),
                               ],
                             ),
                           ],
@@ -221,22 +220,22 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                   const SizedBox(height: 15),
                   if (widget.service.service.fotos != null &&
                       widget.service.service.fotos!.isNotEmpty)
-                  SizedBox(
-                    height: 90,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: widget.service.service.fotos!.length,
-                      separatorBuilder:
-                          (context, index) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        return Image.asset(
-                          widget.service.service.fotos![index],
-                          width: 90,
-                          height: 90,
-                        );
-                      },
+                    SizedBox(
+                      height: 90,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.service.service.fotos!.length,
+                        separatorBuilder:
+                            (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          return Image.asset(
+                            widget.service.service.fotos![index],
+                            width: 90,
+                            height: 90,
+                          );
+                        },
+                      ),
                     ),
-                  ),
 
                   widget.service.service.videos != null &&
                           widget.service.service.videos!.isNotEmpty
@@ -515,7 +514,11 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                 builder:
                     (context) => AlertDialog(
                       backgroundColor: AppColor.bgMsgClient,
-                      icon: const Icon(Icons.error_outline_outlined, color: Colors.red, size: 50,),
+                      icon: const Icon(
+                        Icons.error_outline_outlined,
+                        color: Colors.red,
+                        size: 50,
+                      ),
                       title: const Text("Campo Obligatorio"),
                       content: const Text(
                         "Por favor ingresa un valor para el presupuesto.",
