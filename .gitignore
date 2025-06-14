@@ -46,3 +46,8 @@ app.*.map.json
 /android/app/release
 
 assets/serviexpressapp.json
+
+# Linux - Macos - Windows
+linux/flutter/*
+macos/Flutter/*
+windows/flutter/*
