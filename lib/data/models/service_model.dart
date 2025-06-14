@@ -12,7 +12,7 @@ class ServiceModel {
   double? precio;
   List<String>? fotos;
   List<String>? videos;
-  String? audio;
+  List<String>? audios;
   DateTime? fechaCreacion;
   DateTime? fechaFinalizacion;
   List<File>? fotosFiles;
@@ -30,7 +30,7 @@ class ServiceModel {
     this.precio,
     this.fotos,
     this.videos,
-    this.audio,
+    this.audios,
     this.fechaCreacion,
     this.fechaFinalizacion,
 
@@ -52,7 +52,7 @@ class ServiceModel {
           json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fotos: json['fotos'] != null ? List<String>.from(json['fotos']) : null,
       videos: json['videos'] != null ? List<String>.from(json['videos']) : null,
-      audio: json['audio'] as String?,
+      audios: json['audio'] != null ? List<String>.from(json['audios']) : null,
       fechaCreacion:
           json['fechaCreacion'] != null
               ? (json['fechaCreacion'] as Timestamp).toDate()
@@ -79,7 +79,7 @@ class ServiceModel {
       'precio': precio,
       'fotos': fotos,
       'videos': videos,
-      'audio': audio,
+      'audios': audios,
       'fechaCreacion':
           fechaCreacion != null ? Timestamp.fromDate(fechaCreacion!) : null,
       'fechaFinalizacion':
