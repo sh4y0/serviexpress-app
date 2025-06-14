@@ -146,7 +146,7 @@ class UserRepository {
     return username;
   }
 
-  Future<UserModel?> getCurrentUser(String uid) async {
+  Future<UserModel?> getCurrentUser(String? uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
 
