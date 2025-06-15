@@ -111,7 +111,7 @@ class UserRepository {
     await userDoc.update({'latitud': latitude, 'longitud': longitude});
   }
 
-  Future<List<UserModel>> findByCategory(String category) async {
+  Future<Set<UserModel>> findByCategory(String category) async {
     try {
       final querySnapshot =
           await _firestore
@@ -122,10 +122,10 @@ class UserRepository {
       final users =
           querySnapshot.docs
               .map((doc) => UserModel.fromJson(doc.data()))
-              .toList();
+              .toSet();
       return users;
     } catch (e) {
-      return [];
+      return {};
     }
   }
 
