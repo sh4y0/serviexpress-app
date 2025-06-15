@@ -73,8 +73,12 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _categoriaErrorNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isSolicitudGuardadaNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isProveedorAgregadoNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _isTappedSolicitarServicioNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _isTappedSolicitarServicioNotifier = ValueNotifier(
+    false,
+  );
+  final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(
+    false,
+  );
 
   bool _isZoomedIn = false;
   bool _isMapBeingMoved = false;
@@ -86,7 +90,8 @@ class _HomePageContentState extends State<HomePageContent> {
   late GoogleMapController mapController;
   String? _categoriaTemporalDeSheet2;
 
-  final ValueNotifier<bool> _shouldShowSecondTutorialStepNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _shouldShowSecondTutorialStepNotifier =
+      ValueNotifier(false);
   bool _pendingSecondTutorial = false;
   final GlobalKey _firstCategoryKey = GlobalKey();
   final GlobalKey _locationButtonKey = GlobalKey();
@@ -120,7 +125,7 @@ class _HomePageContentState extends State<HomePageContent> {
       onClickTarget: (target) {
         _onCategorySelected(0);
         _shouldShowSecondTutorialStepNotifier.value = true;
-      }
+      },
     ).show(context: context);
   }
 
@@ -388,7 +393,7 @@ class _HomePageContentState extends State<HomePageContent> {
   void _onCategorySelected(int index) async {
     _selectedCategoryIndex.value = index;
     _categoriaErrorNotifier.value = false;
-    
+
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory = CategoryMock.getCategories()[index].name;
       final providers = await UserRepository.instance.findByCategory(
@@ -399,7 +404,6 @@ class _HomePageContentState extends State<HomePageContent> {
       if (_shouldShowSecondTutorialStepNotifier.value && providers.isNotEmpty) {
         _pendingSecondTutorial = true;
         _shouldShowSecondTutorialStepNotifier.value = false;
-
       } else if (_shouldShowSecondTutorialStepNotifier.value &&
           providers.isEmpty) {
         Future.delayed(
@@ -497,7 +501,7 @@ class _HomePageContentState extends State<HomePageContent> {
     if (_activeProgrammaticOperationId != null) {
       _movementController.endProgrammaticMove(_activeProgrammaticOperationId!);
       _activeProgrammaticOperationId = null;
-      
+
       if (_pendingSecondTutorial) {
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted && _currentProvidersNotifier.value.isNotEmpty) {
@@ -540,7 +544,7 @@ class _HomePageContentState extends State<HomePageContent> {
         final bool isVisible =
             screenCoordinate.y > topPadding &&
             screenCoordinate.y > (screenHeight - bottomSheetHeight);
-      
+
         if (isVisible) {
           _showTutorialForMarkerAt(screenCoordinate);
           return;
@@ -553,6 +557,7 @@ class _HomePageContentState extends State<HomePageContent> {
     }
     _showFallbackTutorial();
   }
+
   void _showTutorialForMarkerAt(ScreenCoordinate markerCoordinate) {
     const double highlightSize = 120.0;
     final double centerX = markerCoordinate.x / 2;
@@ -969,8 +974,7 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
         ),
 
-
-          ValueListenableBuilder<bool>(
+        ValueListenableBuilder<bool>(
           valueListenable: _shouldShowSheet,
           builder: (context, shouldShow, _) {
             return AnimatedPositioned(
@@ -983,70 +987,75 @@ class _HomePageContentState extends State<HomePageContent> {
               child: ValueListenableBuilder<Set<UserModel>>(
                 valueListenable: _currentProvidersNotifier,
                 builder: (context, proveedores, _) {
-                      return Stack(
-                        children: [
-                          AnimatedPositioned(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            left: 0,
-                            right: 0,
-                            bottom:
-                                shouldShow
-                                    ? 0
-                                    : -MediaQuery.of(context).size.height,
-                            top: 0,
-                            child: DraggableSheetSolicitarServicio(
-                              detallarServicioKey: _describirServicioKey,
-                              targetInitialSize: 0.21,
-                              minSheetSize: 0.21,
-                              maxSheetSize: 0.21,
-                              snapPoints: const [0.35],
-                              onTapPressed: () {
-                                if (_selectedCategoryIndex.value == -1) {
-                                  _categoriaErrorNotifier.value = true;
-                                  return;
-                                }
-                                _requestService();
-                              },
-                              onCategoriaError: () => _categoriaErrorNotifier.value = true,
-                              categoriaError: _categoriaErrorNotifier.value,
-                              selectedCategoryIndex: _selectedCategoryIndex.value,
-                              onAbrirDetallesPressed:
-                                  (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
-                              datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
-                              onProveedores: proveedores,
-                              isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
-                              onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: mediaQuery.size.height * 0.22,
-                            right: 10,
-                            child: FloatingActionButton(
-                              key: _locationButtonKey,
-                              heroTag: 'fabHomeRightsheet',
-                              shape: const CircleBorder(),
-                              backgroundColor: const Color(0xFF4a66ff),
-                              onPressed: _toggleZoom,
-                              child: SvgPicture.asset(
-                                'assets/icons/ic_current_location.svg',
-                                width: 26,
-                                height: 26,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
+                  return Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        left: 0,
+                        right: 0,
+                        bottom:
+                            shouldShow
+                                ? 0
+                                : -MediaQuery.of(context).size.height,
+                        top: 0,
+                        child: DraggableSheetSolicitarServicio(
+                          detallarServicioKey: _describirServicioKey,
+                          targetInitialSize: 0.21,
+                          minSheetSize: 0.21,
+                          maxSheetSize: 0.21,
+                          snapPoints: const [0.35],
+                          onTapPressed: () {
+                            if (_selectedCategoryIndex.value == -1) {
+                              _categoriaErrorNotifier.value = true;
+                              return;
+                            }
+                            _requestService();
+                          },
+                          onCategoriaError:
+                              () => _categoriaErrorNotifier.value = true,
+                          categoriaError: _categoriaErrorNotifier.value,
+                          selectedCategoryIndex: _selectedCategoryIndex.value,
+                          onAbrirDetallesPressed:
+                              (isVisible) => _abrirSheetDetalladoDesdeSheet2(
+                                isSheetVisibleSolicitarServicio: isVisible,
                               ),
+                          datosSolicitudExistente:
+                              _datosSolicitudGuardadaNotifier.value,
+                          onProveedores: proveedores,
+                          isSolicitudGuardada:
+                              _isSolicitudGuardadaNotifier.value,
+                          onPressedSolicitarServicio:
+                              _isSolicitudServicioOnTapped,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: mediaQuery.size.height * 0.22,
+                        right: 10,
+                        child: FloatingActionButton(
+                          key: _locationButtonKey,
+                          heroTag: 'fabHomeRightsheet',
+                          shape: const CircleBorder(),
+                          backgroundColor: const Color(0xFF4a66ff),
+                          onPressed: _toggleZoom,
+                          child: SvgPicture.asset(
+                            'assets/icons/ic_current_location.svg',
+                            width: 26,
+                            height: 26,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
                             ),
                           ),
-                        ],
-                      );
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
             );
           },
         ),
-
 
         // ValueListenableBuilder<bool>(
         //   valueListenable: _shouldShowSheet,
@@ -1143,7 +1152,6 @@ class _HomePageContentState extends State<HomePageContent> {
         //     );
         //   },
         // ),
-
         ValueListenableBuilder<bool>(
           valueListenable: _isSheetVisibleSolicitarServicioNotifier,
           builder: (context, isVisible, _) {
