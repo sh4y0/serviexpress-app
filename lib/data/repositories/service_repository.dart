@@ -21,7 +21,7 @@ class ServiceRepository {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Future<ResultState<ServiceModel>> createService(
-    List<String> workersId,
+    Set<String> workersId,
     ServiceModel service,
   ) async {
     try {
