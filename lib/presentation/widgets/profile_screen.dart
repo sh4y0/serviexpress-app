@@ -203,8 +203,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withOpacity(0.3),
-                                highlightColor: Colors.grey.withOpacity(0.18),
+                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                                 onTap: () async {
                                   final route = option["route"];
                                   if (route != null) {
@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     option["iconPath"] as String,
                                     width: 24,
                                     height: 24,
-                                    color: Colors.white,
+                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)
                                   ),
                                   title: Text(
                                     option["title"] as String,
@@ -278,8 +278,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withOpacity(0.3),
-                                highlightColor: Colors.grey.withOpacity(0.18),
+                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                                 onTap: () async {
                                   if (option["route"] != null) {
                                     if (option["route"] == AppRoutes.home) {
@@ -309,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             option["iconPath"] as String,
                                             width: 24,
                                             height: 24,
-                                            color: Colors.white,
+                                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                           )
                                           : Icon(
                                             option["icon"] as IconData,
@@ -348,8 +348,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withOpacity(0.3),
-                              highlightColor: Colors.grey.withOpacity(0.18),
+                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                               onTap: () {},
                               child: ListTile(
                                 leading: SvgPicture.asset(
@@ -365,8 +365,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withOpacity(0.3),
-                              highlightColor: Colors.grey.withOpacity(0.18),
+                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                               onTap: () => _logout(context),
                               child: ListTile(
                                 leading: SvgPicture.asset(

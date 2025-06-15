@@ -141,35 +141,25 @@ class FormularioMultimediaState extends State<FormMultimedia>
   }
 
   Future<void> _pickMultiVideoFromGallery() async {
-    final List<XFile> pickedFiles = await _picker.pickMultipleMedia();
-
+    final List<XFile> pickedFiles = await _picker.pickMultipleMedia(
+      requestFullMetadata: false,
+    );
     if (pickedFiles.isNotEmpty) {
-      List<File> selectedVideos = [];
-      List<String> videoExtensions = [
-        '.mp4',
-        '.mov',
-        '.avi',
-        '.mkv',
-        '.webm',
-        '.flv',
-      ];
-
-      for (XFile xfile in pickedFiles) {
-        String extension = p.extension(xfile.path).toLowerCase();
-        if (videoExtensions.contains(extension)) {
-          selectedVideos.add(File(xfile.path));
-        }
-      }
+      final selectedVideos =
+          pickedFiles
+              .where(
+                (file) =>
+                    file.path.toLowerCase().endsWith('.mp4') ||
+                    file.path.toLowerCase().endsWith('.mov'),
+              )
+              .map((file) => File(file.path))
+              .toList();
 
       if (selectedVideos.isNotEmpty) {
         setState(() {
           _videos.addAll(selectedVideos);
           _isExpanded = true;
         });
-      } else if (pickedFiles.isNotEmpty && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se seleccionaron videos válidos.')),
-        );
       }
     }
   }
@@ -182,7 +172,6 @@ class FormularioMultimediaState extends State<FormMultimedia>
           dir.path,
           'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
         );
-
         await _audioRecorder.start(
           const RecordConfig(encoder: AudioEncoder.aacLc),
           path: path,
@@ -197,14 +186,10 @@ class FormularioMultimediaState extends State<FormMultimedia>
         _micAnimationController.forward();
         _pulseAnimationController.repeat(reverse: true);
         _waveAnimationController.repeat();
-
         _startRecordingTimer();
       }
     } catch (e) {
       debugPrint('Error al iniciar grabación: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo iniciar la grabación.')),
-      );
     }
   }
 
@@ -226,10 +211,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
         final audioFile = File(path);
         final player = AudioPlayer();
         await player.setFilePath(path);
-
         setState(() {
-          _isRecording = false;
-          _recordingSeconds = 0;
           _audios.add(audioFile);
           _audioPlayers.add(player);
         });
@@ -238,11 +220,8 @@ class FormularioMultimediaState extends State<FormMultimedia>
       debugPrint('Error al detener grabación: $e');
     } finally {
       if (mounted) {
-        setState(() {
-          _isRecording = false;
-        });
+        setState(() => _isRecording = false);
       }
-
       _micAnimationController.reverse();
       _pulseAnimationController.stop();
       _waveAnimationController.stop();
@@ -364,6 +343,68 @@ class FormularioMultimediaState extends State<FormMultimedia>
     );
   }
 
+  void _showAttachmentMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color.fromRGBO(38, 48, 137, 1),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Colors.white70),
+                title: const Text(
+                  'Tomar Foto',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _takePhoto();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Colors.white70),
+                title: const Text(
+                  'Subir Fotos de la Galería',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickMultiImageFromGallery();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.videocam, color: Colors.white70),
+                title: const Text(
+                  'Grabar Video',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _recordVideo();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.video_library, color: Colors.white70),
+                title: const Text(
+                  'Subir Videos de la Galería',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickMultiVideoFromGallery();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -424,7 +465,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                             ),
                             decoration: InputDecoration(
                               hintText:
-                                  "Describe a más detalles el trabajo que requieras...",
+                                  "Cuéntanos con más detalle qué necesitas...",
                               hintStyle: TextStyle(
                                 color:
                                     _descripcionError
@@ -637,27 +678,45 @@ class FormularioMultimediaState extends State<FormMultimedia>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                IconButton(
-                  onPressed: _pickMultiImageFromGallery,
-                  icon: const Icon(Icons.photo_library, color: Colors.white),
-                  tooltip: "Seleccionar imágenes",
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: TextButton.icon(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        const Color.fromRGBO(194, 215, 255, 1),
+                      ),
+                      padding: WidgetStateProperty.all(
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      shape: WidgetStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    onPressed: () => _showAttachmentMenu(context),
+                    icon: const Icon(
+                      Icons.camera_alt,
+                      color: Color.fromRGBO(54, 69, 245, 1),
+                    ),
+                    label: const Text(
+                      "Tomar o subir",
+                      style: TextStyle(
+                        color: Color.fromRGBO(54, 69, 245, 1),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
                 ),
-                IconButton(
-                  onPressed: _takePhoto,
-                  icon: const Icon(Icons.camera_alt, color: Colors.white),
-                  tooltip: "Tomar foto",
-                ),
-                IconButton(
-                  onPressed: _pickMultiVideoFromGallery,
-                  icon: const Icon(Icons.video_library, color: Colors.white),
-                  tooltip: "Seleccionar videos",
-                ),
-                IconButton(
-                  onPressed: _recordVideo,
-                  icon: const Icon(Icons.videocam, color: Colors.white),
-                  tooltip: "Grabar video",
-                ),
-
+                // IconButton(
+                //   onPressed: () => _showAttachmentMenu(context),
+                //   icon: const Icon(Icons.attach_file, color: Colors.white),
+                //   tooltip: "Adjuntar archivo",
+                // ),
+                const Spacer(),
                 Expanded(
                   child: Container(
                     alignment: Alignment.centerRight,
@@ -692,7 +751,9 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                           _isRecording
                                               ? [
                                                 BoxShadow(
-                                                  color: Colors.red.withAlpha((0.3 * 255).toInt()),
+                                                  color: Colors.red.withAlpha(
+                                                    (0.3 * 255).toInt(),
+                                                  ),
                                                   spreadRadius: 2,
                                                   blurRadius: 8,
                                                 ),
@@ -836,7 +897,9 @@ class AudioBubbleState extends State<AudioBubble> {
                         );
                       },
                       activeColor: Colors.white,
-                      inactiveColor: Colors.white.withAlpha((0.3 * 255).toInt()),
+                      inactiveColor: Colors.white.withAlpha(
+                        (0.3 * 255).toInt(),
+                      ),
                     ),
                     Text(
                       "${_formatDuration(position)} / ${_formatDuration(duration)}",

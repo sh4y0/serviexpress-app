@@ -10,6 +10,8 @@ class UserRepository {
   UserRepository._();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final CollectionReference _usersCollection = FirebaseFirestore.instance
+      .collection('users');
 
   Future<bool> isDniEmpty(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
@@ -144,5 +146,37 @@ class UserRepository {
     final username = user.username;
 
     return username;
+  }
+
+  Future<void> addDataMock(List<UserModel> providers) async {
+    final WriteBatch batch = _firestore.batch();
+    for (final provider in providers) {
+      final docRef = _usersCollection.doc(provider.uid);
+      batch.set(docRef, provider.toJson());
+    }
+    await batch.commit();
+  }
+
+  Future<void> deleteMockProvidersByCategory(String categoria) async {
+    final QuerySnapshot snapshot =
+        await _usersCollection
+            .where('rol', isEqualTo: 'Proveedor')
+            .where('especialidad', isEqualTo: categoria)
+            .where(
+              FieldPath.documentId,
+              isGreaterThanOrEqualTo: '${categoria}_mock_',
+            )
+            .where(FieldPath.documentId, isLessThan: '${categoria}_mock_\uf8ff')
+            .get();
+
+    if (snapshot.docs.isEmpty) {
+      return;
+    }
+
+    final WriteBatch batch = _firestore.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
   }
 }
