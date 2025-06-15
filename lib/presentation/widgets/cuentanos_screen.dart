@@ -11,8 +11,12 @@ import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 import 'package:serviexpress_app/presentation/viewmodels/user_view_model.dart';
+import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/show_super.dart';
+import 'package:serviexpress_app/presentation/widgets/terminos_condiciones.dart';
+import 'package:serviexpress_app/presentation/widgets/verifiquemos.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class CuentanosScreen extends ConsumerStatefulWidget {
   final UserModel data;
@@ -23,7 +27,18 @@ class CuentanosScreen extends ConsumerStatefulWidget {
 }
 
 class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
-  final List<String> categorias = ["Limpieza", "Pintura", "Otro"];
+  final PageController _controller = PageController();
+  int _currentPage = 0;
+
+  final List<String> categorias = [
+    "Limpieza",
+    "Tecno",
+    "Soldadura",
+    "Electricidad",
+    "Pintura",
+    "Plomeria",
+    "Stripper",
+  ];
   String? categoriaSeleccionada;
 
   final TextEditingController _dniController = TextEditingController();
@@ -34,7 +49,6 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   void initState() {
     super.initState();
     _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
-
   }
 
   Future<void> _precacheSvgs() async {
@@ -56,6 +70,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   void dispose() {
     _dniController.dispose();
     _experienciaController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -73,6 +88,48 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     );
   }
 
+  void _onNext() {
+    if (_currentPage == 0) {
+      // if (_dniController.text.isEmpty ||
+      //     categoriaSeleccionada == null ||
+      //     _experienciaController.text.isEmpty) {
+      //   Alerts.instance.showErrorAlert(
+      //     context,
+      //     "Por favor, completa todos los campos.",
+      //   );
+      //   return;
+      // }
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    }
+    if (_currentPage < 1) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    }
+    if (_currentPage < 2) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    }
+    if (_currentPage < 3) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+    } else {
+      ref.read(userViewModelProvider.notifier).updateUserById(widget.data.uid, {
+        "dni": _dniController.text.trim(),
+        "especialidad": categoriaSeleccionada,
+        "descripcion": _experienciaController.text.trim(),
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen<ResultState>(userViewModelProvider, (previous, next) async {
@@ -88,15 +145,11 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           LoadingScreen.hide();
           if (mounted) {
             await UserPreferences.saveUserId(widget.data.uid);
-
             Alerts.instance.showSuccessAlert(
               context,
               "Ahora puedes disfrutar de nuestros servicios.",
               onOk: () {
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.homeProvider,
-                );
+                Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
               },
             );
           }
@@ -114,82 +167,87 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Cuéntanos mas de ti",
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+        decoration: const BoxDecoration(color: AppColor.bgVerification),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              AnimatedSmoothIndicator(
+                activeIndex: _currentPage,
+                count: 5,
+                effect: const WormEffect(
+                  radius: 2,
+                  dotHeight: 10,
+                  dotWidth: 65,
+                  activeDotColor: AppColor.btnColor,
+                  dotColor: AppColor.bgMsgUser,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: PageView(
+                  controller: _controller,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged:
+                      (index) => setState(() => _currentPage = index),
+                  children: [
+                    _buildCuentanosPaso(),
+                    const Verifiquemos(),
+                    const Antecedentes(),
+                    const TerminosCondiciones(),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ElevatedButton(
+                  onPressed: _onNext,
+                  child: Text(
+                    _currentPage < 3
+                        ? "Siguiente"
+                        : "Presiona aqui para firmar",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const Text(
-                  "Nos gustaría saber de ti por ello te pediremos alguna información adicional.",
-                  style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
-                ),
-                const SizedBox(height: 30),
-                Form(
-                  child: Column(
-                    children: [
-                      _buildTextFieldDNI(),
-                      const SizedBox(height: 20),
-                      _buildDropdownCategoria(),
-                      const SizedBox(height: 20),
-                      _buildTextFieldExperiencia(),
-                      const SizedBox(height: 50),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            backgroundColor: AppColor.btnColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          onPressed: () async {
-                            if (_dniController.text.isEmpty ||
-                                categoriaSeleccionada == null ||
-                                _experienciaController.text.isEmpty) {
-                              Alerts.instance.showErrorAlert(
-                                context,
-                                "Por favor, completa todos los campos.",
-                              );
-                              return;
-                            }
-
-                            ref
-                                .read(userViewModelProvider.notifier)
-                                .updateUserById(widget.data.uid, {
-                                  "dni": _dniController.text.trim(),
-                                  "especialidad": categoriaSeleccionada,
-                                  "descripcion":
-                                      _experienciaController.text.trim(),
-                                });
-                          },
-                          child: const Text(
-                            "Finalizar Registro",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 40),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCuentanosPaso() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Cuéntanos mas de ti",
+            style: TextStyle(
+              fontSize: 30,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Nos gustaría saber de ti por ello te pediremos alguna información adicional.",
+            style: TextStyle(fontSize: 14, color: AppColor.textWelcome),
+          ),
+          const SizedBox(height: 30),
+          _buildTextFieldDNI(),
+          const SizedBox(height: 20),
+          _buildDropdownCategoria(),
+          const SizedBox(height: 20),
+          _buildTextFieldExperiencia(),
+        ],
       ),
     );
   }
