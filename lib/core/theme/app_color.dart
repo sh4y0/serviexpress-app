@@ -107,4 +107,6 @@ class AppColor {
   static const Color txtDetalle = Color(0xFFBBC3D1);
 
   static const Color txtVDetalle = Color(0xFFECF4FF);
+
+  static const Color txtDn = Color(0xFFF0F0F4);
 }
