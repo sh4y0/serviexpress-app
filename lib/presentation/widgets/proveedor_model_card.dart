@@ -64,7 +64,7 @@ class ProveedorModelCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              proveedor.nombreCompleto,
+                              proveedor.nombres,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,

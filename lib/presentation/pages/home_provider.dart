@@ -13,7 +13,7 @@ import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/widgets/animation_home.dart';
+import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
@@ -28,7 +28,7 @@ class HomeProvider extends ConsumerStatefulWidget {
 
 class _HomeProviderState extends ConsumerState<HomeProvider>
     with WidgetsBindingObserver {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
   late final List<Widget Function()> _screens;
   late final StreamSubscription<RemoteMessage> _notificationSubscription;
   List<FCMMessage> notifications = [];
@@ -39,7 +39,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   bool isProvider = true;
 
-  double _buttonOpacity = 1.0;
+  final double _buttonOpacity = 1.0;
 
   bool _state = true;
 
@@ -332,7 +332,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
             child: Center(
               child: SvgPicture.asset(
                 "assets/icons/ic_gochat.svg",
-                color: Colors.white,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
                 width: 18,
                 height: 18,
               ),
@@ -423,7 +426,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_solicitar.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Solicitar servicio"),
                     onTap: () {
@@ -433,7 +439,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Historial de actividad"),
                     onTap: () {
@@ -443,7 +452,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_historial.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: Text(
                       isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
@@ -468,7 +480,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_person.svg",
-                      color: Colors.white,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                     title: const Text("Perfil"),
                     onTap: () {
@@ -488,7 +503,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
             ListTile(
               leading: SvgPicture.asset(
                 "assets/icons/ic_exit.svg",
-                color: Colors.white,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
               title: const Text("Cerrar Sesión"),
               onTap: () {
