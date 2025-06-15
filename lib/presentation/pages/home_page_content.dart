@@ -64,19 +64,12 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier(true);
   final ValueNotifier<double> _keyboardHeight = ValueNotifier(0.0);
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier(-1);
-  final ValueNotifier<List<UserModel>> _currentProvidersNotifier =
-      ValueNotifier([]);
-  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier =
-      ValueNotifier([]);
-  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier =
-      ValueNotifier(false);
-  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier =
-      ValueNotifier(false);
-  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier =
-      ValueNotifier(null);
-  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(
-    null,
-  );
+  final ValueNotifier<Set<UserModel>> _currentProvidersNotifier = ValueNotifier({});
+  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier = ValueNotifier([]);
+  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier = ValueNotifier(false);
+  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier = ValueNotifier(null);
+  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(null,);
   final ValueNotifier<bool> _categoriaErrorNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isSolicitudGuardadaNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isProveedorAgregadoNotifier = ValueNotifier(false);
@@ -86,8 +79,6 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(
     false,
   );
-
-  final ValueNotifier<List<UserModel>> _proveedoresNotifier = ValueNotifier([]);
 
   bool _isZoomedIn = false;
   bool _isMapBeingMoved = false;
@@ -431,14 +422,14 @@ class _HomePageContentState extends State<HomePageContent> {
         _adjustCameraToShowAllMarkers();
       }
     } else {
-      _currentProvidersNotifier.value = [];
+      _currentProvidersNotifier.value = {};
       _updateMarkers();
     }
   }
 
   void _adjustCameraToShowAllMarkers() {
     if (_currentProvidersNotifier.value.isEmpty) return;
-    List<UserModel> providers = _currentProvidersNotifier.value;
+    Set<UserModel> providers = _currentProvidersNotifier.value;
     double minLat = providers.first.latitud!;
     double maxLat = providers.first.latitud!;
     double minLng = providers.first.longitud!;
@@ -993,7 +984,7 @@ class _HomePageContentState extends State<HomePageContent> {
               left: 0,
               right: 0,
               bottom: shouldShow ? 0 : -mediaQuery.size.height,
-              child: ValueListenableBuilder<List<UserModel>>(
+              child: ValueListenableBuilder<Set<UserModel>>(
                 valueListenable: _currentProvidersNotifier,
                 builder: (context, proveedores, _) {
                   return Stack(

@@ -4,7 +4,6 @@ import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
-import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
 
 class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback? onDismiss;
@@ -21,7 +20,7 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
   //final List<UserModel> proveedoresSeleccionados;
-  final List<UserModel> onProveedores;
+  final Set<UserModel> onProveedores;
   final Function(UserModel)? onProveedorRemovido;
   //final Function(UserModel)? onProveedorTapped;
 
@@ -76,7 +75,7 @@ class DraggableSheetSolicitarServicioState
   bool _isDismissing = false;
   bool _descripcionError = false;
 
-  final List<String> proveedoresSeleccionadosId = [];
+  final Set<String> proveedoresSeleccionadosId = {};
 
   @override
   void initState() {
@@ -429,9 +428,8 @@ class DraggableSheetSolicitarServicioState
                                     //         widget.datosSolicitudExistente!,
                                     //       );
                                     // }
-
                                     if (widget.datosSolicitudExistente != null) {
-                                      if (widget.onProveedores.isNotEmpty) {                                      
+                                      if (widget.onProveedores.isNotEmpty) {                                  
                                         for (var proveedor in widget.onProveedores) {
                                           proveedoresSeleccionadosId.add(proveedor.uid);
                                         }
