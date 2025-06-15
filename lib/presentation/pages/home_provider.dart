@@ -50,6 +50,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       _appLifecycleState == AppLifecycleState.resumed;
 
   UserModel? user;
+  final Set<String> _processedServiceIds = {};
 
   void _logout(BuildContext context) {
     showDialog(
@@ -114,29 +115,35 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     _notificationSubscription = NotificationManager().notificationStream.listen(
       (RemoteMessage message) async {
         final fcmMessage = FCMMessage.fromRemoteMessage(message);
+
+        if (_processedServiceIds.contains(fcmMessage.idServicio)) {
+          return;
+        }
+
         service = await ServiceRepository.instance.getService(
           fcmMessage.idServicio,
         );
 
-        bool exists = notifications.any(
-          (notification) => notification.idServicio == fcmMessage.idServicio,
-        );
-        if (!exists) {
-          setState(() {
-            _services[fcmMessage.idServicio] = service!;
-            notifications.add(fcmMessage);
-          });
+        if (service != null) {
+          if (!notifications.any(
+            (n) => n.idServicio == fcmMessage.idServicio,
+          )) {
+            setState(() {
+              _services[fcmMessage.idServicio] = service!;
+              notifications.add(fcmMessage);
+              _processedServiceIds.add(fcmMessage.idServicio);
+            });
 
-          if (isAppInForeground) {
-            NotificationManager().showLocalNotification(
-              title: fcmMessage.title ?? 'Notificación',
-              body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-            );
+            if (isAppInForeground) {
+              NotificationManager().showLocalNotification(
+                title: fcmMessage.title ?? 'Notificación',
+                body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
+              );
+            }
           }
         }
       },
     );
-
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -198,9 +205,11 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                           direction: DismissDirection.endToStart,
                           onDismissed: (direction) async {
                             final userName = await _getUserId(cliente.senderId);
+                            final id = notifications[index].idServicio;
 
                             setState(() {
                               notifications.removeAt(index);
+                              _processedServiceIds.remove(id);
                             });
 
                             ScaffoldMessenger.of(context).showSnackBar(
