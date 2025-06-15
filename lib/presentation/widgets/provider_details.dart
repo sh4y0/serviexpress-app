@@ -132,7 +132,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              widget.service.cliente.username,
+                              widget.service.cliente.nombreCompleto,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
