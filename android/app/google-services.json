@@ -1,0 +1,70 @@
+{
+  "project_info": {
+    "project_number": "970897771269",
+    "project_id": "serviexpressapp-7e391",
+    "storage_bucket": "serviexpressapp-7e391.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970897771269:android:4ff45ddf3f111dccd3856c",
+        "android_client_info": {
+          "package_name": "com.example.serviexpress_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "970897771269-1jlmgkl2s8p2hfhv7ambj642j35o0lu0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "bd04387563489e08d7347af96602458e2762b7ce"
+          }
+        },
+        {
+          "client_id": "970897771269-20m4fiuirsnogv0uu2kiln2sv0mkp6cs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "031d10497d803a981f841e049ec91a33501e1352"
+          }
+        },
+        {
+          "client_id": "970897771269-qpn0g0rtmcubd40a5s6aphjvg97h9g6j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "038e7d611b4fd21bb19e7c891b38fa3f48e474d4"
+          }
+        },
+        {
+          "client_id": "970897771269-nv86qbt0i8so96uacigsvtjop5499nt7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABuitphBiUV8ZPEKXfM7OQZmwEHjTCvX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "970897771269-nv86qbt0i8so96uacigsvtjop5499nt7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "970897771269-agp0o6rrcj269655r8tg66lu4ie82fpq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.serviexpressApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
