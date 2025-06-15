@@ -18,7 +18,7 @@ class ServiceModel {
   List<File>? fotosFiles;
   List<File>? videosFiles;
   List<File>? audioFiles;
-  List<String>? workersId;
+  Set<String>? workersId;
 
   ServiceModel({
     required this.id,
@@ -63,7 +63,7 @@ class ServiceModel {
               : null,
       workersId:
           json['workersId'] != null
-              ? List<String>.from(json['workersId'])
+              ? Set<String>.from(json['workersId'])
               : null,
     );
   }
