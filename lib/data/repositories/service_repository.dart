@@ -28,7 +28,7 @@ class ServiceRepository {
       final String serviceId = service.id;
       List<String> fotoUrls = [];
       List<String> videoUrls = [];
-      String audioUrl = '';
+      List<String> audioUrls = [];
 
       if (service.fotosFiles != null) {
         for (int i = 0; i < service.fotosFiles!.length; i++) {
@@ -52,13 +52,16 @@ class ServiceRepository {
         }
       }
 
-      // if (service.audioFiles != null) {
-      //   final String fileName = '${serviceId}_audio';
-      //   final ref = _storage.ref().child('services/audios/$fileName');
-      //   final uploadTask = await ref.putFile(service.audioFile!);
-      //   final url = await uploadTask.ref.getDownloadURL();
-      //   audioUrl = url;
-      // }
+      if (service.audioFiles != null) {
+        for (int i = 0; i < service.audioFiles!.length; i++) {
+          final String fileName =
+              '${serviceId}_audio_${(i + 1).toString().padLeft(3, '0')}';
+          final ref = _storage.ref().child('services/audios/$fileName');
+          final uploadTask = await ref.putFile(service.audioFiles![i]);
+          final url = await uploadTask.ref.getDownloadURL();
+          audioUrls.add(url);
+        }
+      }
 
       final updatedService = ServiceModel(
         id: serviceId,
@@ -69,7 +72,7 @@ class ServiceRepository {
         workerId: service.workerId,
         fotos: fotoUrls,
         videos: videoUrls,
-        audio: audioUrl,
+        audios: audioUrls,
         fechaCreacion: service.fechaCreacion ?? DateTime.now(),
         fechaFinalizacion: service.fechaFinalizacion,
         workersId: workersId,

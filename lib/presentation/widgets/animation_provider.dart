@@ -45,8 +45,8 @@ class _AnimationProviderState extends State<AnimationProvider>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColor.btnColor.withOpacity(0.4),
-                    AppColor.btnColor.withOpacity(0.5),
+                    AppColor.btnColor.withAlpha((0.4 * 255).toInt()),
+                    AppColor.btnColor.withAlpha((0.5 * 255).toInt()),
                   ],
                   stops: const [0.7, 1.0],
                 ),

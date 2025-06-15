@@ -68,10 +68,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   @override
   void initState() {
     super.initState();
-    _preloadFuture = Future.wait([
-      MapStyleLoader.loadStyle(),
-      _precacheSvgs(),
-    ]);
+    _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
   }
 
   Future<void> _precacheSvgs() async {
@@ -114,7 +111,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is AuthResult) {
             final role = data.userModel.rol;
-
+            UserPreferences.saveUserId(data.userModel.uid);
             if (data.needsProfileCompletion) {
               if (mounted) {
                 Navigator.pushReplacementNamed(
@@ -142,7 +139,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     //     _isLogin = true;
                     //   });
                     // }
-                    UserPreferences.saveUserId(data.userModel.uid);
                   },
                 );
               }
@@ -528,7 +524,7 @@ class _LoginFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "Welcome back you've been missed!",
+          "¡Qué bueno tenerte de vuelta!",
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
@@ -560,7 +556,7 @@ class _LoginFormWidget extends StatelessWidget {
                   onPressed: onForgotPassword,
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: const Text(
-                    "Olvidaste tu contraseña?",
+                    "¿Olvidaste tu contraseña?",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -647,7 +643,7 @@ class _SignupFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "Welcome, let's get you started!",
+          "¡Empecemos! Tu experiencia comienza aquí.",
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),

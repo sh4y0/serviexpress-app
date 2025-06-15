@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,6 +17,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  UserModel? user;
+
   void _logout(BuildContext context) {
     showDialog(
       context: context,
@@ -49,6 +54,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
     );
+  }
+
+  void _getUserById() async {
+    final uid = await UserPreferences.getUserId();
+    if (uid == null) return;
+    var userFetch = await UserRepository.instance.getCurrentUser(uid);
+    if (!mounted) return;
+    setState(() {
+      user = userFetch;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserById();
   }
 
   @override
@@ -100,89 +121,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.bottomCenter,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Column(
-                    children: [
-                      Center(
-                        child: Stack(
-                          alignment: Alignment.bottomRight,
-                          children: [
-                            const CircleAvatar(
-                              radius: 70,
-                              backgroundImage: AssetImage(
-                                "assets/images/avatar.png",
-                              ),
-                              backgroundColor: Colors.white,
-                            ),
-                            Positioned(
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 5,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(4),
-                                  child: SvgPicture.asset(
-                                    "assets/icons/ic_edit.svg",
+            if (user != null)
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              CircleAvatar(
+                                radius: 70,
+                                backgroundColor: Colors.white,
+                                child: ClipOval(
+                                  child: SizedBox(
+                                    width: 140,
+                                    height: 140,
+                                    child:
+                                        user!.imagenUrl != null &&
+                                                user!.imagenUrl!.isNotEmpty
+                                            ? FadeInImage.assetNetwork(
+                                              placeholder:
+                                                  "assets/images/avatar.png",
+                                              image: user!.imagenUrl!,
+                                              fit: BoxFit.cover,
+                                              imageErrorBuilder: (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) {
+                                                return Image.asset(
+                                                  "assets/images/avatar.png",
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                            )
+                                            : Image.asset(
+                                              "assets/images/avatar.png",
+                                              fit: BoxFit.cover,
+                                            ),
                                   ),
                                 ),
+                              ),
+                              Positioned(
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 5,
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
+                                      "assets/icons/ic_edit.svg",
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          user!.nombreCompleto,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              user!.email,
+                              style: const TextStyle(
+                                color: AppColor.txtEmailPhone,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            const Text(
+                              "|",
+                              style: TextStyle(
+                                color: AppColor.txtEmailPhone,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              user!.telefono,
+                              style: const TextStyle(
+                                color: AppColor.txtEmailPhone,
+                                fontSize: 16,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Jeffer G".toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "youremail@domain.com",
-                            style: TextStyle(
-                              color: AppColor.txtEmailPhone,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            "|",
-                            style: TextStyle(
-                              color: AppColor.txtEmailPhone,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            "+01 234 567 89",
-                            style: TextStyle(
-                              color: AppColor.txtEmailPhone,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
@@ -203,8 +252,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withOpacity(0.3),
-                                highlightColor: Colors.grey.withOpacity(0.18),
+                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                                 onTap: () async {
                                   final route = option["route"];
                                   if (route != null) {
@@ -233,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     option["iconPath"] as String,
                                     width: 24,
                                     height: 24,
-                                    color: Colors.white,
+                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)
                                   ),
                                   title: Text(
                                     option["title"] as String,
@@ -278,8 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withOpacity(0.3),
-                                highlightColor: Colors.grey.withOpacity(0.18),
+                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                                 onTap: () async {
                                   if (option["route"] != null) {
                                     if (option["route"] == AppRoutes.home) {
@@ -309,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             option["iconPath"] as String,
                                             width: 24,
                                             height: 24,
-                                            color: Colors.white,
+                                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                           )
                                           : Icon(
                                             option["icon"] as IconData,
@@ -348,8 +397,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withOpacity(0.3),
-                              highlightColor: Colors.grey.withOpacity(0.18),
+                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                               onTap: () {},
                               child: ListTile(
                                 leading: SvgPicture.asset(
@@ -365,8 +414,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withOpacity(0.3),
-                              highlightColor: Colors.grey.withOpacity(0.18),
+                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
+                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
                               onTap: () => _logout(context),
                               child: ListTile(
                                 leading: SvgPicture.asset(
