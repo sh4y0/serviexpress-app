@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/pages/home_page_content.dart';
 import 'package:serviexpress_app/presentation/viewmodels/skeleton_home.dart';
@@ -20,11 +23,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _mapLoaded = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isProvider = false;
+  UserModel? user;
 
   @override
   void initState() {
     super.initState();
     _setupToken();
+    _getUserById();
   }
 
   void _setupToken() async {
@@ -82,6 +87,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  void _getUserById() async {
+    final uid = await UserPreferences.getUserId();
+    if (uid == null) return;
+    var userFetch = await UserRepository.instance.getCurrentUser(uid);
+    if (!mounted) return;
+    setState(() {
+      user = userFetch;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,78 +108,94 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Expanded(
               child: ListView(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 30,
-                      horizontal: 20,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF1B1B2E),
+                  if (user != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 30,
+                        horizontal: 20,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipOval(
+                            child: SizedBox(
+                              width: 60,
+                              height: 60,
+                              child:
+                                  user!.imagenUrl!.isNotEmpty
+                                      ? Image.network(
+                                        user!.imagenUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) {
+                                          return Image.asset(
+                                            "assets/images/avatar.png",
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )
+                                      : Image.asset(
+                                        "assets/images/avatar.png",
+                                        fit: BoxFit.cover,
+                                      ),
+                            ),
                           ),
-                          child: Image.asset(
-                            "assets/images/profile_default.png",
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Fedor Kiryakov",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user!.nombreCompleto,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                    size: 16,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "4.9",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 16,
                                     ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    "(120+ review)",
-                                    style: TextStyle(
-                                      color: Colors.white60,
-                                      fontSize: 14,
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      user!.calificacion.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 5),
-                              Text(
-                                "Limpiador",
-                                style: TextStyle(
-                                  color: AppColor.textInput,
-                                  fontSize: 14,
+                                    const SizedBox(width: 5),
+                                    // const Text(
+                                    //   "(120+ review)",
+                                    //   style: TextStyle(
+                                    //     color: Colors.white60,
+                                    //     fontSize: 14,
+                                    //   ),
+                                    // ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 5),
+                                Text(
+                                  user!.rol!,
+                                  style: const TextStyle(
+                                    color: AppColor.textInput,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_solicitar.svg",
