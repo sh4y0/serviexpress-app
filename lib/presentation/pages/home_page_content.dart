@@ -76,6 +76,8 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _isTappedSolicitarServicioNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(false);
 
+   final ValueNotifier<List<UserModel>> _proveedoresNotifier = ValueNotifier([]);
+
   bool _isZoomedIn = false;
   bool _isMapBeingMoved = false;
   String? _activeProgrammaticOperationId;
@@ -361,7 +363,7 @@ class _HomePageContentState extends State<HomePageContent> {
           onTap: () {
             _selectedProviderNotifier.value = provider;
             _currentlyOpenInfoWindowMarkerId = markerId;
-            _isSheetVisibleDetalleProveedorNotifier.value = true;
+            //_isSheetVisibleDetalleProveedorNotifier.value = true;
           },
         ),
       );
@@ -837,32 +839,32 @@ class _HomePageContentState extends State<HomePageContent> {
     }
   }
 
-  void _agregarProveedor(UserModel proveedor) {
-    final currentList = List<UserModel>.from(
-      _proveedoresSeleccionadosNotifier.value,
-    );
-    if (!currentList.any((p) => p.uid == proveedor.uid)) {
-      currentList.add(proveedor);
-      _proveedoresSeleccionadosNotifier.value = currentList;
-    }
-  }
+  // void _agregarProveedor(UserModel proveedor) {
+  //   final currentList = List<UserModel>.from(
+  //     _proveedoresSeleccionadosNotifier.value,
+  //   );
+  //   if (!currentList.any((p) => p.uid == proveedor.uid)) {
+  //     currentList.add(proveedor);
+  //     _proveedoresSeleccionadosNotifier.value = currentList;
+  //   }
+  // }
 
-  void _removerProveedor(UserModel proveedor) {
-    final currentList = List<UserModel>.from(
-      _proveedoresSeleccionadosNotifier.value,
-    );
-    currentList.removeWhere((p) => p.uid == proveedor.uid);
-    _proveedoresSeleccionadosNotifier.value = currentList;
-    if (currentList.isEmpty) {
-      _isSolicitudGuardadaNotifier.value = false;
-      _isProveedorAgregadoNotifier.value = false;
-    }
-  }
+  // void _removerProveedor(UserModel proveedor) {
+  //   final currentList = List<UserModel>.from(
+  //     _proveedoresSeleccionadosNotifier.value,
+  //   );
+  //   currentList.removeWhere((p) => p.uid == proveedor.uid);
+  //   _proveedoresSeleccionadosNotifier.value = currentList;
+  //   if (currentList.isEmpty) {
+  //     _isSolicitudGuardadaNotifier.value = false;
+  //     _isProveedorAgregadoNotifier.value = false;
+  //   }
+  // }
 
-  void _abrirDetalleProveedor(UserModel proveedor) {
-    _selectedProviderNotifier.value = proveedor;
-    _isSheetVisibleDetalleProveedorNotifier.value = true;
-  }
+  // void _abrirDetalleProveedor(UserModel proveedor) {
+  //   _selectedProviderNotifier.value = proveedor;
+  //   _isSheetVisibleDetalleProveedorNotifier.value = true;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -969,7 +971,8 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
         ),
 
-        ValueListenableBuilder<bool>(
+
+          ValueListenableBuilder<bool>(
           valueListenable: _shouldShowSheet,
           builder: (context, shouldShow, _) {
             return AnimatedPositioned(
@@ -980,19 +983,8 @@ class _HomePageContentState extends State<HomePageContent> {
               right: 0,
               bottom: shouldShow ? 0 : -mediaQuery.size.height,
               child: ValueListenableBuilder<List<UserModel>>(
-                valueListenable: _proveedoresSeleccionadosNotifier,
-                builder: (context, proveedoresSeleccionados, _) {
-                  return ValueListenableBuilder<bool>(
-                    valueListenable: _isProveedorAgregadoNotifier,
-                    builder: (context, isProveedorAgregado, _) {
-                      final bool hayProveedores =
-                          isProveedorAgregado &&
-                          proveedoresSeleccionados.isNotEmpty;
-                      final double minSheetSize = hayProveedores ? 0.36 : 0.21;
-                      final double maxSheetSize = hayProveedores ? 0.36 : 0.21;
-                      final List<double> snapPoints =
-                          hayProveedores ? [0.21, 0.36] : [0.35];
-
+                valueListenable: _currentProvidersNotifier,
+                builder: (context, proveedores, _) {
                       return Stack(
                         children: [
                           AnimatedPositioned(
@@ -1007,10 +999,10 @@ class _HomePageContentState extends State<HomePageContent> {
                             top: 0,
                             child: DraggableSheetSolicitarServicio(
                               detallarServicioKey: _describirServicioKey,
-                              targetInitialSize: minSheetSize,
-                              minSheetSize: minSheetSize,
-                              maxSheetSize: maxSheetSize,
-                              snapPoints: snapPoints,
+                              targetInitialSize: 0.21,
+                              minSheetSize: 0.21,
+                              maxSheetSize: 0.21,
+                              snapPoints: const [0.35],
                               onTapPressed: () {
                                 if (_selectedCategoryIndex.value == -1) {
                                   _categoriaErrorNotifier.value = true;
@@ -1018,35 +1010,19 @@ class _HomePageContentState extends State<HomePageContent> {
                                 }
                                 _requestService();
                               },
-                              onCategoriaError:
-                                  () => _categoriaErrorNotifier.value = true,
+                              onCategoriaError: () => _categoriaErrorNotifier.value = true,
                               categoriaError: _categoriaErrorNotifier.value,
-                              selectedCategoryIndex:
-                                  _selectedCategoryIndex.value,
+                              selectedCategoryIndex: _selectedCategoryIndex.value,
                               onAbrirDetallesPressed:
-                                  (isVisible) =>
-                                      _abrirSheetDetalladoDesdeSheet2(
-                                        isSheetVisibleSolicitarServicio:
-                                            isVisible,
-                                      ),
-                              datosSolicitudExistente:
-                                  _datosSolicitudGuardadaNotifier.value,
-                              proveedoresSeleccionados:
-                                  proveedoresSeleccionados,
-                              onProveedorRemovido: _removerProveedor,
-                              onProveedorTapped: _abrirDetalleProveedor,
-                              isSolicitudGuardada:
-                                  _isSolicitudGuardadaNotifier.value,
-                              isProveedorAgregado: isProveedorAgregado,
-                              onPressedSolicitarServicio:
-                                  _isSolicitudServicioOnTapped,
+                                  (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
+                              datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
+                              onProveedores: proveedores,
+                              isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
+                              onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
                             ),
                           ),
                           Positioned(
-                            bottom:
-                                (hayProveedores
-                                    ? mediaQuery.size.height * 0.37
-                                    : mediaQuery.size.height * 0.22),
+                            bottom: mediaQuery.size.height * 0.22,
                             right: 10,
                             child: FloatingActionButton(
                               key: _locationButtonKey,
@@ -1067,13 +1043,108 @@ class _HomePageContentState extends State<HomePageContent> {
                           ),
                         ],
                       );
-                    },
-                  );
                 },
               ),
             );
           },
         ),
+
+
+        // ValueListenableBuilder<bool>(
+        //   valueListenable: _shouldShowSheet,
+        //   builder: (context, shouldShow, _) {
+        //     return AnimatedPositioned(
+        //       duration: const Duration(milliseconds: 300),
+        //       curve: Curves.easeInOut,
+        //       top: 0,
+        //       left: 0,
+        //       right: 0,
+        //       bottom: shouldShow ? 0 : -mediaQuery.size.height,
+        //       child: ValueListenableBuilder<List<UserModel>>(
+        //         valueListenable: _proveedoresSeleccionadosNotifier,
+        //         builder: (context, proveedoresSeleccionados, _) {
+        //           return ValueListenableBuilder<bool>(
+        //             valueListenable: _isProveedorAgregadoNotifier,
+        //             builder: (context, isProveedorAgregado, _) {
+        //               final bool hayProveedores =
+        //                   isProveedorAgregado &&
+        //                   proveedoresSeleccionados.isNotEmpty;
+        //               final double minSheetSize = hayProveedores ? 0.36 : 0.21;
+        //               final double maxSheetSize = hayProveedores ? 0.36 : 0.21;
+        //               final List<double> snapPoints =
+        //                   hayProveedores ? [0.21, 0.36] : [0.35];
+
+        //               return Stack(
+        //                 children: [
+        //                   AnimatedPositioned(
+        //                     duration: const Duration(milliseconds: 200),
+        //                     curve: Curves.easeInOut,
+        //                     left: 0,
+        //                     right: 0,
+        //                     bottom:
+        //                         shouldShow
+        //                             ? 0
+        //                             : -MediaQuery.of(context).size.height,
+        //                     top: 0,
+        //                     child: DraggableSheetSolicitarServicio(
+        //                       detallarServicioKey: _describirServicioKey,
+        //                       targetInitialSize: minSheetSize,
+        //                       minSheetSize: minSheetSize,
+        //                       maxSheetSize: maxSheetSize,
+        //                       snapPoints: snapPoints,
+        //                       onTapPressed: () {
+        //                         if (_selectedCategoryIndex.value == -1) {
+        //                           _categoriaErrorNotifier.value = true;
+        //                           return;
+        //                         }
+        //                         _requestService();
+        //                       },
+        //                       onCategoriaError: () => _categoriaErrorNotifier.value = true,
+        //                       categoriaError: _categoriaErrorNotifier.value,
+        //                       selectedCategoryIndex: _selectedCategoryIndex.value,
+        //                       onAbrirDetallesPressed:
+        //                           (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
+        //                       datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
+        //                       proveedoresSeleccionados: proveedoresSeleccionados,
+        //                       onProveedorRemovido: _removerProveedor,
+        //                       onProveedorTapped: _abrirDetalleProveedor,
+        //                       isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
+        //                       isProveedorAgregado: isProveedorAgregado,
+        //                       onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
+        //                     ),
+        //                   ),
+        //                   Positioned(
+        //                     bottom:
+        //                         (hayProveedores
+        //                             ? mediaQuery.size.height * 0.37
+        //                             : mediaQuery.size.height * 0.22),
+        //                     right: 10,
+        //                     child: FloatingActionButton(
+        //                       key: _locationButtonKey,
+        //                       heroTag: 'fabHomeRightsheet',
+        //                       shape: const CircleBorder(),
+        //                       backgroundColor: const Color(0xFF4a66ff),
+        //                       onPressed: _toggleZoom,
+        //                       child: SvgPicture.asset(
+        //                         'assets/icons/ic_current_location.svg',
+        //                         width: 26,
+        //                         height: 26,
+        //                         colorFilter: const ColorFilter.mode(
+        //                           Colors.white,
+        //                           BlendMode.srcIn,
+        //                         ),
+        //                       ),
+        //                     ),
+        //                   ),
+        //                 ],
+        //               );
+        //             },
+        //           );
+        //         },
+        //       ),
+        //     );
+        //   },
+        // ),
 
         ValueListenableBuilder<bool>(
           valueListenable: _isSheetVisibleSolicitarServicioNotifier,
@@ -1129,7 +1200,7 @@ class _HomePageContentState extends State<HomePageContent> {
                           maxSheetSize: 0.95,
                           snapPoints: const [0.0, 0.57, 0.95],
                           onDismiss: _handleSheetDismissedDetalleProveedor,
-                          onProveedorAgregado: _agregarProveedor,
+                          //onProveedorAgregado: _agregarProveedor,
                           selectedProvider: selectedProvider,
                           isProveedorAgregado:
                               (isAgregado) =>
