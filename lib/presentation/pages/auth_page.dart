@@ -524,7 +524,7 @@ class _LoginFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "Welcome back you've been missed!",
+          "¡Qué bueno tenerte de vuelta!",
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
@@ -556,7 +556,7 @@ class _LoginFormWidget extends StatelessWidget {
                   onPressed: onForgotPassword,
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: const Text(
-                    "Olvidaste tu contraseña?",
+                    "¿Olvidaste tu contraseña?",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -643,7 +643,7 @@ class _SignupFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "Welcome, let's get you started!",
+          "¡Empecemos! Tu experiencia comienza aquí.",
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
