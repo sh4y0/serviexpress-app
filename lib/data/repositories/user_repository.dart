@@ -248,4 +248,26 @@ class UserRepository {
       throw ErrorMapper.map(e);
     }
   }
+
+  Future<void> addUserCriminalRecord(File file, String uid) async {
+    try {
+      final fileExtension = file.path.split('.').last.toLowerCase();
+      if (fileExtension != 'pdf' && fileExtension != 'docx') {
+        throw Exception('Solo se permiten archivos PDF o DOCX.');
+      }
+      final fileRef = _storage
+          .ref()
+          .child('users/criminal_records')
+          .child('$uid.$fileExtension');
+
+      final uploadTask = await fileRef.putFile(file);
+      final fileUrl = await uploadTask.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'criminalRecordUrl': fileUrl,
+      });
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
 }
