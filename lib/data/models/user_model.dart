@@ -22,6 +22,7 @@ class UserModel {
   final List<dynamic>? resenias;
   final String? dniFrontImageUrl;
   final String? dniBackImageUrl;
+  final String? criminalRecordUrl;
 
   UserModel({
     required this.uid,
@@ -45,6 +46,7 @@ class UserModel {
     this.resenias,
     this.dniFrontImageUrl,
     this.dniBackImageUrl,
+    this.criminalRecordUrl,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -76,6 +78,7 @@ class UserModel {
               : (json['resenias'] as List<dynamic>?) ?? [],
       dniFrontImageUrl: json['dniFrontImageUrl'],
       dniBackImageUrl: json['dniBackImageUrl'],
+      criminalRecordUrl: json['criminalRecordUrl'],
     );
   }
 
@@ -102,6 +105,7 @@ class UserModel {
       'resenias': resenias is List ? resenias : (resenias ?? []),
       'dniFrontImageUrl': dniFrontImageUrl,
       'dniBackImageUrl': dniBackImageUrl,
+      'criminalRecordUrl': criminalRecordUrl,
     };
   }
 }
