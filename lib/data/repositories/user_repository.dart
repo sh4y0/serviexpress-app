@@ -111,21 +111,26 @@ class UserRepository {
     await userDoc.update({'latitud': latitude, 'longitud': longitude});
   }
 
-  Future<Set<UserModel>> findByCategory(String category) async {
+  Stream<Set<UserModel>> findByCategoryStream(String category) {
     try {
-      final querySnapshot =
-          await _firestore
-              .collection('users')
-              .where('especialidad', isEqualTo: category)
-              .get();
-
-      final users =
-          querySnapshot.docs
-              .map((doc) => UserModel.fromJson(doc.data()))
-              .toSet();
-      return users;
+      return _firestore
+          .collection('users')
+          .where('especialidad', isEqualTo: category)
+          .snapshots()
+          .map((querySnapshot) {
+            return querySnapshot.docs
+                .map((doc) => UserModel.fromJson(doc.data()))
+                .where(
+                  (user) =>
+                      user.especialidad?.isNotEmpty == true &&
+                      user.latitud != null &&
+                      user.longitud != null &&
+                      user.token?.isNotEmpty == true,
+                )
+                .toSet();
+          });
     } catch (e) {
-      return {};
+      return const Stream.empty();
     }
   }
 

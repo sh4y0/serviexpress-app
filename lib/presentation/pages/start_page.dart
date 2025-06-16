@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:serviexpress_app/config/app_session_config.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/presentation/pages/onboarnding_screen.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -12,8 +11,8 @@ class StartPage extends StatefulWidget {
   State<StartPage> createState() => _StartPageState();
 }
 
-class _StartPageState extends State<StartPage> with SingleTickerProviderStateMixin{
-
+class _StartPageState extends State<StartPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -21,12 +20,13 @@ class _StartPageState extends State<StartPage> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 2), () {
-      Navigator.of(context).push(
-        CupertinoPageRoute(builder: (context) => const OnboarndingScreen()),
-      );
+      AppSessionConfig.handleAuthRedirect(context);
     });
 
-    _controller = AnimationController(duration: const Duration(seconds: 2), vsync: this,);
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _controller.forward();
   }
