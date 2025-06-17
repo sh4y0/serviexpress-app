@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
+import 'package:serviexpress_app/core/utils/loading_screen.dart';
+import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/viewmodels/desactive_account_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final bool isProvider;
   const ProfileScreen({super.key, required this.isProvider});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   UserModel? user;
 
   void _logout(BuildContext context) {
@@ -66,6 +71,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  void _listenToViewModel() {
+    ref.listen<ResultState>(desactivateAccountViewModelProvider, (
+      _,
+      next,
+    ) async {
+      switch (next) {
+        case Idle():
+          LoadingScreen.hide();
+          break;
+        case Loading():
+          LoadingScreen.show(context);
+          break;
+        case Success(data: final data):
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showSuccessAlert(
+              context,
+              data,
+              onOk: () {
+                Navigator.pushReplacementNamed(context, AppRoutes.startPage);
+              },
+            );
+          }
+
+          break;
+        case Failure(error: final error):
+          LoadingScreen.hide();
+          if (mounted) {
+            Alerts.instance.showErrorAlert(context, error.message);
+          }
+          break;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _listenToViewModel();
     final options = [
       {
         "iconPath": "assets/icons/ic_privacidad.svg",
@@ -252,8 +293,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
-                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
+                                splashColor: Colors.grey.withAlpha(
+                                  (0.3 * 255).toInt(),
+                                ),
+                                highlightColor: Colors.grey.withAlpha(
+                                  (0.18 * 255).toInt(),
+                                ),
                                 onTap: () async {
                                   final route = option["route"];
                                   if (route != null) {
@@ -282,7 +327,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     option["iconPath"] as String,
                                     width: 24,
                                     height: 24,
-                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                                    colorFilter: const ColorFilter.mode(
+                                      Colors.white,
+                                      BlendMode.srcIn,
+                                    ),
                                   ),
                                   title: Text(
                                     option["title"] as String,
@@ -327,8 +375,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
-                                highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
+                                splashColor: Colors.grey.withAlpha(
+                                  (0.3 * 255).toInt(),
+                                ),
+                                highlightColor: Colors.grey.withAlpha(
+                                  (0.18 * 255).toInt(),
+                                ),
                                 onTap: () async {
                                   if (option["route"] != null) {
                                     if (option["route"] == AppRoutes.home) {
@@ -358,7 +410,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             option["iconPath"] as String,
                                             width: 24,
                                             height: 24,
-                                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                            colorFilter: const ColorFilter.mode(
+                                              Colors.white,
+                                              BlendMode.srcIn,
+                                            ),
                                           )
                                           : Icon(
                                             option["icon"] as IconData,
@@ -397,15 +452,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
-                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
-                              onTap: () {},
+                              splashColor: Colors.grey.withAlpha(
+                                (0.3 * 255).toInt(),
+                              ),
+                              highlightColor: Colors.grey.withAlpha(
+                                (0.18 * 255).toInt(),
+                              ),
+                              onTap: () async {
+                                final confirmed = await Alerts.instance
+                                    .showConfirmAlert(
+                                      context,
+                                      "¿Estás seguro de que deseas desactivar tu cuenta?",
+                                      confirmText: "Sí, continuar",
+                                      cancelText: "Cancelar",
+                                    );
+
+                                if (confirmed) {
+                                  await ref
+                                      .read(
+                                        desactivateAccountViewModelProvider
+                                            .notifier,
+                                      )
+                                      .deactivateCurrentUserAccount();
+                                }
+                              },
                               child: ListTile(
                                 leading: SvgPicture.asset(
                                   "assets/icons/ic_delete_account.svg",
                                 ),
                                 title: const Text(
-                                  "Eliminar cuenta",
+                                  "Inhabilitar cuenta",
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -414,8 +490,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              splashColor: Colors.grey.withAlpha((0.3 * 255).toInt()),
-                              highlightColor: Colors.grey.withAlpha((0.18 * 255).toInt()),
+                              splashColor: Colors.grey.withAlpha(
+                                (0.3 * 255).toInt(),
+                              ),
+                              highlightColor: Colors.grey.withAlpha(
+                                (0.18 * 255).toInt(),
+                              ),
                               onTap: () => _logout(context),
                               child: ListTile(
                                 leading: SvgPicture.asset(

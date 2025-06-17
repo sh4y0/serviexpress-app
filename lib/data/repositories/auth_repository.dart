@@ -42,7 +42,19 @@ class AuthRepository {
           return const Failure(UserNotFound("Nombre de usuario incorrecto."));
         }
 
-        email = snap.docs.first['email'];
+        final userDoc = snap.docs.first;
+        final userData = userDoc.data();
+
+        final isActive = userData['isActive'] ?? true;
+        if (!isActive) {
+          return const Failure(
+            UnknownError(
+              "Esta cuenta ha sido desactivada. Contacta al soporte.",
+            ),
+          );
+        }
+
+        email = userData['email'];
       }
 
       final result = await _auth.signInWithEmailAndPassword(
@@ -52,6 +64,21 @@ class AuthRepository {
 
       final user = result.user;
       if (user != null) {
+        final userDoc =
+            await _firestore.collection("users").doc(user.uid).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          final isActive = userData?['activo'] ?? true;
+          if (!isActive) {
+            await _auth.signOut();
+            return const Failure(
+              UnknownError(
+                "Esta cuenta ha sido desactivada. Por favor contacta con soporte.",
+              ),
+            );
+          }
+        }
+
         return await _processAuthenticatedUser(user, isNewUser: false);
       } else {
         return const Failure(UnknownError("No se pudo obtener el usuario."));
@@ -124,6 +151,17 @@ class AuthRepository {
           .doc(firebaseUser.uid);
 
       final DocumentSnapshot doc = await docRef.get();
+
+      final Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+      final isActive = data?['isActive'] ?? true;
+      if (isActive == false) {
+        return const Failure(
+          UnknownError(
+            "Esta cuenta ha sido desactivada. Por favor contacta con soporte.",
+          ),
+        );
+      }
+
       UserModel userModel;
       bool needsProfileCompletion = false;
 
@@ -198,6 +236,7 @@ class AuthRepository {
   ResultState<String> logout() {
     try {
       _auth.signOut();
+      _auth.authStateChanges().first;
       return const Success("Cierre de sesión exitoso");
     } catch (_) {
       return const Failure(UnknownError("Error al cerrar sesión"));
