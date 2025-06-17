@@ -19,12 +19,13 @@ class GoogleAuthProviderStrategy extends AuthProviderStrategy {
     try {
       await GoogleSignIn().signOut();
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      
+
       if (googleUser == null) {
         return const Failure(UserNotFound("Inicio de sesión cancelado."));
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -32,7 +33,7 @@ class GoogleAuthProviderStrategy extends AuthProviderStrategy {
 
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(credential);
-      
+
       final User? user = userCredential.user;
       if (user == null) {
         return const Failure(UnknownError("No se pudo autenticar con Google."));
@@ -42,11 +43,12 @@ class GoogleAuthProviderStrategy extends AuthProviderStrategy {
     } on FirebaseAuthException catch (e) {
       return Failure(ErrorMapper.map(e));
     } catch (e) {
-      return const Failure(UnknownError("Error inesperado en login con Google."));
+      return const Failure(
+        UnknownError("Error inesperado en login con Google."),
+      );
     }
   }
 }
-
 
 class FacebookAuthProviderStrategy extends AuthProviderStrategy {
   @override
@@ -56,13 +58,15 @@ class FacebookAuthProviderStrategy extends AuthProviderStrategy {
   Future<ResultState<User>> authenticate() async {
     try {
       await FacebookAuth.instance.logOut();
-      
+
       final LoginResult loginResult = await FacebookAuth.instance.login(
         permissions: ['email', 'public_profile'],
       );
 
       if (loginResult.status != LoginStatus.success) {
-        return const Failure(UserNotFound("Inicio de sesión cancelado o fallido."));
+        return const Failure(
+          UserNotFound("Inicio de sesión cancelado o fallido."),
+        );
       }
 
       final accessToken = loginResult.accessToken;
@@ -70,22 +74,26 @@ class FacebookAuthProviderStrategy extends AuthProviderStrategy {
         return const Failure(UserNotFound("No se obtuvo token de Facebook."));
       }
 
-      final OAuthCredential facebookAuthCredential = 
+      final OAuthCredential facebookAuthCredential =
           FacebookAuthProvider.credential(accessToken.tokenString);
 
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(facebookAuthCredential);
-      
+
       final User? user = userCredential.user;
       if (user == null) {
-        return const Failure(UnknownError("No se pudo autenticar con Facebook."));
+        return const Failure(
+          UnknownError("No se pudo autenticar con Facebook."),
+        );
       }
 
       return Success(user);
     } on FirebaseAuthException catch (e) {
       return Failure(ErrorMapper.map(e));
     } catch (e) {
-      return const Failure(UnknownError("Error inesperado en login con Facebook."));
+      return const Failure(
+        UnknownError("Error inesperado en login con Facebook."),
+      );
     }
   }
 }
@@ -96,6 +104,8 @@ class AppleAuthProviderStrategy extends AuthProviderStrategy {
 
   @override
   Future<ResultState<User>> authenticate() async {
-    return const Failure(UnknownError("Autenticación con Apple no implementada."));
+    return const Failure(
+      UnknownError("Autenticación con Apple no implementada."),
+    );
   }
 }

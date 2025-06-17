@@ -96,6 +96,7 @@ class ServiceRepository {
           title: 'Tienes un nuevo servicio',
           body: 'Limpieza solicitada por $username',
           receiverId: workerId,
+          screen: 'provider_details',
         );
 
         await FirebaseMessagingService.instance.sendFCMMessage(

@@ -64,12 +64,20 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier(true);
   final ValueNotifier<double> _keyboardHeight = ValueNotifier(0.0);
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier(-1);
-  final ValueNotifier<Set<UserModel>> _currentProvidersNotifier = ValueNotifier({});
-  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier = ValueNotifier([]);
-  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier = ValueNotifier(false);
-  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier = ValueNotifier(null);
-  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(null,);
+  final ValueNotifier<Set<UserModel>> _currentProvidersNotifier = ValueNotifier(
+    {},
+  );
+  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier =
+      ValueNotifier([]);
+  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier =
+      ValueNotifier(false);
+  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier =
+      ValueNotifier(false);
+  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier =
+      ValueNotifier(null);
+  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(
+    null,
+  );
   final ValueNotifier<bool> _categoriaErrorNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isSolicitudGuardadaNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isProveedorAgregadoNotifier = ValueNotifier(false);
@@ -98,6 +106,7 @@ class _HomePageContentState extends State<HomePageContent> {
   final GlobalKey _describirServicioKey = GlobalKey();
   TutorialCoachMark? _tutorialCoachMark;
   final List<TargetFocus> _targets = [];
+  StreamSubscription<Set<UserModel>>? _userStreamSubscription;
 
   @override
   void initState() {
@@ -390,38 +399,45 @@ class _HomePageContentState extends State<HomePageContent> {
     }
   }
 
-  void _onCategorySelected(int index) async {
+  void _onCategorySelected(int index) {
     _selectedCategoryIndex.value = index;
     _categoriaErrorNotifier.value = false;
 
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory = CategoryMock.getCategories()[index].name;
-      final providers = await UserRepository.instance.findByCategory(
-        selectedCategory,
-      );
-      _currentProvidersNotifier.value = providers;
+      _userStreamSubscription?.cancel();
 
-      if (_shouldShowSecondTutorialStepNotifier.value && providers.isNotEmpty) {
-        _pendingSecondTutorial = true;
-        _shouldShowSecondTutorialStepNotifier.value = false;
-      } else if (_shouldShowSecondTutorialStepNotifier.value &&
-          providers.isEmpty) {
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          _showFallbackTutorial,
-        );
-        _shouldShowSecondTutorialStepNotifier.value = false;
-      }
-      _updateMarkers();
-      if (providers.isNotEmpty) {
-        _activeProgrammaticOperationId =
-            'category_selection_adjust_${DateTime.now().millisecondsSinceEpoch}';
-        _movementController.startProgrammaticMove(
-          _activeProgrammaticOperationId!,
-        );
-        _adjustCameraToShowAllMarkers();
-      }
+      _userStreamSubscription = UserRepository.instance
+          .findByCategoryStream(selectedCategory)
+          .listen((providers) {
+            _currentProvidersNotifier.value = providers;
+
+            if (_shouldShowSecondTutorialStepNotifier.value &&
+                providers.isNotEmpty) {
+              _pendingSecondTutorial = true;
+              _shouldShowSecondTutorialStepNotifier.value = false;
+            } else if (_shouldShowSecondTutorialStepNotifier.value &&
+                providers.isEmpty) {
+              Future.delayed(
+                const Duration(milliseconds: 500),
+                _showFallbackTutorial,
+              );
+              _shouldShowSecondTutorialStepNotifier.value = false;
+            }
+
+            _updateMarkers();
+
+            if (providers.isNotEmpty) {
+              _activeProgrammaticOperationId =
+                  'category_selection_adjust_${DateTime.now().millisecondsSinceEpoch}';
+              _movementController.startProgrammaticMove(
+                _activeProgrammaticOperationId!,
+              );
+              _adjustCameraToShowAllMarkers();
+            }
+          });
     } else {
+      _userStreamSubscription?.cancel();
       _currentProvidersNotifier.value = {};
       _updateMarkers();
     }
@@ -1245,6 +1261,7 @@ class _HomePageContentState extends State<HomePageContent> {
     _isTappedSolicitarServicioNotifier.dispose();
     _shouldShowSecondTutorialStepNotifier.dispose();
     _mapInteractionTimer?.cancel();
+    _userStreamSubscription?.cancel();
     super.dispose();
   }
 }
