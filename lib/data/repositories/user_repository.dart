@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
@@ -201,6 +202,29 @@ class UserRepository {
       return UserModel.fromJson(data);
     } catch (e) {
       throw ErrorMapper.map(e);
+    }
+  }
+
+  Future<ResultState<String>> desactivateCurrentUserAccount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        return const Failure(UnknownError("No hay un usuario autenticado."));
+      }
+
+      final uid = user.uid;
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'isActive': false,
+      });
+
+      await FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.authStateChanges().first;
+
+      return const Success("Cuenta desactivada exitosamente.");
+    } catch (e) {
+      return Failure(ErrorMapper.map(e));
     }
   }
 
