@@ -89,13 +89,13 @@ class CardDesing extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.star, color: AppColor.bgStr),
-                            SizedBox(width: 4),
+                            const Icon(Icons.star, color: AppColor.bgStr),
+                            const SizedBox(width: 4),
                             Text(
-                              "4.0",
-                              style: TextStyle(
+                              service.cliente.calificacion.toString(),
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
