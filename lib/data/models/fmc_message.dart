@@ -7,6 +7,7 @@ class FCMMessage {
   final String receiverId;
   final String? title;
   final String? body;
+  final bool? isSenderWorker;
 
   FCMMessage({
     required this.token,
@@ -15,6 +16,7 @@ class FCMMessage {
     required this.receiverId,
     this.title,
     this.body,
+    this.isSenderWorker = false,
   });
 
   factory FCMMessage.fromRemoteMessage(RemoteMessage message) {
@@ -26,6 +28,7 @@ class FCMMessage {
       receiverId: data['receiverId'] ?? '',
       title: data['title'],
       body: data['body'],
+      isSenderWorker: data['isSenderWorker'],
     );
   }
 
@@ -36,6 +39,7 @@ class FCMMessage {
     String? receiverId,
     String? title,
     String? body,
+    bool? isSenderWorker,
   }) {
     return FCMMessage(
       token: token ?? this.token,
@@ -44,6 +48,7 @@ class FCMMessage {
       receiverId: receiverId ?? this.receiverId,
       title: title ?? this.title,
       body: body ?? this.body,
+      isSenderWorker: isSenderWorker ?? this.isSenderWorker,
     );
   }
 
@@ -78,6 +83,7 @@ class FCMMessage {
       'receiverId': receiverId,
       'title': title,
       'body': body,
+      'isSenderWorker': isSenderWorker,
     };
   }
 }
