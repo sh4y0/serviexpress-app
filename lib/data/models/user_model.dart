@@ -78,9 +78,9 @@ class UserModel {
           json['resenias'] is List
               ? json['resenias']
               : (json['resenias'] as List<dynamic>?) ?? [],
-      dniFrontImageUrl: json['dniFrontImageUrl'],
-      dniBackImageUrl: json['dniBackImageUrl'],
-      criminalRecordUrl: json['criminalRecordUrl'],
+      dniFrontImageUrl: json['dniFrontImageUrl'] ?? '',
+      dniBackImageUrl: json['dniBackImageUrl'] ?? '',
+      criminalRecordUrl: json['criminalRecordUrl'] ?? '',
       isActive: json['isActive'] ?? true,
     );
   }
