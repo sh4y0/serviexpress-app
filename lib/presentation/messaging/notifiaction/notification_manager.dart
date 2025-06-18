@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/config/navigation_config.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -31,25 +31,17 @@ class NotificationManager {
       badge: true,
       sound: true,
     );
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) return;
+
     final fcmToken = await _firebaseMessaging.getToken();
+
     if (fcmToken != null) {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        await UserRepository.instance.updateUserToken(
-          currentUser.uid,
-          fcmToken,
-        );
-      }
+      await UserRepository.instance.updateUserToken(userId, fcmToken);
     }
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        await UserRepository.instance.updateUserToken(
-          currentUser.uid,
-          newToken,
-        );
-      }
+      await UserRepository.instance.updateUserToken(userId, newToken);
     });
 
     final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
