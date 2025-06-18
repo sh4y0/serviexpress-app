@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logging/logging.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 
 class LocationMapsService {
@@ -50,19 +50,15 @@ class LocationMapsService {
     await Geolocator.isLocationServiceEnabled();
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+      final userId = await UserPreferences.getUserId();
+      if (userId == null) return;
 
       final position = await getCurrentPosition();
 
       final latitud = position.latitude;
       final longitud = position.longitude;
 
-      await UserRepository.instance.setUserLocation(
-        user.uid,
-        latitud,
-        longitud,
-      );
+      await UserRepository.instance.setUserLocation(userId, latitud, longitud);
     } catch (e) {
       _log.severe("Error al inicializar el servicio de ubicación: $e");
     }
