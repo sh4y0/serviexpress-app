@@ -58,12 +58,12 @@ class CardDesing extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircleAvatar(
-                          radius: 30,
+                          radius: 26,
                           backgroundColor: Colors.white,
                           child: ClipOval(
                             child: SizedBox(
-                              width: 60,
-                              height: 60,
+                              width: 52,
+                              height: 52,
                               child:
                                   service.cliente.imagenUrl != null
                                       ? FadeInImage.assetNetwork(
@@ -88,20 +88,21 @@ class CardDesing extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            const Icon(Icons.star, color: AppColor.bgStr),
-                            const SizedBox(width: 4),
-                            Text(
-                              service.cliente.calificacion.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                        const SizedBox(height: 8),
+                        //const SizedBox(height: 10),
+                        // Row(
+                        //   children: [
+                        //     const Icon(Icons.star, color: AppColor.bgStr),
+                        //     const SizedBox(width: 4),
+                        //     Text(
+                        //       service.cliente.calificacion.toString(),
+                        //       style: const TextStyle(
+                        //         color: Colors.white,
+                        //         fontWeight: FontWeight.bold,
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                     const SizedBox(width: 16),
@@ -116,7 +117,7 @@ class CardDesing extends StatelessWidget {
                             service.cliente.nombreCompleto,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -135,6 +136,7 @@ class CardDesing extends StatelessWidget {
                                   style: const TextStyle(
                                     color: AppColor.txtPrice,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 12,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -158,6 +160,7 @@ class CardDesing extends StatelessWidget {
                                 distancia,
                                 style: const TextStyle(
                                   color: AppColor.bgDistance,
+                                  fontSize: 12
                                 ),
                               ),
                             ],
@@ -165,77 +168,99 @@ class CardDesing extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColor.txtPrice,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: IconButton(
-                        onPressed: () {},
-                        icon: SvgPicture.asset(
-                          "assets/icons/ic_gochat.svg",
-                          width: 25,
-                          height: 25,
-                        ),
-                        color: Colors.white,
-                      ),
-                    ),
+                    // const SizedBox(width: 16),
+                    // Container(
+                    //   decoration: BoxDecoration(
+                    //     color: AppColor.txtPrice,
+                    //     borderRadius: BorderRadius.circular(50),
+                    //   ),
+                    //   child: IconButton(
+                    //     onPressed: () {},
+                    //     icon: SvgPicture.asset(
+                    //       "assets/icons/ic_gochat.svg",
+                    //       width: 25,
+                    //       height: 25,
+                    //     ),
+                    //     color: Colors.white,
+                    //   ),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Detalles de servicios",
+                  "Detalle del servicio",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 2),
                 Text(
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   service.service.descripcion,
-                  style: const TextStyle(color: AppColor.txtDetalle),
+                  style: const TextStyle(color: AppColor.txtDetalle, fontSize: 13),
                 ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: onViewDetails,
-                        style: ElevatedButton.styleFrom(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
                           backgroundColor: AppColor.bgMsgUser,
-                        ),
-                        child: const Text(
-                          "Ver detalles",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        onPressed: onViewDetails,
+                        child: const Text("Ver más"),
                       ),
+                      // child: ElevatedButton(
+                      //
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: AppColor.bgMsgUser,
+                      //   ),
+                      //   child: const Text(
+                      //     "Ver detalles",
+                      //     style: TextStyle(
+                      //       color: Colors.white,
+                      //       fontSize: 16,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Acción para aceptar
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColor.bgAll,
-                        ),
-                        child: const Text(
-                          "Aceptar",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color.fromRGBO(56, 109, 243, 1),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        onPressed: onViewDetails,
+                        child: const Text("Aceptar"),
                       ),
+                      // child: ElevatedButton(
+                      //   onPressed: () {
+                      //     // Acción para aceptar
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: AppColor.bgAll,
+                      //   ),
+                      //   child: const Text(
+                      //     "Aceptar",
+                      //     style: TextStyle(
+                      //       color: Colors.white,
+                      //       fontSize: 16,
+                      //       fontWeight: FontWeight.bold,
+                      //     ),
+                      //   ),
+                      // ),
                     ),
                   ],
                 ),

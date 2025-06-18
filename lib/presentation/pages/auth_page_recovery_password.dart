@@ -57,52 +57,44 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
           Alerts.instance.showErrorAlert(context, error.message);
       }
     });
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) {
-          Navigator.pushReplacementNamed(context, AppRoutes.login);
-        }
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColor.bgChat,
+      appBar: AppBar(
         backgroundColor: AppColor.bgChat,
-        appBar: AppBar(
-          backgroundColor: AppColor.bgChat,
-          elevation: 0,
-          leading: IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AuthPage(),
-                  transitionsBuilder: (_, animation, __, child) {
-                    return SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(1.0, 0.0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    );
-                  },
-                ),
-              );
-            },
-            icon: Transform.translate(
-              offset: const Offset(4, 0),
-              child: const Icon(Icons.arrow_back_ios, color: Colors.white),
-            ),
-            style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AuthPage(),
+                transitionsBuilder: (_, animation, __, child) {
+                  return SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },
+          icon: Transform.translate(
+            offset: const Offset(4, 0),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
+          style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
         ),
-        body: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          //decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-            child: Column(children: [_buildLoginForm(ref)]),
-          ),
+      ),
+      body: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        //decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+          child: Column(children: [_buildLoginForm(ref)]),
         ),
       ),
     );
