@@ -31,7 +31,6 @@ class NotificationManager {
       badge: true,
       sound: true,
     );
-    print('[NotificationManager] Inicializando Firebase Messaging');
     final fcmToken = await _firebaseMessaging.getToken();
     if (fcmToken != null) {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -58,10 +57,6 @@ class NotificationManager {
       final payload = initialMessage.data['idServicio'];
       if (payload != null) {
         _handleMessageOpenedApp(payload);
-      } else {
-        print(
-          '[NotificationManager] ⚠️ No se encontró payload en initialMessage.',
-        );
       }
     }
 
@@ -73,10 +68,6 @@ class NotificationManager {
       initSettings,
       onDidReceiveNotificationResponse: (details) {
         // Aquí puedes manejar acciones al tocar la notificación
-        // final payload = details.payload;
-        // if (payload != null) {
-        //   _handleMessageOpenedApp(payload);
-        // }
       },
     );
 
@@ -84,10 +75,6 @@ class NotificationManager {
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       // Aquí puedes manejar navegación o acciones específicas
-      // final payload = message.data['idServicio'];
-      // if (payload != null) {
-      //   _handleMessageOpenedApp(payload);
-      // }
     });
   }
 
@@ -168,8 +155,6 @@ class NotificationManager {
   }
 
   void _handleMessageOpenedApp(String payload) async {
-    print('[NotificationManager] 👆 Notificación tocada con payload: $payload');
-
     final serviceId = payload;
     final service = await ServiceRepository.instance.getService(serviceId);
     await MapStyleLoader.loadStyle();
@@ -178,10 +163,6 @@ class NotificationManager {
       NavigationConfig.navigateTo(
         AppRoutes.providerDetails,
         arguments: {'service': service, 'mapStyle': MapStyleLoader.cachedStyle},
-      );
-    } else {
-      print(
-        '[NotificationManager] 🚫 Servicio no encontrado para el ID: $serviceId',
       );
     }
   }
