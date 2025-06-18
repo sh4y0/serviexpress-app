@@ -15,6 +15,7 @@ import 'package:serviexpress_app/presentation/widgets/category_button.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class MapMovementController {
@@ -222,11 +223,23 @@ class _HomePageContentState extends State<HomePageContent> {
         widget.onMapLoaded(true);
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
-            _showFirstTutorialStep();
+            //_showFirstTutorialStep();
+            _checkAndShowTutorial();
           }
         });
       }
     });
+  }
+
+   void _checkAndShowTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool tutorialMostrado = prefs.getBool('tutorial_mostrado') ?? false;
+
+    if (!tutorialMostrado) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showFirstTutorialStep();
+      });
+    }
   }
 
   void _loadMarkerIcon() async {
@@ -735,7 +748,18 @@ class _HomePageContentState extends State<HomePageContent> {
       textSkip: "FINALIZAR",
       paddingFocus: 10,
       opacityShadow: 0.8,
+      onFinish: () => _marcarTutorialComoMostrado(),
+      onSkip: () {
+        _marcarTutorialComoMostrado();
+        return true;
+      }
     )..show(context: context);
+  }
+
+  Future<void> _marcarTutorialComoMostrado() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tutorial_mostrado', true);
+
   }
 
   void _showFallbackTutorial() {
