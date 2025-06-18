@@ -42,7 +42,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: 0.30,
-            maxChildSize: 0.65, //mod 8
+            maxChildSize: 0.8, //mod 8
             builder: (context, scrollController) {
               return ScreenClientData(
                 service: widget.service,
