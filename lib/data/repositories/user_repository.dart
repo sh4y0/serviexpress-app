@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/datasources/reniec_api.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
@@ -121,6 +122,8 @@ class UserRepository {
       return _firestore
           .collection('users')
           .where('especialidad', isEqualTo: category)
+          .where('isActive', isEqualTo: true)
+          .where('isAvailable', isEqualTo: true)
           .snapshots()
           .map((querySnapshot) {
             return querySnapshot.docs
@@ -137,6 +140,27 @@ class UserRepository {
     } catch (e) {
       return const Stream.empty();
     }
+  }
+
+  Future<bool> getUserAvailability() async {
+    String? userId = await UserPreferences.getUserId();
+
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    if (doc.exists && doc.data()!.containsKey('isAvailable')) {
+      return doc['isAvailable'] as bool;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> toggleUserAvailability(bool value) async {
+    String? userId = await UserPreferences.getUserId();
+
+    final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    await docRef.set({'isAvailable': value}, SetOptions(merge: true));
   }
 
   Future<String> getUserName(String uid) async {

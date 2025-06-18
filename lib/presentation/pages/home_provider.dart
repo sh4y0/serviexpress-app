@@ -103,6 +103,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   void initState() {
     super.initState();
     _getUserById();
+    _setStateSwitch();
     _screens = [
       () => _buildHomeProvider(),
       () => const Center(
@@ -151,6 +152,13 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
       _appLifecycleState = state;
+    });
+  }
+
+  void _setStateSwitch() async {
+    final value = await UserRepository.instance.getUserAvailability();
+    setState(() {
+      _state = value;
     });
   }
 
@@ -338,7 +346,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                 inactiveThumbColor: Colors.white,
                 inactiveTrackColor: Colors.grey[300],
                 value: _state,
-                onChanged: (value) {
+                onChanged: (value) async {
+                  await UserRepository.instance.toggleUserAvailability(value);
                   setState(() {
                     _state = value;
                   });
