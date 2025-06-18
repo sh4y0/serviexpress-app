@@ -24,6 +24,7 @@ class UserModel {
   final String? dniBackImageUrl;
   final String? criminalRecordUrl;
   final bool isActive;
+  final bool isAvailable;
 
   UserModel({
     required this.uid,
@@ -49,6 +50,7 @@ class UserModel {
     this.dniBackImageUrl,
     this.criminalRecordUrl,
     this.isActive = true,
+    this.isAvailable = true,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +84,7 @@ class UserModel {
       dniBackImageUrl: json['dniBackImageUrl'] ?? '',
       criminalRecordUrl: json['criminalRecordUrl'] ?? '',
       isActive: json['isActive'] ?? true,
+      isAvailable: json['isAvailable'] ?? true,
     );
   }
 
@@ -110,6 +113,7 @@ class UserModel {
       'dniBackImageUrl': dniBackImageUrl,
       'criminalRecordUrl': criminalRecordUrl,
       'isActive': isActive,
+      'isAvailable': isAvailable,
     };
   }
 }
