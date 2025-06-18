@@ -134,13 +134,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
               notifications.add(fcmMessage);
               _processedServiceIds.add(fcmMessage.idServicio);
             });
-
-            if (isAppInForeground) {
-              NotificationManager().showLocalNotification(
-                title: fcmMessage.title ?? 'Notificación',
-                body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-              );
-            }
           }
         }
       },
