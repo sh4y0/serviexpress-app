@@ -193,21 +193,18 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   Future<void> _initializeLocation() async {
-    bool hasPermission = await _checkLocationPermission();
-    if (!hasPermission) return;
-    try {
-      Position? position =
-          await Geolocator.getLastKnownPosition() ??
-          await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-          );
-      final newPosition = LatLng(position.latitude, position.longitude);
-      _currentPositionNotifier.value = newPosition;
-      _updateMarkers();
-    } catch (e) {
-      debugPrint('Error al inicializar la ubicación: $e');
-    }
+  bool hasPermission = await _checkLocationPermission();
+  if (!hasPermission) return;
+  
+  try {
+    final position = await LocationMapsService().getCurrentPosition();
+    final newPosition = LatLng(position.latitude, position.longitude);
+    _currentPositionNotifier.value = newPosition;
+    _updateMarkers();
+  } catch (e) {
+    debugPrint('Error al inicializar la ubicación: $e');
   }
+}
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -294,9 +291,7 @@ class _HomePageContentState extends State<HomePageContent> {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      Position position = await LocationMapsService().getCurrentPosition();
       final newPosition = LatLng(position.latitude, position.longitude);
       bool shouldUpdate =
           forceUpdate ||
@@ -340,7 +335,7 @@ class _HomePageContentState extends State<HomePageContent> {
           position: currentPosition,
           icon: _locationMarkerIcon ?? BitmapDescriptor.defaultMarker,
           anchor: const Offset(0.5, 0.5),
-          zIndex: 2,
+          zIndexInt: 2,
           onTap: _animateCameraBasedOnZoomState,
         ),
       );
@@ -362,7 +357,7 @@ class _HomePageContentState extends State<HomePageContent> {
               _providerMarkerIcon ??
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           anchor: const Offset(0.5, 1.0),
-          zIndex: 1,
+          zIndexInt: 1,
           onTap: () {
             _selectedProviderNotifier.value = provider;
             _currentlyOpenInfoWindowMarkerId = markerId;
@@ -673,7 +668,7 @@ class _HomePageContentState extends State<HomePageContent> {
       },
       onClickTarget: (target) {
         _toggleZoom();
-        Future.delayed(const Duration(seconds: 2), _showFourthTutorialStep);
+        Future.delayed(const Duration(seconds: 1), _showFourthTutorialStep);
       },
       hideSkip: true,
       paddingFocus: 10,
@@ -859,7 +854,7 @@ class _HomePageContentState extends State<HomePageContent> {
   //   currentList.removeWhere((p) => p.uid == proveedor.uid);
   //   _proveedoresSeleccionadosNotifier.value = currentList;
   //   if (currentList.isEmpty) {
-  //     _isSolicitudGuardadaNotifier.value = false;
+  //     _isSolicitudGuardadaNotifier.value = false;127.0.0.1:6555
   //     _isProveedorAgregadoNotifier.value = false;
   //   }
   // }

@@ -91,6 +91,8 @@ class DraggableSheetState
     });
   }
 
+  void animateToDismiss() async {}
+
   @override
   void dispose() {
     _internalController.removeListener(_onChanged);
@@ -103,7 +105,7 @@ class DraggableSheetState
     if (!_isReadyForInteraction || !_internalController.isAttached) return;
 
     final currentSize = _internalController.size;
-    final double keyboardDismissThreshold = widget.targetInitialSize * 0.90;
+    final double keyboardDismissThreshold = widget.targetInitialSize * 1;
 
     if (currentSize < _lastKnownSheetSize &&
         currentSize < keyboardDismissThreshold) {
@@ -173,102 +175,149 @@ class DraggableSheetState
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (builder, constraints) {
-        return DraggableScrollableSheet(
-          initialChildSize: widget.minSheetSize,
-          maxChildSize: widget.maxSheetSize,
-          minChildSize: widget.minSheetSize,
-          expand: true,
-          snap: true,
-          snapSizes: widget.snapPoints,
-          controller: _internalController,
-          builder: (context, scrollController) {
-            return DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Color(0xff161a50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xff161a50),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: Offset(0, 1),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          if (_internalController.size > widget.minSheetSize + 0.01) {
+            await _internalController.animateTo(
+              widget.minSheetSize,
+              duration: widget.entryAnimationDuration,
+              curve: Curves.easeInOut,
+            );
+            widget.onDismiss?.call();
+          } else {
+            Navigator.of(context).pop(result);
+          }
+        }
+      },
+      child: LayoutBuilder(
+        builder: (builder, constraints) {
+          return DraggableScrollableSheet(
+            initialChildSize: widget.minSheetSize,
+            maxChildSize: widget.maxSheetSize,
+            minChildSize: widget.minSheetSize,
+            expand: true,
+            snap: true,
+            snapSizes: widget.snapPoints,
+            controller: _internalController,
+            builder: (context, scrollController) {
+              return DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: Color(0xff161a50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff161a50),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
                   ),
-                ],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
                 ),
-              ),
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Opacity(
-                            opacity: 0.15,
-                            child: Container(
-                              margin: const EdgeInsets.all(13),
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
+                child: Stack(
+                  children: [
+                    CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Opacity(
+                                  opacity: 0.15,
+                                  child: Container(
+                                    margin: const EdgeInsets.all(13),
+                                    decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      color: Color.fromRGBO(117, 148, 255, 1),
+                                      shape: BoxShape.rectangle,
+                                    ),
+                                    width: 154,
+                                    height: 2,
+                                  ),
                                 ),
-                                color: Color.fromRGBO(117, 148, 255, 1),
-                                shape: BoxShape.rectangle,
-                              ),
-                              width: 154,
-                              height: 2,
-                            ),
-                          ),
-                          const SizedBox(height: 10,),
-                          const Text(
-                            'Brinda más detalle al Proveedor',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                            ),
-                          ),
+                                const SizedBox(height: 10),
+                                const Text(
+                                  'Brinda más detalle al Proveedor',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                  ),
+                                ),
 
-                          FormMultimedia(key: _formMultimediaKey),
-                          const SizedBox(height: 12),
+                                FormMultimedia(key: _formMultimediaKey),
+                                const SizedBox(height: 12),
 
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _accionAgregarSolicitud,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF3645f5),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _accionAgregarSolicitud,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF3645f5),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Guardar Solicitud',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: const Text(
-                                'Guardar Solicitud',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 15,
+                      child: GestureDetector(
+                        onTap: () async {
+                          await _internalController.animateTo(
+                            widget.minSheetSize,
+                            duration: widget.entryAnimationDuration,
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: Container(
+                          width: 27,
+                          height: 27,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF3645f5),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

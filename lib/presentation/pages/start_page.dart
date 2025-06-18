@@ -21,8 +21,8 @@ class _StartPageState extends State<StartPage> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     Timer(const Duration(seconds: 2), () {
-      Navigator.of(context).push(
-        CupertinoPageRoute(builder: (context) => const OnboarndingScreen()),
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const OnboarndingScreen()),
       );
     });
 

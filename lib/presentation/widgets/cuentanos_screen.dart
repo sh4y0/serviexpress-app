@@ -90,15 +90,15 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
 
   void _onNext() {
     if (_currentPage == 0) {
-      // if (_dniController.text.isEmpty ||
-      //     categoriaSeleccionada == null ||
-      //     _experienciaController.text.isEmpty) {
-      //   Alerts.instance.showErrorAlert(
-      //     context,
-      //     "Por favor, completa todos los campos.",
-      //   );
-      //   return;
-      // }
+      if (_dniController.text.isEmpty ||
+          categoriaSeleccionada == null ||
+          _experienciaController.text.isEmpty) {
+        Alerts.instance.showErrorAlert(
+          context,
+          "Por favor, completa todos los campos.",
+        );
+        return;
+      }
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
