@@ -138,7 +138,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
               NotificationManager().showLocalNotification(
                 title: fcmMessage.title ?? 'Notificación',
                 body: fcmMessage.body ?? 'Tienes un nuevo mensaje.',
-                payload: fcmMessage.idServicio,
               );
             }
           }
