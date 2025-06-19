@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/datasources/reniec_api.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
@@ -10,6 +15,7 @@ class UserRepository {
   UserRepository._();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final CollectionReference _usersCollection = FirebaseFirestore.instance
       .collection('users');
 
@@ -111,22 +117,50 @@ class UserRepository {
     await userDoc.update({'latitud': latitude, 'longitud': longitude});
   }
 
-  Future<List<UserModel>> findByCategory(String category) async {
+  Stream<Set<UserModel>> findByCategoryStream(String category) {
     try {
-      final querySnapshot =
-          await _firestore
-              .collection('users')
-              .where('especialidad', isEqualTo: category)
-              .get();
-
-      final users =
-          querySnapshot.docs
-              .map((doc) => UserModel.fromJson(doc.data()))
-              .toList();
-      return users;
+      return _firestore
+          .collection('users')
+          .where('especialidad', isEqualTo: category)
+          .where('isActive', isEqualTo: true)
+          .where('isAvailable', isEqualTo: true)
+          .snapshots()
+          .map((querySnapshot) {
+            return querySnapshot.docs
+                .map((doc) => UserModel.fromJson(doc.data()))
+                .where(
+                  (user) =>
+                      user.especialidad?.isNotEmpty == true &&
+                      user.latitud != null &&
+                      user.longitud != null &&
+                      user.token?.isNotEmpty == true,
+                )
+                .toSet();
+          });
     } catch (e) {
-      return [];
+      return const Stream.empty();
     }
+  }
+
+  Future<bool> getUserAvailability() async {
+    String? userId = await UserPreferences.getUserId();
+
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+    if (doc.exists && doc.data()!.containsKey('isAvailable')) {
+      return doc['isAvailable'] as bool;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> toggleUserAvailability(bool value) async {
+    String? userId = await UserPreferences.getUserId();
+
+    final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    await docRef.set({'isAvailable': value}, SetOptions(merge: true));
   }
 
   Future<String> getUserName(String uid) async {
@@ -190,6 +224,96 @@ class UserRepository {
       }
 
       return UserModel.fromJson(data);
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
+
+  Future<ResultState<String>> desactivateCurrentUserAccount() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        return const Failure(UnknownError("No hay un usuario autenticado."));
+      }
+
+      final uid = user.uid;
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'isActive': false,
+      });
+
+      await FirebaseAuth.instance.signOut();
+      await FirebaseAuth.instance.authStateChanges().first;
+
+      return const Success("Cuenta desactivada exitosamente.");
+    } catch (e) {
+      return Failure(ErrorMapper.map(e));
+    }
+  }
+
+  Future<void> addUserProfilePhoto(File photo, String uid) async {
+    try {
+      final storageRef = _storage
+          .ref()
+          .child('users/profile_photos')
+          .child('$uid.jpg');
+
+      final uploadTask = await storageRef.putFile(photo);
+
+      final imageUrl = await uploadTask.ref.getDownloadURL();
+
+      final userDoc = _firestore.collection('users').doc(uid);
+      await userDoc.update({'imagenUrl': imageUrl});
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
+
+  Future<void> addUserDNIPhoto(File front, File back, String uid) async {
+    try {
+      final frontRef = _storage
+          .ref()
+          .child('users/dni_photos')
+          .child('${uid}_front.jpg');
+
+      final backRef = _storage
+          .ref()
+          .child('users/dni_photos')
+          .child('${uid}_back.jpg');
+
+      final frontUploadTask = await frontRef.putFile(front);
+      final backUploadTask = await backRef.putFile(back);
+
+      final frontUrl = await frontUploadTask.ref.getDownloadURL();
+      final backUrl = await backUploadTask.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'dniFrontImageUrl': frontUrl,
+        'dniBackImageUrl': backUrl,
+      });
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
+
+  Future<void> addUserCriminalRecord(File file, String uid) async {
+    try {
+      final fileExtension = file.path.split('.').last.toLowerCase();
+      if (fileExtension != 'pdf' && fileExtension != 'docx') {
+        throw Exception('Solo se permiten archivos PDF o DOCX.');
+      }
+      final fileRef = _storage
+          .ref()
+          .child('users/criminal_records')
+          .child('$uid.$fileExtension');
+
+      final uploadTask = await fileRef.putFile(file);
+      final fileUrl = await uploadTask.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'criminalRecordUrl': fileUrl,
+      });
     } catch (e) {
       throw ErrorMapper.map(e);
     }
