@@ -4,7 +4,6 @@ import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
-import 'package:serviexpress_app/presentation/widgets/proveedor_model_card.dart';
 
 class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback? onDismiss;
