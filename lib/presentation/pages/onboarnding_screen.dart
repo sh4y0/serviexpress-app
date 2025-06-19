@@ -14,11 +14,12 @@ class OnboarndingScreen extends StatefulWidget {
 
 class _OnboarndingScreenState extends State<OnboarndingScreen> {
   final PageController _controller = PageController();
-  bool isLastPage = false;
+  final ValueNotifier<bool> _isLastPage = ValueNotifier(false);
 
   @override
   void dispose() {
     _controller.dispose();
+    _isLastPage.dispose();
     super.dispose();
   }
 
@@ -37,7 +38,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
                 child: PageView(
                   controller: _controller,
                   onPageChanged: (index) {
-                    setState(() => isLastPage = index == 2);
+                    _isLastPage.value = index == 2;
                   },
                   children: const [
                     _OnboardContent(
@@ -82,10 +83,14 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
                 flex: 2,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child:
-                      isLastPage
+                  child: ValueListenableBuilder(
+                    valueListenable: _isLastPage,
+                    builder: (context, isLastPage, _) {
+                      return isLastPage
                           ? _buildFinalButtons()
-                          : _buildNavigationButtons(),
+                          : _buildNavigationButtons();
+                    },
+                  ),
                 ),
               ),
             ],
