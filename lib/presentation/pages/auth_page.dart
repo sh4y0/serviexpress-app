@@ -214,79 +214,85 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             return ValueListenableBuilder<bool>(
               valueListenable: _isLogin,
               builder: (context, isLogin, _) {
-                return Column(
-                  children: [
-                    _AuthHeader(isLogin: isLogin, onToggle: _toggleAuthMode),
-                    const SizedBox(height: 35),
-                    AnimatedCrossFade(
-                      crossFadeState:
-                          isLogin
-                              ? CrossFadeState.showFirst
-                              : CrossFadeState.showSecond,
-                      firstChild: ValueListenableBuilder<bool>(
-                        valueListenable: _obscurePasswordLogin,
-                        builder: (context, obscurePasswordLogin, _) {
-                          return _LoginFormWidget(
-                            formKey: _formLoginKey,
-                            emailController: _emailLoginController,
-                            passwordController: _passwordLoginController,
-                            obscurePassword: obscurePasswordLogin,
-                            onTogglePasswordVisibility:
-                                () =>
-                                    _obscurePasswordLogin.value =
-                                        !_obscurePasswordLogin.value,
-                            onLogin: _performLogin,
-                            onForgotPassword: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.recoveryPassword,
-                              );
-                            },
-                            onSwitchToSignup: _toggleAuthMode,
-                            ref: ref,
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 65,
+                    horizontal: 24,
+                  ),
+                  child: Column(
+                    children: [
+                      _AuthHeader(isLogin: isLogin, onToggle: _toggleAuthMode),
+                      const SizedBox(height: 35),
+                      AnimatedCrossFade(
+                        crossFadeState:
+                            isLogin
+                                ? CrossFadeState.showFirst
+                                : CrossFadeState.showSecond,
+                        firstChild: ValueListenableBuilder<bool>(
+                          valueListenable: _obscurePasswordLogin,
+                          builder: (context, obscurePasswordLogin, _) {
+                            return _LoginFormWidget(
+                              formKey: _formLoginKey,
+                              emailController: _emailLoginController,
+                              passwordController: _passwordLoginController,
+                              obscurePassword: obscurePasswordLogin,
+                              onTogglePasswordVisibility:
+                                  () =>
+                                      _obscurePasswordLogin.value =
+                                          !_obscurePasswordLogin.value,
+                              onLogin: _performLogin,
+                              onForgotPassword: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.recoveryPassword,
+                                );
+                              },
+                              onSwitchToSignup: _toggleAuthMode,
+                              ref: ref,
+                            );
+                          },
+                        ),
+                        secondChild: ValueListenableBuilder<bool>(
+                          valueListenable: _obscurePasswordSignup,
+                          builder: (context, obscurePasswordSignup, _) {
+                            return _SignupFormWidget(
+                              formKey: _formSignupKey,
+                              usuarioController: _usuarioSignupController,
+                              dniController: _dniSignupController,
+                              emailController: _emailSignupController,
+                              passwordController: _passwordSignupController,
+                              obscurePassword: obscurePasswordSignup,
+                              onTogglePasswordVisibility:
+                                  () =>
+                                      _obscurePasswordSignup.value =
+                                          !_obscurePasswordSignup.value,
+                              onSignup: _performSignup,
+                              onSwitchToLogin: _toggleAuthMode,
+                              ref: ref,
+                            );
+                          },
+                        ),
+                        duration: const Duration(milliseconds: 500),
+                        firstCurve: Curves.easeOutQuart,
+                        secondCurve: Curves.easeInQuart,
+                        sizeCurve: Curves.easeInOutCubic,
+                        layoutBuilder: (
+                          topChild,
+                          topKey,
+                          bottomChild,
+                          bottomKey,
+                        ) {
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(key: bottomKey, child: bottomChild),
+                              Positioned(key: topKey, child: topChild),
+                            ],
                           );
                         },
                       ),
-                      secondChild: ValueListenableBuilder<bool>(
-                        valueListenable: _obscurePasswordSignup,
-                        builder: (context, obscurePasswordSignup, _) {
-                          return _SignupFormWidget(
-                            formKey: _formSignupKey,
-                            usuarioController: _usuarioSignupController,
-                            dniController: _dniSignupController,
-                            emailController: _emailSignupController,
-                            passwordController: _passwordSignupController,
-                            obscurePassword: obscurePasswordSignup,
-                            onTogglePasswordVisibility:
-                                () =>
-                                    _obscurePasswordSignup.value =
-                                        !_obscurePasswordSignup.value,
-                            onSignup: _performSignup,
-                            onSwitchToLogin: _toggleAuthMode,
-                            ref: ref,
-                          );
-                        },
-                      ),
-                      duration: const Duration(milliseconds: 500),
-                      firstCurve: Curves.easeOutQuart,
-                      secondCurve: Curves.easeInQuart,
-                      sizeCurve: Curves.easeInOutCubic,
-                      layoutBuilder: (
-                        topChild,
-                        topKey,
-                        bottomChild,
-                        bottomKey,
-                      ) {
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Positioned(key: bottomKey, child: bottomChild),
-                            Positioned(key: topKey, child: topChild),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             );
