@@ -106,7 +106,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
            "Por favor, completa todos los campos.",
          );
          return;
-       }
+       }      
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
