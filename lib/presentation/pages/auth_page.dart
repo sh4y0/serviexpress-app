@@ -50,21 +50,21 @@ class AuthPage extends ConsumerStatefulWidget {
 }
 
 class _AuthPageState extends ConsumerState<AuthPage> {
-  bool _isLogin = true;
-
   final _formLoginKey = GlobalKey<FormState>();
   final _emailLoginController = TextEditingController();
   final _passwordLoginController = TextEditingController();
-  bool _obscurePasswordLogin = true;
+  final ValueNotifier<bool> _obscurePasswordLogin = ValueNotifier<bool>(true);
 
   final _formSignupKey = GlobalKey<FormState>();
   final _usuarioSignupController = TextEditingController();
   final _dniSignupController = TextEditingController();
   final _emailSignupController = TextEditingController();
   final _passwordSignupController = TextEditingController();
-  bool _obscurePasswordSignup = true;
+  final ValueNotifier<bool> _obscurePasswordSignup = ValueNotifier<bool>(true);
 
   late Future<void> _preloadFuture;
+
+  final ValueNotifier<bool> _isLogin = ValueNotifier<bool>(true);
 
   @override
   void initState() {
@@ -92,10 +92,13 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   void dispose() {
     _emailLoginController.dispose();
     _passwordLoginController.dispose();
+    _obscurePasswordLogin.dispose();
     _usuarioSignupController.dispose();
     _dniSignupController.dispose();
     _emailSignupController.dispose();
     _passwordSignupController.dispose();
+    _obscurePasswordSignup.dispose();
+    _isLogin.dispose();
     super.dispose();
   }
 
@@ -181,7 +184,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   }
 
   void _toggleAuthMode() {
-    setState(() => _isLogin = !_isLogin);
+    _isLogin.value = !_isLogin.value;
   }
 
   @override
@@ -211,71 +214,151 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               );
             }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-              child: Column(
-                children: [
-                  _AuthHeader(isLogin: _isLogin, onToggle: _toggleAuthMode),
-                  const SizedBox(height: 35),
-                  AnimatedCrossFade(
-                    crossFadeState:
-                        _isLogin
-                            ? CrossFadeState.showFirst
-                            : CrossFadeState.showSecond,
-                    firstChild: _LoginFormWidget(
-                      formKey: _formLoginKey,
-                      emailController: _emailLoginController,
-                      passwordController: _passwordLoginController,
-                      obscurePassword: _obscurePasswordLogin,
-                      onTogglePasswordVisibility:
-                          () => setState(
-                            () =>
-                                _obscurePasswordLogin = !_obscurePasswordLogin,
-                          ),
-                      onLogin: _performLogin,
-                      onForgotPassword: () {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.recoveryPassword,
+            return ValueListenableBuilder<bool>(
+              valueListenable: _isLogin,
+              builder: (context, isLogin, _) {
+                return Column(
+                  children: [
+                    _AuthHeader(isLogin: isLogin, onToggle: _toggleAuthMode),
+                    const SizedBox(height: 35),
+                    AnimatedCrossFade(
+                      crossFadeState:
+                          isLogin
+                              ? CrossFadeState.showFirst
+                              : CrossFadeState.showSecond,
+                      firstChild: ValueListenableBuilder<bool>(
+                        valueListenable: _obscurePasswordLogin,
+                        builder: (context, obscurePasswordLogin, _) {
+                          return _LoginFormWidget(
+                            formKey: _formLoginKey,
+                            emailController: _emailLoginController,
+                            passwordController: _passwordLoginController,
+                            obscurePassword: obscurePasswordLogin,
+                            onTogglePasswordVisibility:
+                                () =>
+                                    _obscurePasswordLogin.value =
+                                        !_obscurePasswordLogin.value,
+                            onLogin: _performLogin,
+                            onForgotPassword: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.recoveryPassword,
+                              );
+                            },
+                            onSwitchToSignup: _toggleAuthMode,
+                            ref: ref,
+                          );
+                        },
+                      ),
+                      secondChild: ValueListenableBuilder<bool>(
+                        valueListenable: _obscurePasswordSignup,
+                        builder: (context, obscurePasswordSignup, _) {
+                          return _SignupFormWidget(
+                            formKey: _formSignupKey,
+                            usuarioController: _usuarioSignupController,
+                            dniController: _dniSignupController,
+                            emailController: _emailSignupController,
+                            passwordController: _passwordSignupController,
+                            obscurePassword: obscurePasswordSignup,
+                            onTogglePasswordVisibility:
+                                () =>
+                                    _obscurePasswordSignup.value =
+                                        !_obscurePasswordSignup.value,
+                            onSignup: _performSignup,
+                            onSwitchToLogin: _toggleAuthMode,
+                            ref: ref,
+                          );
+                        },
+                      ),
+                      duration: const Duration(milliseconds: 500),
+                      firstCurve: Curves.easeOutQuart,
+                      secondCurve: Curves.easeInQuart,
+                      sizeCurve: Curves.easeInOutCubic,
+                      layoutBuilder: (
+                        topChild,
+                        topKey,
+                        bottomChild,
+                        bottomKey,
+                      ) {
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(key: bottomKey, child: bottomChild),
+                            Positioned(key: topKey, child: topChild),
+                          ],
                         );
                       },
-                      onSwitchToSignup: _toggleAuthMode,
-                      ref: ref,
                     ),
-                    secondChild: _SignupFormWidget(
-                      formKey: _formSignupKey,
-                      usuarioController: _usuarioSignupController,
-                      dniController: _dniSignupController,
-                      emailController: _emailSignupController,
-                      passwordController: _passwordSignupController,
-                      obscurePassword: _obscurePasswordSignup,
-                      onTogglePasswordVisibility:
-                          () => setState(
-                            () =>
-                                _obscurePasswordSignup =
-                                    !_obscurePasswordSignup,
-                          ),
-                      onSignup: _performSignup,
-                      onSwitchToLogin: _toggleAuthMode,
-                      ref: ref,
-                    ),
-                    duration: const Duration(milliseconds: 500),
-                    firstCurve: Curves.easeOutQuart,
-                    secondCurve: Curves.easeInQuart,
-                    sizeCurve: Curves.easeInOutCubic,
-                    layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Positioned(key: bottomKey, child: bottomChild),
-                          Positioned(key: topKey, child: topChild),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
             );
+
+            // return SingleChildScrollView(
+            //   padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+            //   child: Column(
+            //     children: [
+            //       _AuthHeader(isLogin: _isLogin, onToggle: _toggleAuthMode),
+            //       const SizedBox(height: 35),
+            //       AnimatedCrossFade(
+            //         crossFadeState:
+            //             _isLogin
+            //                 ? CrossFadeState.showFirst
+            //                 : CrossFadeState.showSecond,
+            //         firstChild: _LoginFormWidget(
+            //           formKey: _formLoginKey,
+            //           emailController: _emailLoginController,
+            //           passwordController: _passwordLoginController,
+            //           obscurePassword: _obscurePasswordLogin,
+            //           onTogglePasswordVisibility:
+            //               () => setState(
+            //                 () =>
+            //                     _obscurePasswordLogin = !_obscurePasswordLogin,
+            //               ),
+            //           onLogin: _performLogin,
+            //           onForgotPassword: () {
+            //             Navigator.pushNamed(
+            //               context,
+            //               AppRoutes.recoveryPassword,
+            //             );
+            //           },
+            //           onSwitchToSignup: _toggleAuthMode,
+            //           ref: ref,
+            //         ),
+            //         secondChild: _SignupFormWidget(
+            //           formKey: _formSignupKey,
+            //           usuarioController: _usuarioSignupController,
+            //           dniController: _dniSignupController,
+            //           emailController: _emailSignupController,
+            //           passwordController: _passwordSignupController,
+            //           obscurePassword: _obscurePasswordSignup,
+            //           onTogglePasswordVisibility:
+            //               () => setState(
+            //                 () =>
+            //                     _obscurePasswordSignup =
+            //                         !_obscurePasswordSignup,
+            //               ),
+            //           onSignup: _performSignup,
+            //           onSwitchToLogin: _toggleAuthMode,
+            //           ref: ref,
+            //         ),
+            //         duration: const Duration(milliseconds: 500),
+            //         firstCurve: Curves.easeOutQuart,
+            //         secondCurve: Curves.easeInQuart,
+            //         sizeCurve: Curves.easeInOutCubic,
+            //         layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
+            //           return Stack(
+            //             clipBehavior: Clip.none,
+            //             children: [
+            //               Positioned(key: bottomKey, child: bottomChild),
+            //               Positioned(key: topKey, child: topChild),
+            //             ],
+            //           );
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            // );
           },
         ),
       ),
