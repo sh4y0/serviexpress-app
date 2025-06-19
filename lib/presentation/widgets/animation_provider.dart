@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class AnimationProvider extends StatefulWidget {
-  const AnimationProvider({super.key});
+  final bool showAnimation;
+
+  const AnimationProvider({super.key, required this.showAnimation});
 
   @override
   State<AnimationProvider> createState() => _AnimationProviderState();
@@ -19,7 +21,23 @@ class _AnimationProviderState extends State<AnimationProvider>
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
-    )..repeat();
+    );
+
+    if (widget.showAnimation) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(AnimationProvider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.showAnimation != oldWidget.showAnimation) {
+      if (widget.showAnimation) {
+        _controller.repeat();
+      } else {
+        _controller.stop();
+      }
+    }
   }
 
   @override
@@ -59,37 +77,96 @@ class _AnimationProviderState extends State<AnimationProvider>
     );
   }
 
+  Widget buildSearchingContent() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 80),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            buildAnimatedCircle(0.0),
+            buildAnimatedCircle(0.33),
+            buildAnimatedCircle(0.66),
+            SvgPicture.asset("assets/icons/ic_location.svg"),
+          ],
+        ),
+        const SizedBox(height: 80),
+        const Text(
+          "Empezando a buscar solicitudes",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "cercanas a ti",
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget buildNotActiveContent() {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.access_time_filled, size: 150, color: Colors.orangeAccent),
+        SizedBox(height: 20),
+        Text(
+          "Activa tu disponibilidad",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          "para empezar a buscar solicitudes",
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.bgVerification,
       body: Center(
-        child: SizedBox.expand(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 80),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  buildAnimatedCircle(0.0),
-                  buildAnimatedCircle(0.33),
-                  buildAnimatedCircle(0.66),
-                  SvgPicture.asset("assets/icons/ic_location.svg"),
-                ],
-              ),
-              const SizedBox(height: 80),
-
-              const Text(
-                "Buscando solicitudes cerca",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 600),
+          switchInCurve: Curves.easeOutBack,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(scale: animation, child: child),
+            );
+          },
+          child:
+              widget.showAnimation
+                  ? KeyedSubtree(
+                    key: const ValueKey('searching'),
+                    child: buildSearchingContent(),
+                  )
+                  : KeyedSubtree(
+                    key: const ValueKey('notActive'),
+                    child: buildNotActiveContent(),
+                  ),
         ),
       ),
     );
