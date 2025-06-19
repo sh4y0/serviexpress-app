@@ -15,6 +15,7 @@ import 'package:serviexpress_app/presentation/widgets/category_button.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class MapMovementController {
@@ -64,19 +65,29 @@ class _HomePageContentState extends State<HomePageContent> {
   final ValueNotifier<bool> _shouldShowSheet = ValueNotifier(true);
   final ValueNotifier<double> _keyboardHeight = ValueNotifier(0.0);
   final ValueNotifier<int> _selectedCategoryIndex = ValueNotifier(-1);
-  final ValueNotifier<List<UserModel>> _currentProvidersNotifier = ValueNotifier([]);
-  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier = ValueNotifier([]);
-  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier = ValueNotifier(false);
-  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier = ValueNotifier(null);
-  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(null,);
+  final ValueNotifier<Set<UserModel>> _currentProvidersNotifier = ValueNotifier(
+    {},
+  );
+  final ValueNotifier<List<UserModel>> _proveedoresSeleccionadosNotifier =
+      ValueNotifier([]);
+  final ValueNotifier<bool> _isSheetVisibleSolicitarServicioNotifier =
+      ValueNotifier(false);
+  final ValueNotifier<bool> _isSheetVisibleDetalleProveedorNotifier =
+      ValueNotifier(false);
+  final ValueNotifier<ServiceModel?> _datosSolicitudGuardadaNotifier =
+      ValueNotifier(null);
+  final ValueNotifier<UserModel?> _selectedProviderNotifier = ValueNotifier(
+    null,
+  );
   final ValueNotifier<bool> _categoriaErrorNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isSolicitudGuardadaNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isProveedorAgregadoNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _isTappedSolicitarServicioNotifier = ValueNotifier(false);
-  final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(false);
-
-   final ValueNotifier<List<UserModel>> _proveedoresNotifier = ValueNotifier([]);
+  final ValueNotifier<bool> _isTappedSolicitarServicioNotifier = ValueNotifier(
+    false,
+  );
+  final ValueNotifier<bool> _hasShownMarkerTutorialNotifier = ValueNotifier(
+    false,
+  );
 
   bool _isZoomedIn = false;
   bool _isMapBeingMoved = false;
@@ -88,13 +99,15 @@ class _HomePageContentState extends State<HomePageContent> {
   late GoogleMapController mapController;
   String? _categoriaTemporalDeSheet2;
 
-  final ValueNotifier<bool> _shouldShowSecondTutorialStepNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _shouldShowSecondTutorialStepNotifier =
+      ValueNotifier(false);
   bool _pendingSecondTutorial = false;
   final GlobalKey _firstCategoryKey = GlobalKey();
   final GlobalKey _locationButtonKey = GlobalKey();
   final GlobalKey _describirServicioKey = GlobalKey();
   TutorialCoachMark? _tutorialCoachMark;
   final List<TargetFocus> _targets = [];
+  StreamSubscription<Set<UserModel>>? _userStreamSubscription;
 
   @override
   void initState() {
@@ -122,7 +135,7 @@ class _HomePageContentState extends State<HomePageContent> {
       onClickTarget: (target) {
         _onCategorySelected(0);
         _shouldShowSecondTutorialStepNotifier.value = true;
-      }
+      },
     ).show(context: context);
   }
 
@@ -190,21 +203,18 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   Future<void> _initializeLocation() async {
-    bool hasPermission = await _checkLocationPermission();
-    if (!hasPermission) return;
-    try {
-      Position? position =
-          await Geolocator.getLastKnownPosition() ??
-          await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high,
-          );
-      final newPosition = LatLng(position.latitude, position.longitude);
-      _currentPositionNotifier.value = newPosition;
-      _updateMarkers();
-    } catch (e) {
-      debugPrint('Error al inicializar la ubicación: $e');
-    }
+  bool hasPermission = await _checkLocationPermission();
+  if (!hasPermission) return;
+  
+  try {
+    final position = await LocationMapsService().getCurrentPosition();
+    final newPosition = LatLng(position.latitude, position.longitude);
+    _currentPositionNotifier.value = newPosition;
+    _updateMarkers();
+  } catch (e) {
+    debugPrint('Error al inicializar la ubicación: $e');
   }
+}
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -213,11 +223,23 @@ class _HomePageContentState extends State<HomePageContent> {
         widget.onMapLoaded(true);
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
-            _showFirstTutorialStep();
+            //_showFirstTutorialStep();
+            _checkAndShowTutorial();
           }
         });
       }
     });
+  }
+
+   void _checkAndShowTutorial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool tutorialMostrado = prefs.getBool('tutorial_mostrado') ?? false;
+
+    if (!tutorialMostrado) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showFirstTutorialStep();
+      });
+    }
   }
 
   void _loadMarkerIcon() async {
@@ -291,9 +313,7 @@ class _HomePageContentState extends State<HomePageContent> {
     bool hasPermission = await _checkLocationPermission();
     if (!hasPermission) return;
     try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      Position position = await LocationMapsService().getCurrentPosition();
       final newPosition = LatLng(position.latitude, position.longitude);
       bool shouldUpdate =
           forceUpdate ||
@@ -337,7 +357,7 @@ class _HomePageContentState extends State<HomePageContent> {
           position: currentPosition,
           icon: _locationMarkerIcon ?? BitmapDescriptor.defaultMarker,
           anchor: const Offset(0.5, 0.5),
-          zIndex: 2,
+          zIndexInt: 2,
           onTap: _animateCameraBasedOnZoomState,
         ),
       );
@@ -359,7 +379,7 @@ class _HomePageContentState extends State<HomePageContent> {
               _providerMarkerIcon ??
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           anchor: const Offset(0.5, 1.0),
-          zIndex: 1,
+          zIndexInt: 1,
           onTap: () {
             _selectedProviderNotifier.value = provider;
             _currentlyOpenInfoWindowMarkerId = markerId;
@@ -387,47 +407,53 @@ class _HomePageContentState extends State<HomePageContent> {
     }
   }
 
-  void _onCategorySelected(int index) async {
+  void _onCategorySelected(int index) {
     _selectedCategoryIndex.value = index;
     _categoriaErrorNotifier.value = false;
-    
+
     if (index >= 0 && index < CategoryMock.getCategories().length) {
       String selectedCategory = CategoryMock.getCategories()[index].name;
-      final providers = await UserRepository.instance.findByCategory(
-        selectedCategory,
-      );
-      _currentProvidersNotifier.value = providers;
+      _userStreamSubscription?.cancel();
 
-      if (_shouldShowSecondTutorialStepNotifier.value && providers.isNotEmpty) {
-        _pendingSecondTutorial = true;
-        _shouldShowSecondTutorialStepNotifier.value = false;
+      _userStreamSubscription = UserRepository.instance
+          .findByCategoryStream(selectedCategory)
+          .listen((providers) {
+            _currentProvidersNotifier.value = providers;
 
-      } else if (_shouldShowSecondTutorialStepNotifier.value &&
-          providers.isEmpty) {
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          _showFallbackTutorial,
-        );
-        _shouldShowSecondTutorialStepNotifier.value = false;
-      }
-      _updateMarkers();
-      if (providers.isNotEmpty) {
-        _activeProgrammaticOperationId =
-            'category_selection_adjust_${DateTime.now().millisecondsSinceEpoch}';
-        _movementController.startProgrammaticMove(
-          _activeProgrammaticOperationId!,
-        );
-        _adjustCameraToShowAllMarkers();
-      }
+            if (_shouldShowSecondTutorialStepNotifier.value &&
+                providers.isNotEmpty) {
+              _pendingSecondTutorial = true;
+              _shouldShowSecondTutorialStepNotifier.value = false;
+            } else if (_shouldShowSecondTutorialStepNotifier.value &&
+                providers.isEmpty) {
+              Future.delayed(
+                const Duration(milliseconds: 500),
+                _showFallbackTutorial,
+              );
+              _shouldShowSecondTutorialStepNotifier.value = false;
+            }
+
+            _updateMarkers();
+
+            if (providers.isNotEmpty) {
+              _activeProgrammaticOperationId =
+                  'category_selection_adjust_${DateTime.now().millisecondsSinceEpoch}';
+              _movementController.startProgrammaticMove(
+                _activeProgrammaticOperationId!,
+              );
+              _adjustCameraToShowAllMarkers();
+            }
+          });
     } else {
-      _currentProvidersNotifier.value = [];
+      _userStreamSubscription?.cancel();
+      _currentProvidersNotifier.value = {};
       _updateMarkers();
     }
   }
 
   void _adjustCameraToShowAllMarkers() {
     if (_currentProvidersNotifier.value.isEmpty) return;
-    List<UserModel> providers = _currentProvidersNotifier.value;
+    Set<UserModel> providers = _currentProvidersNotifier.value;
     double minLat = providers.first.latitud!;
     double maxLat = providers.first.latitud!;
     double minLng = providers.first.longitud!;
@@ -499,7 +525,7 @@ class _HomePageContentState extends State<HomePageContent> {
     if (_activeProgrammaticOperationId != null) {
       _movementController.endProgrammaticMove(_activeProgrammaticOperationId!);
       _activeProgrammaticOperationId = null;
-      
+
       if (_pendingSecondTutorial) {
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted && _currentProvidersNotifier.value.isNotEmpty) {
@@ -542,7 +568,7 @@ class _HomePageContentState extends State<HomePageContent> {
         final bool isVisible =
             screenCoordinate.y > topPadding &&
             screenCoordinate.y > (screenHeight - bottomSheetHeight);
-      
+
         if (isVisible) {
           _showTutorialForMarkerAt(screenCoordinate);
           return;
@@ -555,6 +581,7 @@ class _HomePageContentState extends State<HomePageContent> {
     }
     _showFallbackTutorial();
   }
+
   void _showTutorialForMarkerAt(ScreenCoordinate markerCoordinate) {
     const double highlightSize = 120.0;
     final double centerX = markerCoordinate.x / 2;
@@ -670,7 +697,7 @@ class _HomePageContentState extends State<HomePageContent> {
       },
       onClickTarget: (target) {
         _toggleZoom();
-        Future.delayed(const Duration(seconds: 2), _showFourthTutorialStep);
+        Future.delayed(const Duration(seconds: 1), _showFourthTutorialStep);
       },
       hideSkip: true,
       paddingFocus: 10,
@@ -721,7 +748,18 @@ class _HomePageContentState extends State<HomePageContent> {
       textSkip: "FINALIZAR",
       paddingFocus: 10,
       opacityShadow: 0.8,
+      onFinish: () => _marcarTutorialComoMostrado(),
+      onSkip: () {
+        _marcarTutorialComoMostrado();
+        return true;
+      }
     )..show(context: context);
+  }
+
+  Future<void> _marcarTutorialComoMostrado() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('tutorial_mostrado', true);
+
   }
 
   void _showFallbackTutorial() {
@@ -856,7 +894,7 @@ class _HomePageContentState extends State<HomePageContent> {
   //   currentList.removeWhere((p) => p.uid == proveedor.uid);
   //   _proveedoresSeleccionadosNotifier.value = currentList;
   //   if (currentList.isEmpty) {
-  //     _isSolicitudGuardadaNotifier.value = false;
+  //     _isSolicitudGuardadaNotifier.value = false;127.0.0.1:6555
   //     _isProveedorAgregadoNotifier.value = false;
   //   }
   // }
@@ -971,8 +1009,7 @@ class _HomePageContentState extends State<HomePageContent> {
           ),
         ),
 
-
-          ValueListenableBuilder<bool>(
+        ValueListenableBuilder<bool>(
           valueListenable: _shouldShowSheet,
           builder: (context, shouldShow, _) {
             return AnimatedPositioned(
@@ -982,73 +1019,78 @@ class _HomePageContentState extends State<HomePageContent> {
               left: 0,
               right: 0,
               bottom: shouldShow ? 0 : -mediaQuery.size.height,
-              child: ValueListenableBuilder<List<UserModel>>(
+              child: ValueListenableBuilder<Set<UserModel>>(
                 valueListenable: _currentProvidersNotifier,
                 builder: (context, proveedores, _) {
-                      return Stack(
-                        children: [
-                          AnimatedPositioned(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            left: 0,
-                            right: 0,
-                            bottom:
-                                shouldShow
-                                    ? 0
-                                    : -MediaQuery.of(context).size.height,
-                            top: 0,
-                            child: DraggableSheetSolicitarServicio(
-                              detallarServicioKey: _describirServicioKey,
-                              targetInitialSize: 0.21,
-                              minSheetSize: 0.21,
-                              maxSheetSize: 0.21,
-                              snapPoints: const [0.35],
-                              onTapPressed: () {
-                                if (_selectedCategoryIndex.value == -1) {
-                                  _categoriaErrorNotifier.value = true;
-                                  return;
-                                }
-                                _requestService();
-                              },
-                              onCategoriaError: () => _categoriaErrorNotifier.value = true,
-                              categoriaError: _categoriaErrorNotifier.value,
-                              selectedCategoryIndex: _selectedCategoryIndex.value,
-                              onAbrirDetallesPressed:
-                                  (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
-                              datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
-                              onProveedores: proveedores,
-                              isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
-                              onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: mediaQuery.size.height * 0.22,
-                            right: 10,
-                            child: FloatingActionButton(
-                              key: _locationButtonKey,
-                              heroTag: 'fabHomeRightsheet',
-                              shape: const CircleBorder(),
-                              backgroundColor: const Color(0xFF4a66ff),
-                              onPressed: _toggleZoom,
-                              child: SvgPicture.asset(
-                                'assets/icons/ic_current_location.svg',
-                                width: 26,
-                                height: 26,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
-                                  BlendMode.srcIn,
-                                ),
+                  return Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        left: 0,
+                        right: 0,
+                        bottom:
+                            shouldShow
+                                ? 0
+                                : -MediaQuery.of(context).size.height,
+                        top: 0,
+                        child: DraggableSheetSolicitarServicio(
+                          detallarServicioKey: _describirServicioKey,
+                          targetInitialSize: 0.21,
+                          minSheetSize: 0.21,
+                          maxSheetSize: 0.21,
+                          snapPoints: const [0.35],
+                          onTapPressed: () {
+                            if (_selectedCategoryIndex.value == -1) {
+                              _categoriaErrorNotifier.value = true;
+                              return;
+                            }
+                            _requestService();
+                          },
+                          onCategoriaError:
+                              () => _categoriaErrorNotifier.value = true,
+                          categoriaError: _categoriaErrorNotifier.value,
+                          selectedCategoryIndex: _selectedCategoryIndex.value,
+                          onAbrirDetallesPressed:
+                              (isVisible) => _abrirSheetDetalladoDesdeSheet2(
+                                isSheetVisibleSolicitarServicio: isVisible,
                               ),
+                          datosSolicitudExistente:
+                              _datosSolicitudGuardadaNotifier.value,
+                          onProveedores: proveedores,
+                          isSolicitudGuardada:
+                              _isSolicitudGuardadaNotifier.value,
+                          onPressedSolicitarServicio:
+                              _isSolicitudServicioOnTapped,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: mediaQuery.size.height * 0.22,
+                        right: 10,
+                        child: FloatingActionButton(
+                          key: _locationButtonKey,
+                          heroTag: 'fabHomeRightsheet',
+                          shape: const CircleBorder(),
+                          backgroundColor: const Color(0xFF4a66ff),
+                          onPressed: _toggleZoom,
+                          child: SvgPicture.asset(
+                            'assets/icons/ic_current_location.svg',
+                            width: 26,
+                            height: 26,
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
                             ),
                           ),
-                        ],
-                      );
+                        ),
+                      ),
+                    ],
+                  );
                 },
               ),
             );
           },
         ),
-
 
         // ValueListenableBuilder<bool>(
         //   valueListenable: _shouldShowSheet,
@@ -1145,7 +1187,6 @@ class _HomePageContentState extends State<HomePageContent> {
         //     );
         //   },
         // ),
-
         ValueListenableBuilder<bool>(
           valueListenable: _isSheetVisibleSolicitarServicioNotifier,
           builder: (context, isVisible, _) {
@@ -1239,6 +1280,7 @@ class _HomePageContentState extends State<HomePageContent> {
     _isTappedSolicitarServicioNotifier.dispose();
     _shouldShowSecondTutorialStepNotifier.dispose();
     _mapInteractionTimer?.cancel();
+    _userStreamSubscription?.cancel();
     super.dispose();
   }
 }
