@@ -14,31 +14,36 @@ class CategoryMock{
       CategoryModel(
         id: '1',
         name: 'Limpieza',
-        iconPath: 'assets/icons/ic_clean.svg',
+        iconPath: 'assets/icons/ic_clean2.svg',
       ),
       CategoryModel(
         id: '2',
-        name: 'Reparador',
-        iconPath: 'assets/icons/ic_repair.svg',
+        name: 'Tecno',
+        iconPath: 'assets/icons/ic_laptop.svg',
       ),
       CategoryModel(
         id: '3',
-        name: 'Pintor',
-        iconPath: 'assets/icons/ic_pest.svg',
+        name: 'Soldadura',
+        iconPath: 'assets/icons/ic_welding.svg',
       ),
       CategoryModel(
         id: '4',
-        name: 'Mecanico',
-        iconPath: 'assets/icons/ic_food.svg',
+        name: 'Electricidad',
+        iconPath: 'assets/icons/ic_electricity.svg',
       ),
       CategoryModel(
         id: '5',
-        name: 'Electronico',
-        iconPath: 'assets/icons/ic_clean.svg',
+        name: 'Pintura',
+        iconPath: 'assets/icons/ic_brush.svg',
       ),
       CategoryModel(
         id: '6',
-        name: 'Striper',
+        name: 'Plomeria',
+        iconPath: 'assets/icons/ic_plumber.svg',
+      ),
+      CategoryModel(
+        id: '7',
+        name: 'Stripper',
         iconPath: 'assets/icons/ic_repair.svg',
       ),
     ];
