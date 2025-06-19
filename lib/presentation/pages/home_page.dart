@@ -8,7 +8,7 @@ import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/pages/home_page_content.dart';
-import 'package:serviexpress_app/presentation/viewmodels/skeleton_home.dart';
+import 'package:serviexpress_app/presentation/widgets/skeleton_home.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 
 class HomePage extends StatefulWidget {
