@@ -20,7 +20,7 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
   //final List<UserModel> proveedoresSeleccionados;
-  final List<UserModel> onProveedores;
+  final Set<UserModel> onProveedores;
   final Function(UserModel)? onProveedorRemovido;
   //final Function(UserModel)? onProveedorTapped;
 
@@ -75,7 +75,7 @@ class DraggableSheetSolicitarServicioState
   bool _isDismissing = false;
   bool _descripcionError = false;
 
-  final List<String> proveedoresSeleccionadosId = [];
+  final Set<String> proveedoresSeleccionadosId = {};
 
   @override
   void initState() {
@@ -428,9 +428,8 @@ class DraggableSheetSolicitarServicioState
                                     //         widget.datosSolicitudExistente!,
                                     //       );
                                     // }
-
                                     if (widget.datosSolicitudExistente != null) {
-                                      if (widget.onProveedores.isNotEmpty) {                                      
+                                      if (widget.onProveedores.isNotEmpty) {                                  
                                         for (var proveedor in widget.onProveedores) {
                                           proveedoresSeleccionadosId.add(proveedor.uid);
                                         }

@@ -53,10 +53,18 @@ class FormularioMultimediaState extends State<FormMultimedia>
   List<File> get videos => videosNotifier.value;
   List<File> get audios => audiosNotifier.value;
 
+  final ValueNotifier<bool> isTextFieldReadOnlyNotifier = ValueNotifier(true);
+
   @override
   void initState() {
     super.initState();
     _initAnimations();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).requestFocus(focusNodeSegundo);
+      }
+    });
   }
 
   void _initAnimations() {
@@ -89,22 +97,43 @@ class FormularioMultimediaState extends State<FormMultimedia>
     );
   }
 
-  void setInitialData(
+  Future<void> setInitialData(
     String categoria,
     String description,
     List<File> initialImages,
     List<File> initialVideos,
     List<File> initialAudios,
-  ) {
+  ) async {
     if (mounted) {
       descripcionController.text = description;
       imagesNotifier.value = initialImages;
       videosNotifier.value = initialVideos;
 
+      for (var player in audioPlayersNotifier.value) {
+        player.dispose();
+      }
+
+      final newPlayers = <AudioPlayer>[];
+      for (var audioFile in initialAudios) {
+        final player = AudioPlayer();
+        try {
+          await player.setFilePath(audioFile.path);
+          newPlayers.add(player);
+        } catch (e) {
+          debugPrint(
+            "Error al cargar el archivo de audio ${audioFile.path}: $e",
+          );
+        }
+      }
+
+      audioPlayersNotifier.value = newPlayers;
+      audiosNotifier.value = initialAudios;
+
       isExpandedNotifier.value =
           description.isNotEmpty ||
           initialImages.isNotEmpty ||
-          initialVideos.isNotEmpty;
+          initialVideos.isNotEmpty ||
+          initialAudios.isNotEmpty;
     }
   }
 
@@ -274,7 +303,8 @@ class FormularioMultimediaState extends State<FormMultimedia>
   bool hasContent() {
     return descripcionController.text.isNotEmpty ||
         imagesNotifier.value.isNotEmpty ||
-        videosNotifier.value.isNotEmpty;
+        videosNotifier.value.isNotEmpty ||
+        audiosNotifier.value.isNotEmpty;
   }
 
   void mostrarErrorDescripcion() {
@@ -452,49 +482,58 @@ class FormularioMultimediaState extends State<FormMultimedia>
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextField(
-                            controller: descripcionController,
-                            focusNode: focusNodeSegundo,
-                            autofocus: true,
-                            maxLines: null,
-                            keyboardType: TextInputType.multiline,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                            decoration: InputDecoration(
-                              hintText:
-                                  "Cuéntanos con más detalle qué necesitas...",
-                              hintStyle: TextStyle(
-                                color:
-                                    descripcionErrorNotifier.value
-                                        ? Colors.red
-                                        : const Color.fromRGBO(
-                                          194,
-                                          215,
-                                          255,
-                                          0.6,
-                                        ),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                              ),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                            ),
-                            cursorColor: Colors.white,
-                            onTap: () {
-                              if (!isExpandedNotifier.value) {
-                                isExpandedNotifier.value = true;
-                              }
-                            },
-                            onChanged: (text) {
-                              if (text.isNotEmpty) {
-                                descripcionErrorNotifier.value = false;
-                                if (!isExpandedNotifier.value) {
-                                  isExpandedNotifier.value = true;
-                                }
-                              }
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable: isTextFieldReadOnlyNotifier,
+                            builder: (context, isReadOnly, child) {
+                              return TextField(
+                                controller: descripcionController,
+                                focusNode: focusNodeSegundo,
+                                readOnly: isReadOnly,
+                                maxLines: null,
+                                showCursor: true,
+                                keyboardType: TextInputType.multiline,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText:
+                                      "Cuéntanos con más detalle qué necesitas...",
+                                  hintStyle: TextStyle(
+                                    color:
+                                        descripcionErrorNotifier.value
+                                            ? Colors.red
+                                            : const Color.fromRGBO(
+                                              194,
+                                              215,
+                                              255,
+                                              0.6,
+                                            ),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                cursorColor: Colors.white,
+                                onTap: () {
+                                  if (isTextFieldReadOnlyNotifier.value) {
+                                    isTextFieldReadOnlyNotifier.value = false;
+                                  }
+                                  if (!isExpandedNotifier.value) {
+                                    isExpandedNotifier.value = true;
+                                  }
+                                },
+                                onChanged: (text) {
+                                  if (text.isNotEmpty) {
+                                    descripcionErrorNotifier.value = false;
+                                    if (!isExpandedNotifier.value) {
+                                      isExpandedNotifier.value = true;
+                                    }
+                                  }
+                                },
+                              );
                             },
                           ),
                         ),
@@ -802,6 +841,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
     descripcionErrorNotifier.dispose();
     isRecordingNotifier.dispose();
     recordingSecondsNotifier.dispose();
+    isTextFieldReadOnlyNotifier.dispose();
     super.dispose();
   }
 }

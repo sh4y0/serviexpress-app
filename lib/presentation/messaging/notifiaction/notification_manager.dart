@@ -1,10 +1,15 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
+import 'package:serviexpress_app/config/navigation_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
+@pragma('vm:entry-point')
 class NotificationManager {
   static final NotificationManager _instance = NotificationManager._internal();
   factory NotificationManager() => _instance;
@@ -26,27 +31,26 @@ class NotificationManager {
       badge: true,
       sound: true,
     );
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) return;
 
     final fcmToken = await _firebaseMessaging.getToken();
+
     if (fcmToken != null) {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        await UserRepository.instance.updateUserToken(
-          currentUser.uid,
-          fcmToken,
-        );
-      }
+      await UserRepository.instance.updateUserToken(userId, fcmToken);
     }
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        await UserRepository.instance.updateUserToken(
-          currentUser.uid,
-          newToken,
-        );
-      }
+      await UserRepository.instance.updateUserToken(userId, newToken);
     });
+
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      final payload = initialMessage.data['idServicio'];
+      if (payload != null) {
+        _handleMessageOpenedApp(payload);
+      }
+    }
 
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
@@ -106,23 +110,53 @@ class NotificationManager {
 
     _notificationStreamController.add(message);
 
-    if (notification == null) {
-      showLocalNotification(title: title, body: body);
+    if (notification != null) {
+      return;
     }
+
+    showLocalNotification(
+      title: title,
+      body: body,
+      payload: data['idServicio'],
+    );
   }
 
+  @pragma('vm:entry-point')
   static Future<void> handleBackgroundMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
 
     final data = message.data;
+    final notification = message.notification;
     final title =
         message.notification?.title ?? data['title'] ?? 'Notificación';
     final body =
         message.notification?.body ??
         data['body'] ??
         'Tienes un nuevo mensaje.';
+    final payload = data['idServicio'];
 
-    await NotificationManager().showLocalNotification(title: title, body: body);
+    if (notification != null) {
+      return;
+    }
+
+    await NotificationManager().showLocalNotification(
+      title: title,
+      body: body,
+      payload: payload,
+    );
+  }
+
+  void _handleMessageOpenedApp(String payload) async {
+    final serviceId = payload;
+    final service = await ServiceRepository.instance.getService(serviceId);
+    await MapStyleLoader.loadStyle();
+
+    if (service != null) {
+      NavigationConfig.navigateTo(
+        AppRoutes.providerDetails,
+        arguments: {'service': service, 'mapStyle': MapStyleLoader.cachedStyle},
+      );
+    }
   }
 
   void dispose() {

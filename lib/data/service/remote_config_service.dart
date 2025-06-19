@@ -22,4 +22,8 @@ class RemoteConfigService {
   String getReniecToken() {
     return _remoteConfig.getString('RENIEC_API_TOKEN');
   }
+
+  String getGoogleMapsKey() {
+    return _remoteConfig.getString('GOOGLE_MAPS_API_KEY');
+  }
 }

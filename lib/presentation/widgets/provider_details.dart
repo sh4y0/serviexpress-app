@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
+import 'package:serviexpress_app/data/service/location_service.dart';
 
 class ProviderDetails extends StatefulWidget {
   final ServiceComplete service;
@@ -42,7 +43,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: 0.30,
-            maxChildSize: 0.65, //mod 8
+            maxChildSize: 0.8, //mod 8
             builder: (context, scrollController) {
               return ScreenClientData(
                 service: widget.service,
@@ -104,19 +105,47 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.asset(
-                            "assets/images/profile_default.png",
-                            width: 45,
-                            height: 45,
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.white,
+                            child: ClipOval(
+                              child: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child:
+                                    widget.service.cliente.imagenUrl != null
+                                        ? FadeInImage.assetNetwork(
+                                          placeholder:
+                                              "assets/images/avatar.png",
+                                          image:
+                                              widget.service.cliente.imagenUrl!,
+                                          fit: BoxFit.cover,
+                                          imageErrorBuilder: (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) {
+                                            return Image.asset(
+                                              "assets/images/avatar.png",
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                        : Image.asset(
+                                          "assets/images/avatar.png",
+                                          fit: BoxFit.cover,
+                                        ),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 10),
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.star, color: AppColor.bgStr),
-                              SizedBox(width: 4),
+                              const Icon(Icons.star, color: AppColor.bgStr),
+                              const SizedBox(width: 4),
                               Text(
-                                "4.0",
-                                style: TextStyle(
+                                widget.service.cliente.calificacion.toString(),
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -127,50 +156,75 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              widget.service.cliente.username,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        child: FutureBuilder<List<String>>(
+                          future: Future.wait([
+                            LocationService.getAddressFromLatLng(
+                              widget.service.cliente.latitud!,
+                              widget.service.cliente.longitud!,
                             ),
-                            const SizedBox(height: 4),
-                            Row(
+                            LocationService.getDistanceFromCurrentLocation(
+                              widget.service.cliente.latitud!,
+                              widget.service.cliente.longitud!,
+                            ),
+                          ]),
+                          builder: (context, snapshot) {
+                            final direccion =
+                                snapshot.hasData
+                                    ? snapshot.data![0]
+                                    : "Obteniendo dirección...";
+                            final distancia =
+                                snapshot.hasData
+                                    ? snapshot.data![1]
+                                    : "Calculando distancia...";
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                SvgPicture.asset(
-                                  "assets/icons/ic_location.svg",
-                                ),
-                                const SizedBox(width: 4),
-                                const Text(
-                                  "U. Privada del Norte",
-                                  style: TextStyle(
-                                    color: AppColor.txtPrice,
+                                Text(
+                                  widget.service.cliente.nombreCompleto,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/icons/ic_distance.svg",
-                                  width: 23,
-                                  height: 23,
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/icons/ic_location.svg",
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      direccion,
+                                      style: const TextStyle(
+                                        color: AppColor.txtPrice,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  "A 1 min de ti",
-                                  style: TextStyle(color: AppColor.bgDistance),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      "assets/icons/ic_distance.svg",
+                                      width: 23,
+                                      height: 23,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      distancia,
+                                      style: const TextStyle(
+                                        color: AppColor.bgDistance,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),

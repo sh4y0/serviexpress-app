@@ -57,6 +57,7 @@ class FirebaseMessagingService {
         await NotificationRepository.instance.saveNotification(
           messageWithToken,
         );
+
         return true;
       } else {
         return false;

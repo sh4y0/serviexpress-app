@@ -21,7 +21,7 @@ class ServiceRepository {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Future<ResultState<ServiceModel>> createService(
-    List<String> workersId,
+    Set<String> workersId,
     ServiceModel service,
   ) async {
     try {
@@ -96,6 +96,7 @@ class ServiceRepository {
           title: 'Tienes un nuevo servicio',
           body: 'Limpieza solicitada por $username',
           receiverId: workerId,
+          screen: 'provider_details',
         );
 
         await FirebaseMessagingService.instance.sendFCMMessage(

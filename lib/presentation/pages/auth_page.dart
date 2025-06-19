@@ -109,58 +109,63 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           break;
         case Success(data: final data):
           LoadingScreen.hide();
-          if (mounted && data is AuthResult) {
-            final role = data.userModel.rol;
-            UserPreferences.saveUserId(data.userModel.uid);
-            if (data.needsProfileCompletion) {
-              if (mounted) {
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.completeProfile,
-                  arguments: data.userModel,
-                );
-              }
-              return;
-            }
 
-            if (data.isNewUser && !data.needsProfileCompletion) {
-              if (mounted) {
-                Alerts.instance.showSuccessAlert(
-                  context,
-                  "¡Registro exitoso! Bienvenido a ServiExpress",
-                  onOk: () {
-                    Navigator.pushReplacementNamed(
+            if (mounted && data is AuthResult) {
+              final role = data.userModel.rol;
+              UserPreferences.saveUserId(data.userModel.uid);
+              if (data.needsProfileCompletion) {
+                if (mounted) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.completeProfile,
+                    arguments: data.userModel,
+                  );
+                }
+                return;
+              }
+
+              if (data.isNewUser && !data.needsProfileCompletion) {
+                if (mounted) {
+                  Alerts.instance.showSuccessAlert(
+                    context,
+                    "¡Registro exitoso! Bienvenido a ServiExpress",
+                    onOk: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        AppRoutes.home,
+                        (route) => false,
+                        arguments: MapStyleLoader.cachedStyle,
+                      );
+                      //   if (mounted) {
+                      //   setState(() {
+                      //     _isLogin = true;
+                      //   });
+                      // }
+                    },
+                  );
+                }
+              } else {
+                if (role == "Trabajador") {
+                  if (mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRoutes.homeProvider,
+                      (route) => false,
+                    );
+                  }
+                } else if (role == "Cliente") {
+                  if (mounted) {
+                    Navigator.pushNamedAndRemoveUntil(
                       context,
                       AppRoutes.home,
+                      (route) => false,
                       arguments: MapStyleLoader.cachedStyle,
                     );
-                    //   if (mounted) {
-                    //   setState(() {
-                    //     _isLogin = true;
-                    //   });
-                    // }
-                  },
-                );
-              }
-            } else {
-              if (role == "Trabajador") {
-                if (mounted) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.homeProvider,
-                  );
-                }
-              } else if (role == "Cliente") {
-                if (mounted) {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    AppRoutes.home,
-                    arguments: MapStyleLoader.cachedStyle,
-                  );
+                  }
                 }
               }
             }
-          }
+
           break;
         case Failure(error: final error):
           LoadingScreen.hide();
@@ -696,9 +701,9 @@ class _SignupFormWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               const _SocialLoginDivider(text: "O regístrate con"),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               _SocialLoginButtons(
                 authViewModelNotifier: ref.read(authViewModelProvider.notifier),
               ),
