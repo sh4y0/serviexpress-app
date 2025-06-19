@@ -29,7 +29,7 @@ class CuentanosScreen extends ConsumerStatefulWidget {
 
 class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   final PageController _controller = PageController();
-  int _currentPage = 0;
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
 
   final List<String> categorias = [
     "Limpieza",
@@ -40,7 +40,9 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     "Plomeria",
     "Stripper",
   ];
-  String? categoriaSeleccionada;
+  final ValueNotifier<String?> categoriaSeleccionada = ValueNotifier<String?>(
+    null,
+  );
 
   final ValueNotifier<bool> _mostrarAceptar = ValueNotifier(false);
 
@@ -97,34 +99,34 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   }
 
   void _onNext() {
-    if (_currentPage == 0) {
-       if (_dniController.text.isEmpty ||
-           categoriaSeleccionada == null ||
-           _experienciaController.text.isEmpty) {
-         Alerts.instance.showErrorAlert(
-           context,
-           "Por favor, completa todos los campos.",
-         );
-         return;
-       }      
+    if (_currentPage.value == 0) {
+      if (_dniController.text.isEmpty ||
+          categoriaSeleccionada.value == null ||
+          _experienciaController.text.isEmpty) {
+        Alerts.instance.showErrorAlert(
+          context,
+          "Por favor, completa todos los campos.",
+        );
+        return;
+      }
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage == 1) {
+    if (_currentPage.value == 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage == 2) {
+    if (_currentPage.value == 2) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage == 3) {
+    if (_currentPage.value == 3) {
       // if (!_aceptado.value) {
       //   Alerts.instance.showErrorAlert(
       //     context,
@@ -145,7 +147,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     } else {
       ref.read(userViewModelProvider.notifier).updateUserById(widget.data.uid, {
         "dni": _dniController.text.trim(),
-        "especialidad": categoriaSeleccionada,
+        "especialidad": categoriaSeleccionada.value,
         "descripcion": _experienciaController.text.trim(),
       });
     }
@@ -194,16 +196,21 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
             children: [
               const SizedBox(height: 20),
               Center(
-                child: AnimatedSmoothIndicator(
-                  activeIndex: _currentPage,
-                  count: 4,
-                  effect: const WormEffect(
-                    radius: 2,
-                    dotHeight: 10,
-                    dotWidth: 75,
-                    activeDotColor: AppColor.btnColor,
-                    dotColor: AppColor.bgMsgUser,
-                  ),
+                child: ValueListenableBuilder<int>(
+                  valueListenable: _currentPage,
+                  builder: (context, currentPage, _) {
+                    return AnimatedSmoothIndicator(
+                      activeIndex: currentPage,
+                      count: 4,
+                      effect: const WormEffect(
+                        radius: 2,
+                        dotHeight: 10,
+                        dotWidth: 75,
+                        activeDotColor: AppColor.btnColor,
+                        dotColor: AppColor.bgMsgUser,
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 20),
@@ -211,8 +218,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                 child: PageView(
                   controller: _controller,
                   physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged:
-                      (index) => setState(() => _currentPage = index),
+                  onPageChanged: (index) => _currentPage.value = index,
                   children: [
                     _buildCuentanosPaso(),
                     const Verifiquemos(),
@@ -227,19 +233,19 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                 ),
               ),
 
-              ValueListenableBuilder(
-                valueListenable: _mostrarAceptar,
-                builder: (context, mostrar, _) {
-                  if (_currentPage == 3 && !mostrar) {
+              ValueListenableBuilder2<int, bool>(
+                first: _currentPage,
+                second: _mostrarAceptar,
+                builder: (context, currentPage, mostrar, _) {
+                  if (currentPage == 3 && !mostrar) {
                     return const SizedBox.shrink();
                   }
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
                       onPressed: _onNext,
                       child: Text(
-                        _currentPage < 3 ? "Siguiente" : "Aceptar",
+                        currentPage < 3 ? "Siguiente" : "Aceptar",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -280,7 +286,12 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           const SizedBox(height: 30),
           _buildTextFieldDNI(),
           const SizedBox(height: 20),
-          _buildDropdownCategoria(),
+          ValueListenableBuilder<String?>(
+            valueListenable: categoriaSeleccionada,
+            builder: (context, value, _) {
+              return _buildDropdownCategoria(value);
+            },
+          ),
           const SizedBox(height: 20),
           _buildTextFieldExperiencia(),
         ],
@@ -319,9 +330,9 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     );
   }
 
-  Widget _buildDropdownCategoria() {
+  Widget _buildDropdownCategoria(String? selectedValue) {
     return DropdownButtonFormField2<String>(
-      value: categoriaSeleccionada,
+      value: selectedValue,
       items:
           categorias.map((String categoria) {
             return DropdownMenuItem<String>(
@@ -330,9 +341,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
             );
           }).toList(),
       onChanged: (String? newValue) {
-        setState(() {
-          categoriaSeleccionada = newValue;
-        });
+        categoriaSeleccionada.value = newValue;
       },
       decoration: InputDecoration(
         filled: true,
@@ -393,6 +402,34 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           borderSide: const BorderSide(color: AppColor.textInput, width: 1),
         ),
       ),
+    );
+  }
+}
+
+class ValueListenableBuilder2<A, B> extends StatelessWidget {
+  final ValueNotifier<A> first;
+  final ValueNotifier<B> second;
+  final Widget Function(BuildContext, A, B, Widget?) builder;
+
+  const ValueListenableBuilder2({
+    super.key,
+    required this.first,
+    required this.second,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<A>(
+      valueListenable: first,
+      builder: (context, valueA, _) {
+        return ValueListenableBuilder<B>(
+          valueListenable: second,
+          builder: (context, valueB, child) {
+            return builder(context, valueA, valueB, child);
+          },
+        );
+      },
     );
   }
 }
