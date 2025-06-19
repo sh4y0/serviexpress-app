@@ -1160,6 +1160,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  signature:
+    dependency: "direct main"
+    description:
+      name: signature
+      sha256: f3d14bd6dae46d3b4802c6a091d6d39c9c6080d999e8c5380581d3725c30e360
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.3.0"
   sizer:
     dependency: "direct main"
     description:
