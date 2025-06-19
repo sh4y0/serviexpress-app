@@ -72,8 +72,23 @@ class ScreenClientData extends StatefulWidget {
 }
 
 class _ScreenClientDataState extends State<ScreenClientData> {
-  String? presupuestoPersonalizado;
-  String? propuestaTexto;
+  late final ValueNotifier<String?> presupuestoPersonalizado;
+  late final ValueNotifier<String?> propuestaTexto;
+
+  @override
+  void initState() {
+    super.initState();
+    presupuestoPersonalizado = ValueNotifier<String?>(null);
+    propuestaTexto = ValueNotifier<String?>(null);
+  }
+
+  @override
+  void dispose() {
+    presupuestoPersonalizado.dispose();
+    propuestaTexto.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -374,20 +389,23 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                   //   ],
                   // ),
                   const SizedBox(height: 10),
-                  InputPresupuestoLauncher(
-                    presupuesto: presupuestoPersonalizado,
-                    onTap: () async {
-                      final result = await mostrarPropuesta(
-                        context,
-                        initialValue: presupuestoPersonalizado,
-                        initialpropuesta: propuestaTexto,
+                  ValueListenableBuilder<String?>(
+                    valueListenable: presupuestoPersonalizado,
+                    builder: (context, presupuestoPersonalizado, _) {
+                      return InputPresupuestoLauncher(
+                        presupuesto: presupuestoPersonalizado,
+                        onTap: () async {
+                          final result = await mostrarPropuesta(
+                            context,
+                            initialValue: presupuestoPersonalizado,
+                            initialpropuesta: propuestaTexto.value,
+                          );
+                          if (result != null) {
+                            presupuestoPersonalizado = result["presupuesto"];
+                            propuestaTexto.value = result["propuesta"];
+                          }
+                        },
                       );
-                      if (result != null) {
-                        setState(() {
-                          presupuestoPersonalizado = result["presupuesto"];
-                          propuestaTexto = result["propuesta"];
-                        });
-                      }
                     },
                   ),
                   const SizedBox(height: 20),

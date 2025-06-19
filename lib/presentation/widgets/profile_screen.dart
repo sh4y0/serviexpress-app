@@ -22,7 +22,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  UserModel? user;
+  final ValueNotifier<UserModel?> _user = ValueNotifier<UserModel?>(null);
 
   void _logout(BuildContext context) {
     showDialog(
@@ -66,9 +66,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (uid == null) return;
     var userFetch = await UserRepository.instance.getCurrentUser(uid);
     if (!mounted) return;
-    setState(() {
-      user = userFetch;
-    });
+    _user.value = userFetch;
   }
 
   void _listenToViewModel() {
@@ -162,117 +160,122 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (user != null)
-              Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Column(
-                      children: [
-                        Center(
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Colors.white,
-                                child: ClipOval(
-                                  child: SizedBox(
-                                    width: 140,
-                                    height: 140,
-                                    child:
-                                        user!.imagenUrl != null &&
-                                                user!.imagenUrl!.isNotEmpty
-                                            ? FadeInImage.assetNetwork(
-                                              placeholder:
-                                                  "assets/images/avatar.png",
-                                              image: user!.imagenUrl!,
-                                              fit: BoxFit.cover,
-                                              imageErrorBuilder: (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) {
-                                                return Image.asset(
-                                                  "assets/images/avatar.png",
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            )
-                                            : Image.asset(
-                                              "assets/images/avatar.png",
-                                              fit: BoxFit.cover,
-                                            ),
+            ValueListenableBuilder<UserModel?>(
+              valueListenable: _user,
+              builder: (context, user, _) {
+                if (user == null) return const SizedBox.shrink();
+                return Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Column(
+                        children: [
+                          Center(
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                CircleAvatar(
+                                  radius: 70,
+                                  backgroundColor: Colors.white,
+                                  child: ClipOval(
+                                    child: SizedBox(
+                                      width: 140,
+                                      height: 140,
+                                      child:
+                                          user.imagenUrl != null &&
+                                                  user.imagenUrl!.isNotEmpty
+                                              ? FadeInImage.assetNetwork(
+                                                placeholder:
+                                                    "assets/images/avatar.png",
+                                                image: user.imagenUrl!,
+                                                fit: BoxFit.cover,
+                                                imageErrorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) {
+                                                  return Image.asset(
+                                                    "assets/images/avatar.png",
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                },
+                                              )
+                                              : Image.asset(
+                                                "assets/images/avatar.png",
+                                                fit: BoxFit.cover,
+                                              ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                child: GestureDetector(
-                                  onTap: () {},
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 5,
+                                Positioned(
+                                  child: GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[100],
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 5,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: SvgPicture.asset(
+                                        "assets/icons/ic_edit.svg",
                                       ),
                                     ),
-                                    padding: const EdgeInsets.all(4),
-                                    child: SvgPicture.asset(
-                                      "assets/icons/ic_edit.svg",
-                                    ),
                                   ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            user.nombreCompleto,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                user.email,
+                                style: const TextStyle(
+                                  color: AppColor.txtEmailPhone,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              const Text(
+                                "|",
+                                style: TextStyle(
+                                  color: AppColor.txtEmailPhone,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                user.telefono,
+                                style: const TextStyle(
+                                  color: AppColor.txtEmailPhone,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          user!.nombreCompleto,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 23,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              user!.email,
-                              style: const TextStyle(
-                                color: AppColor.txtEmailPhone,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            const Text(
-                              "|",
-                              style: TextStyle(
-                                color: AppColor.txtEmailPhone,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              user!.telefono,
-                              style: const TextStyle(
-                                color: AppColor.txtEmailPhone,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
+            ),
             const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
