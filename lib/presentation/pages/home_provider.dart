@@ -181,7 +181,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   Widget _buildHomeProvider() {
     return Stack(
       children: [
-        const AnimationProvider(),
+        AnimationProvider(showAnimation: _state),
         if (notifications.isNotEmpty)
           SafeArea(
             child: Padding(
