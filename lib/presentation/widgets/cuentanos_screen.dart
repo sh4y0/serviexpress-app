@@ -10,6 +10,7 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:serviexpress_app/presentation/viewmodels/user_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
@@ -41,6 +42,11 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   ];
   String? categoriaSeleccionada;
 
+  final ValueNotifier<bool> _mostrarAceptar = ValueNotifier(false);
+
+  final ValueNotifier<bool> _aceptado = ValueNotifier(false);
+  final ValueNotifier<bool> _firmado = ValueNotifier(false);
+
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _experienciaController = TextEditingController();
   late Future<void> _preloadFuture;
@@ -71,6 +77,8 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     _dniController.dispose();
     _experienciaController.dispose();
     _controller.dispose();
+    _aceptado.dispose();
+    _firmado.dispose();
     super.dispose();
   }
 
@@ -90,33 +98,46 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
 
   void _onNext() {
     if (_currentPage == 0) {
-      if (_dniController.text.isEmpty ||
-          categoriaSeleccionada == null ||
-          _experienciaController.text.isEmpty) {
-        Alerts.instance.showErrorAlert(
-          context,
-          "Por favor, completa todos los campos.",
-        );
-        return;
-      }
+       if (_dniController.text.isEmpty ||
+           categoriaSeleccionada == null ||
+           _experienciaController.text.isEmpty) {
+         Alerts.instance.showErrorAlert(
+           context,
+           "Por favor, completa todos los campos.",
+         );
+         return;
+       }      
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage < 1) {
+    if (_currentPage == 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage < 2) {
+    if (_currentPage == 2) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
-    if (_currentPage < 3) {
+    if (_currentPage == 3) {
+      // if (!_aceptado.value) {
+      //   Alerts.instance.showErrorAlert(
+      //     context,
+      //     "Debes aceptar los términos y condiciones.",
+      //   );
+      //   return;
+      // }
+
+      // if (!_firmado.value) {
+      //   Alerts.instance.showErrorAlert(context, "Debes firmar para continuar.");
+      //   return;
+      // }
+
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
@@ -172,15 +193,17 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              AnimatedSmoothIndicator(
-                activeIndex: _currentPage,
-                count: 5,
-                effect: const WormEffect(
-                  radius: 2,
-                  dotHeight: 10,
-                  dotWidth: 65,
-                  activeDotColor: AppColor.btnColor,
-                  dotColor: AppColor.bgMsgUser,
+              Center(
+                child: AnimatedSmoothIndicator(
+                  activeIndex: _currentPage,
+                  count: 4,
+                  effect: const WormEffect(
+                    radius: 2,
+                    dotHeight: 10,
+                    dotWidth: 75,
+                    activeDotColor: AppColor.btnColor,
+                    dotColor: AppColor.bgMsgUser,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -194,27 +217,40 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                     _buildCuentanosPaso(),
                     const Verifiquemos(),
                     const Antecedentes(),
-                    const TerminosCondiciones(),
+                    TerminosCondiciones(
+                      aceptado: _aceptado,
+                      firmado: _firmado,
+                      mostrarBotonAceptar: _mostrarAceptar,
+                    ),
+                    const Verification(),
                   ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ElevatedButton(
-                  onPressed: _onNext,
-                  child: Text(
-                    _currentPage < 3
-                        ? "Siguiente"
-                        : "Presiona aqui para firmar",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
+
+              ValueListenableBuilder(
+                valueListenable: _mostrarAceptar,
+                builder: (context, mostrar, _) {
+                  if (_currentPage == 3 && !mostrar) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ElevatedButton(
+                      onPressed: _onNext,
+                      child: Text(
+                        _currentPage < 3 ? "Siguiente" : "Aceptar",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
             ],
           ),
         ),
