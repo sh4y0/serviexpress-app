@@ -20,12 +20,13 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final ServiceModel? datosSolicitudExistente;
   final Function(bool? isSheetVisibleSolicitarServicio) onAbrirDetallesPressed;
 
-  final List<UserModel> proveedoresSeleccionados;
+  //final List<UserModel> proveedoresSeleccionados;
+  final List<UserModel> onProveedores;
   final Function(UserModel)? onProveedorRemovido;
-  final Function(UserModel)? onProveedorTapped;
+  //final Function(UserModel)? onProveedorTapped;
 
   final bool isSolicitudGuardada;
-  final bool isProveedorAgregado;
+  //final bool isProveedorAgregado;
   final bool categoriaError;
   final VoidCallback? onCategoriaError;
   final Function(bool? isPressedSolicitarServicio)? onPressedSolicitarServicio;
@@ -47,11 +48,12 @@ class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
     required this.onTapPressed,
     required this.onAbrirDetallesPressed,
     this.datosSolicitudExistente,
-    required this.proveedoresSeleccionados,
+    //required this.proveedoresSeleccionados,
+    required this.onProveedores,
     this.onProveedorRemovido,
-    this.onProveedorTapped,
+    //this.onProveedorTapped,
     this.isSolicitudGuardada = false,
-    this.isProveedorAgregado = false,
+    //this.isProveedorAgregado = false,
     this.categoriaError = false,
     this.onCategoriaError,
     this.selectedCategoryIndex = -1,
@@ -204,50 +206,50 @@ class DraggableSheetSolicitarServicioState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (widget.isProveedorAgregado)
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 8.0,
-                                    bottom: 4.0,
-                                  ),
-                                  child: Text(
-                                    widget.isProveedorAgregado
-                                        ? 'Tu solicitud será enviada a:'
-                                        : '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              if (widget.isProveedorAgregado)
-                                const SizedBox(height: 8),
-                              if (widget.isProveedorAgregado &&
-                                  widget.proveedoresSeleccionados.isNotEmpty)
-                                SizedBox(
-                                  height: 70,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount:
-                                        widget.proveedoresSeleccionados.length,
-                                    itemBuilder: (context, index) {
-                                      final proveedor =
-                                          widget
-                                              .proveedoresSeleccionados[index];
-                                      return ProveedorModelCard(
-                                        proveedor: proveedor,
-                                        onTap:
-                                            () => widget.onProveedorTapped
-                                                ?.call(proveedor),
-                                        onRemove:
-                                            () => widget.onProveedorRemovido
-                                                ?.call(proveedor),
-                                      );
-                                    },
-                                  ),
-                                ),
+                              // if (widget.isProveedorAgregado)
+                              //   Padding(
+                              //     padding: const EdgeInsets.only(
+                              //       top: 8.0,
+                              //       bottom: 4.0,
+                              //     ),
+                              //     child: Text(
+                              //       widget.isProveedorAgregado
+                              //           ? 'Tu solicitud será enviada a:'
+                              //           : '',
+                              //       style: const TextStyle(
+                              //         fontSize: 14,
+                              //         color: Colors.white,
+                              //         fontWeight: FontWeight.w700,
+                              //       ),
+                              //     ),
+                              //   ),
+                              // if (widget.isProveedorAgregado)
+                              //   const SizedBox(height: 8),
+                              // if (widget.isProveedorAgregado && widget.proveedoresSeleccionados.isNotEmpty)
+                              //   SizedBox(
+                              //     height: 70,
+                              //     child: ListView.builder(
+                              //       scrollDirection: Axis.horizontal,
+                              //       itemCount:
+                              //           widget.proveedoresSeleccionados.length,
+                              //       itemBuilder: (context, index) {
+                              //         final proveedor =
+                              //             widget
+                              //                 .proveedoresSeleccionados[index];
+                              //         return ProveedorModelCard(
+                              //           proveedor: proveedor,
+                              //           onTap:
+                              //               () => widget.onProveedorTapped
+                              //                   ?.call(proveedor),
+                              //           onRemove:
+                              //               () => widget.onProveedorRemovido
+                              //                   ?.call(proveedor),
+                              //         );
+                              //       },
+                              //     ),
+                              //   ),
                               Container(
+                                key: widget.detallarServicioKey,
                                 margin: const EdgeInsets.only(
                                   top: 15,
                                   bottom: 12,
@@ -307,7 +309,6 @@ class DraggableSheetSolicitarServicioState
                                           ),
                                           Expanded(
                                             child: Column(
-                                              key: widget.detallarServicioKey,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
@@ -416,17 +417,23 @@ class DraggableSheetSolicitarServicioState
 
                                     widget.onPressedSolicitarServicio!(true);
 
-                                    if (widget.datosSolicitudExistente !=
-                                        null) {
-                                      if (widget
-                                          .proveedoresSeleccionados
-                                          .isNotEmpty) {
-                                        for (var proveedor
-                                            in widget
-                                                .proveedoresSeleccionados) {
-                                          proveedoresSeleccionadosId.add(
-                                            proveedor.uid,
-                                          );
+                                    // if (widget.datosSolicitudExistente != null) {
+                                    //   if (widget.proveedoresSeleccionados.isNotEmpty) {
+                                    //     for (var proveedor in widget.proveedoresSeleccionados) {
+                                    //       proveedoresSeleccionadosId.add(proveedor.uid);
+                                    //     }
+                                    //   }
+                                    //   await ServiceRepository.instance
+                                    //       .createService(
+                                    //         proveedoresSeleccionadosId,
+                                    //         widget.datosSolicitudExistente!,
+                                    //       );
+                                    // }
+
+                                    if (widget.datosSolicitudExistente != null) {
+                                      if (widget.onProveedores.isNotEmpty) {                                      
+                                        for (var proveedor in widget.onProveedores) {
+                                          proveedoresSeleccionadosId.add(proveedor.uid);
                                         }
                                       }
                                       await ServiceRepository.instance

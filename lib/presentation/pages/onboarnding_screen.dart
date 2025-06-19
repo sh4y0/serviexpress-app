@@ -157,7 +157,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
           height: 45,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: const Text(
-            "Skip",
+            "Saltar",
             style: TextStyle(color: AppColor.bgAll, fontSize: 16),
           ),
         ),

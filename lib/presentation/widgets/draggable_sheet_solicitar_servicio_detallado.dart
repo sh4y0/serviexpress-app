@@ -52,21 +52,32 @@ class DraggableSheetState
 
   late ValueNotifier<int> _selectedCategoryIndex;
 
+  double _lastKnownSheetSize = 0.0;
+  bool _isReadyForInteraction = false;
+
   @override
   void initState() {
     super.initState();
     _internalController = DraggableScrollableController();
+
+    _lastKnownSheetSize = widget.targetInitialSize;
+
     _internalController.addListener(_onChanged);
     _selectedCategoryIndex = ValueNotifier<int>(widget.selectedCategoryIndex);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _internalController.isAttached) {
-        _internalController.animateTo(
-          widget.targetInitialSize,
-          duration: widget.entryAnimationDuration,
-          curve: widget.entryAnimationCurve,
-        );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      await _internalController.animateTo(
+        widget.targetInitialSize,
+        duration: widget.entryAnimationDuration,
+        curve: widget.entryAnimationCurve,
+      );
+
+      if (mounted) {
+        _isReadyForInteraction = true;
       }
+
       if (widget.initialData != null &&
           _formMultimediaKey.currentState != null) {
         _formMultimediaKey.currentState?.setInitialData(
@@ -89,9 +100,17 @@ class DraggableSheetState
   }
 
   void _onChanged() {
-    if (!_internalController.isAttached) return;
+    if (!_isReadyForInteraction || !_internalController.isAttached) return;
 
     final currentSize = _internalController.size;
+    final double keyboardDismissThreshold = widget.targetInitialSize * 0.90;
+
+    if (currentSize < _lastKnownSheetSize &&
+        currentSize < keyboardDismissThreshold) {
+      FocusScope.of(context).unfocus();
+    }
+    _lastKnownSheetSize = currentSize;
+
     if (!_isDismissing && currentSize <= widget.minSheetSize + 0.01) {
       _isDismissing = true;
       widget.onDismiss?.call();
@@ -205,13 +224,12 @@ class DraggableSheetState
                               height: 2,
                             ),
                           ),
-
+                          const SizedBox(height: 10,),
                           const Text(
-                            'Brinda mas detalle al Proveedor',
+                            'Brinda más detalle al Proveedor',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
                             ),
                           ),
 
