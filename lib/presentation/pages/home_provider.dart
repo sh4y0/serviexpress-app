@@ -29,26 +29,24 @@ class HomeProvider extends ConsumerStatefulWidget {
 
 class _HomeProviderState extends ConsumerState<HomeProvider>
     with WidgetsBindingObserver {
-  final int _selectedIndex = 0;
+  final ValueNotifier<int> _selectedIndex = ValueNotifier<int>(0);
   late final List<Widget Function()> _screens;
   late final StreamSubscription<RemoteMessage> _notificationSubscription;
-  List<FCMMessage> notifications = [];
+  final ValueNotifier<List<FCMMessage>> notifications =
+      ValueNotifier<List<FCMMessage>>([]);
   final Map<String, ServiceComplete> _services = {};
   ServiceComplete? service;
 
-  AppLifecycleState? _appLifecycleState;
+  final ValueNotifier<AppLifecycleState?> _appLifecycleState =
+      ValueNotifier<AppLifecycleState?>(null);
 
   bool isProvider = true;
 
   final double _buttonOpacity = 1.0;
 
-  bool _state = true;
+  final ValueNotifier<bool> _state = ValueNotifier<bool>(true);
 
-  bool get isAppInForeground =>
-      _appLifecycleState == null ||
-      _appLifecycleState == AppLifecycleState.resumed;
-
-  UserModel? user;
+  final ValueNotifier<UserModel?> user = ValueNotifier<UserModel?>(null);
   final Set<String> _processedServiceIds = {};
 
   void _logout(BuildContext context) {
@@ -125,14 +123,13 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
         );
 
         if (service != null) {
-          if (!notifications.any(
+          if (!notifications.value.any(
             (n) => n.idServicio == fcmMessage.idServicio,
           )) {
-            setState(() {
-              _services[fcmMessage.idServicio] = service!;
-              notifications.add(fcmMessage);
-              _processedServiceIds.add(fcmMessage.idServicio);
-            });
+            _services[fcmMessage.idServicio] = service!;
+            notifications.value = List.from(notifications.value)
+              ..add(fcmMessage);
+            _processedServiceIds.add(fcmMessage.idServicio);
           }
         }
       },
@@ -142,16 +139,12 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _appLifecycleState = state;
-    });
+    _appLifecycleState.value = state;
   }
 
   void _setStateSwitch() async {
     final value = await UserRepository.instance.getUserAvailability();
-    setState(() {
-      _state = value;
-    });
+    _state.value = value;
   }
 
   void _setupToken() async {
@@ -172,100 +165,109 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     if (uid == null) return;
     var userFetch = await UserRepository.instance.getCurrentUser(uid);
     if (!mounted) return;
-    setState(() {
-      user = userFetch;
-    });
+    user.value = userFetch;
   }
 
   Widget _buildHomeProvider() {
     return Stack(
       children: [
-        AnimationProvider(showAnimation: _state),
-        if (notifications.isNotEmpty)
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification is ScrollStartNotification) {
-                  } else if (notification is ScrollEndNotification) {}
-                  return true;
-                },
-                child: SizedBox(
-                  //height: MediaQuery.of(context).size.height * 0.60,
-                  child: ListView.builder(
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final cliente = notifications[index];
-                      final serviceForCliente = _services[cliente.idServicio]!;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Dismissible(
-                          key: Key(cliente.idServicio + index.toString()),
-                          direction: DismissDirection.endToStart,
-                          onDismissed: (direction) async {
-                            final userName = await _getUserId(cliente.senderId);
-                            final id = notifications[index].idServicio;
+        ValueListenableBuilder<bool>(
+          valueListenable: _state,
+          builder: (context, stateValue, _) {
+            return AnimationProvider(showAnimation: stateValue);
+          },
+        ),
+        ValueListenableBuilder<List<FCMMessage>>(
+          valueListenable: notifications,
+          builder: (context, notifList, _) {
+            if (notifList.isEmpty) return const SizedBox.shrink();
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 15,
+                ),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) => true,
+                  child: SizedBox(
+                    child: ListView.builder(
+                      itemCount: notifList.length,
+                      itemBuilder: (context, index) {
+                        final cliente = notifList[index];
+                        final serviceForCliente =
+                            _services[cliente.idServicio]!;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Dismissible(
+                            key: Key(cliente.idServicio + index.toString()),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (direction) async {
+                              final userName = await _getUserId(
+                                cliente.senderId,
+                              );
+                              final id = notifList[index].idServicio;
 
-                            setState(() {
-                              notifications.removeAt(index);
+                              notifications.value = List.from(
+                                notifications.value,
+                              )..removeAt(index);
                               _processedServiceIds.remove(id);
-                            });
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: AppColor.bgMsgUser,
-                                content: Text(
-                                  "La solicitud de $userName fue eliminada",
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            );
-                          },
-                          background: Container(
-                            padding: const EdgeInsets.only(right: 20),
-                            alignment: Alignment.centerRight,
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.delete,
-                              color: Colors.white,
-                              size: 40,
-                            ),
-                          ),
-                          child: CardDesing(
-                            service: serviceForCliente,
-                            onViewDetails: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder:
-                                      (
-                                        context,
-                                        animation,
-                                        secondaryAnimation,
-                                      ) => ProviderDetails(
-                                        service: serviceForCliente,
-                                        mapStyle: MapStyleLoader.cachedStyle,
-                                      ),
-                                  transitionsBuilder: _transition,
-                                  transitionDuration: const Duration(
-                                    milliseconds: 300,
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: AppColor.bgMsgUser,
+                                  content: Text(
+                                    "La solicitud de $userName fue eliminada",
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
                               );
                             },
+                            background: Container(
+                              padding: const EdgeInsets.only(right: 20),
+                              alignment: Alignment.centerRight,
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ),
+                            child: CardDesing(
+                              service: serviceForCliente,
+                              onViewDetails: () {
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder:
+                                        (
+                                          context,
+                                          animation,
+                                          secondaryAnimation,
+                                        ) => ProviderDetails(
+                                          service: serviceForCliente,
+                                          mapStyle: MapStyleLoader.cachedStyle,
+                                        ),
+                                    transitionsBuilder: _transition,
+                                    transitionDuration: const Duration(
+                                      milliseconds: 300,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
+        ),
       ],
     );
   }
@@ -315,34 +317,49 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: _state ? AppColor.bgSwitch : Colors.grey[300],
-                  shape: BoxShape.circle,
-                ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _state,
+                builder: (context, stateValue, _) {
+                  return Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: stateValue ? AppColor.bgSwitch : Colors.grey[300],
+                      shape: BoxShape.circle,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
-              Text(
-                _state ? "Disponible" : "No Disponible",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: _state ? Colors.white : Colors.grey[300],
-                ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _state,
+                builder: (context, stateValue, _) {
+                  return Text(
+                    stateValue ? "Disponible" : "No Disponible",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: stateValue ? Colors.white : Colors.grey[300],
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
-              Switch(
-                activeColor: Colors.white,
-                activeTrackColor: AppColor.bgSwitch,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: Colors.grey[300],
-                value: _state,
-                onChanged: (value) async {
-                  await UserRepository.instance.toggleUserAvailability(value);
-                  setState(() {
-                    _state = value;
-                  });
+              ValueListenableBuilder<bool>(
+                valueListenable: _state,
+                builder: (context, stateValue, _) {
+                  return Switch(
+                    activeColor: Colors.white,
+                    activeTrackColor: AppColor.bgSwitch,
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: Colors.grey[300],
+                    value: stateValue,
+                    onChanged: (value) async {
+                      await UserRepository.instance.toggleUserAvailability(
+                        value,
+                      );
+                      _state.value = value;
+                    },
+                  );
                 },
               ),
             ],
@@ -373,194 +390,204 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       ),
       drawer: Drawer(
         backgroundColor: AppColor.bgCard,
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  if (user != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 30,
-                        horizontal: 20,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipOval(
-                            child: SizedBox(
-                              width: 60,
-                              height: 60,
-                              child:
-                                  user!.imagenUrl!.isNotEmpty
-                                      ? Image.network(
-                                        user!.imagenUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) {
-                                          return Image.asset(
+        child: ValueListenableBuilder<UserModel?>(
+          valueListenable: user,
+          builder: (context, user, _) {
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      if (user != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 30,
+                            horizontal: 20,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipOval(
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child:
+                                      user.imagenUrl!.isNotEmpty
+                                          ? Image.network(
+                                            user.imagenUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) {
+                                              return Image.asset(
+                                                "assets/images/avatar.png",
+                                                fit: BoxFit.cover,
+                                              );
+                                            },
+                                          )
+                                          : Image.asset(
                                             "assets/images/avatar.png",
                                             fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                      : Image.asset(
-                                        "assets/images/avatar.png",
-                                        fit: BoxFit.cover,
-                                      ),
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user!.nombreCompleto,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                          ),
                                 ),
-                                const SizedBox(height: 5),
-                                Row(
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 5),
                                     Text(
-                                      user!.calificacion.toString(),
+                                      user.nombreCompleto,
                                       style: const TextStyle(
                                         color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          user.calificacion.toString(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        // const Text(
+                                        //   "(120+ review)",
+                                        //   style: TextStyle(
+                                        //     color: Colors.white60,
+                                        //     fontSize: 14,
+                                        //   ),
+                                        // ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      user.especialidad!,
+                                      style: const TextStyle(
+                                        color: AppColor.textInput,
                                         fontSize: 14,
                                       ),
                                     ),
-                                    const SizedBox(width: 5),
-                                    // const Text(
-                                    //   "(120+ review)",
-                                    //   style: TextStyle(
-                                    //     color: Colors.white60,
-                                    //     fontSize: 14,
-                                    //   ),
-                                    // ),
                                   ],
                                 ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  user!.especialidad!,
-                                  style: const TextStyle(
-                                    color: AppColor.textInput,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_solicitar.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    title: const Text("Solicitar servicio"),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_historial.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    title: const Text("Historial de actividad"),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_historial.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    title: Text(
-                      isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
-                    ),
-                    onTap: () async {
-                      final mapStyle = await MapStyleLoader.loadStyle();
-                      Navigator.pop(context);
-                      if (isProvider) {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          AppRoutes.home,
-                          (route) => false,
-                          arguments: mapStyle,
-                        );
-                      } else {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          AppRoutes.homeProvider,
-                          (route) => false,
-                        );
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_person.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    title: const Text("Perfil"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  const ProfileScreen(isProvider: false),
                         ),
-                      );
-                    },
+                      ListTile(
+                        leading: SvgPicture.asset(
+                          "assets/icons/ic_solicitar.svg",
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: const Text("Solicitar servicio"),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      ListTile(
+                        leading: SvgPicture.asset(
+                          "assets/icons/ic_historial.svg",
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: const Text("Historial de actividad"),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      ListTile(
+                        leading: SvgPicture.asset(
+                          "assets/icons/ic_historial.svg",
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: Text(
+                          isProvider
+                              ? "Cambiar a Cliente"
+                              : "Cambiar a Trabajador",
+                        ),
+                        onTap: () async {
+                          final mapStyle = await MapStyleLoader.loadStyle();
+                          Navigator.pop(context);
+                          if (isProvider) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AppRoutes.home,
+                              (route) => false,
+                              arguments: mapStyle,
+                            );
+                          } else {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AppRoutes.homeProvider,
+                              (route) => false,
+                            );
+                          }
+                        },
+                      ),
+                      ListTile(
+                        leading: SvgPicture.asset(
+                          "assets/icons/ic_person.svg",
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: const Text("Perfil"),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      const ProfileScreen(isProvider: false),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: SvgPicture.asset(
-                "assets/icons/ic_exit.svg",
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
                 ),
-              ),
-              title: const Text("Cerrar Sesión"),
-              onTap: () {
-                _logout(context);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
+                ListTile(
+                  leading: SvgPicture.asset(
+                    "assets/icons/ic_exit.svg",
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  title: const Text("Cerrar Sesión"),
+                  onTap: () {
+                    _logout(context);
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          },
         ),
       ),
-      body: _screens[_selectedIndex](),
+      body: ValueListenableBuilder<int>(
+        valueListenable: _selectedIndex,
+        builder: (context, idx, _) => _screens[idx](),
+      ),
     );
   }
 
@@ -651,6 +678,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   void dispose() {
     _notificationSubscription.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    _selectedIndex.dispose();
+    notifications.dispose();
+    _state.dispose();
+    _appLifecycleState.dispose();
     super.dispose();
   }
 }

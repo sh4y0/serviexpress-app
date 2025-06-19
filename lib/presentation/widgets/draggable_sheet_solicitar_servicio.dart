@@ -73,7 +73,7 @@ class DraggableSheetSolicitarServicioState
   late TextEditingController _descripcionController = TextEditingController();
 
   bool _isDismissing = false;
-  bool _descripcionError = false;
+  final ValueNotifier<bool> _descripcionError = ValueNotifier<bool>(false);
 
   final Set<String> proveedoresSeleccionadosId = {};
 
@@ -266,7 +266,7 @@ class DraggableSheetSolicitarServicioState
                                     ),
                                   ],
                                   border:
-                                      _descripcionError &&
+                                      _descripcionError.value &&
                                               !widget.isSolicitudGuardada
                                           ? Border.all(
                                             color: Colors.red,
@@ -296,7 +296,9 @@ class DraggableSheetSolicitarServicioState
                                             child: SvgCache.getIconSvg(
                                               'assets/icons/ic_message_form.svg',
                                               color:
-                                                  _descripcionError && !widget.isSolicitudGuardada
+                                                  _descripcionError.value &&
+                                                          !widget
+                                                              .isSolicitudGuardada
                                                       ? Colors.red
                                                       : const Color.fromRGBO(
                                                         194,
@@ -327,7 +329,10 @@ class DraggableSheetSolicitarServicioState
                                                             : "Describe el servicio que necesitas...",
                                                     hintStyle: TextStyle(
                                                       color:
-                                                          _descripcionError && !widget.isSolicitudGuardada
+                                                          _descripcionError
+                                                                      .value &&
+                                                                  !widget
+                                                                      .isSolicitudGuardada
                                                               ? Colors.red
                                                               : const Color.fromRGBO(
                                                                 194,
@@ -392,14 +397,10 @@ class DraggableSheetSolicitarServicioState
                                     }
 
                                     if (!widget.isSolicitudGuardada) {
-                                      setState(() {
-                                        _descripcionError = true;
-                                      });
+                                      _descripcionError.value = true;
                                       return;
                                     } else {
-                                      setState(() {
-                                        _descripcionError = false;
-                                      });
+                                      _descripcionError.value = false;
                                     }
 
                                     // if (_descripcionController.text.trim().isEmpty) {
@@ -428,10 +429,14 @@ class DraggableSheetSolicitarServicioState
                                     //         widget.datosSolicitudExistente!,
                                     //       );
                                     // }
-                                    if (widget.datosSolicitudExistente != null) {
-                                      if (widget.onProveedores.isNotEmpty) {                                  
-                                        for (var proveedor in widget.onProveedores) {
-                                          proveedoresSeleccionadosId.add(proveedor.uid);
+                                    if (widget.datosSolicitudExistente !=
+                                        null) {
+                                      if (widget.onProveedores.isNotEmpty) {
+                                        for (var proveedor
+                                            in widget.onProveedores) {
+                                          proveedoresSeleccionadosId.add(
+                                            proveedor.uid,
+                                          );
                                         }
                                       }
                                       await ServiceRepository.instance

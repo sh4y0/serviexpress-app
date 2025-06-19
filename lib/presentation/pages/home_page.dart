@@ -20,10 +20,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  bool _mapLoaded = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isProvider = false;
-  UserModel? user;
+
+  final ValueNotifier<UserModel?> user = ValueNotifier<UserModel?>(null);
+  final ValueNotifier<bool> _mapLoaded = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -92,9 +93,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (uid == null) return;
     var userFetch = await UserRepository.instance.getCurrentUser(uid);
     if (!mounted) return;
-    setState(() {
-      user = userFetch;
-    });
+    user.value = userFetch;
+  }
+
+  @override
+  void dispose() {
+    user.dispose();
+    _mapLoaded.dispose();
+    super.dispose();
   }
 
   @override
@@ -108,94 +114,91 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Expanded(
               child: ListView(
                 children: [
-                  if (user != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 30,
-                        horizontal: 20,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipOval(
-                            child: SizedBox(
-                              width: 60,
-                              height: 60,
-                              child:
-                                  user!.imagenUrl!.isNotEmpty
-                                      ? Image.network(
-                                        user!.imagenUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) {
-                                          return Image.asset(
-                                            "assets/images/avatar.png",
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                      : Image.asset(
-                                        "assets/images/avatar.png",
-                                        fit: BoxFit.cover,
-                                      ),
+                  ValueListenableBuilder<UserModel?>(
+                    valueListenable: user,
+                    builder: (context, userValue, _) {
+                      if (userValue == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 30,
+                          horizontal: 20,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipOval(
+                              child: SizedBox(
+                                width: 60,
+                                height: 60,
+                                child:
+                                    userValue.imagenUrl!.isNotEmpty
+                                        ? Image.network(
+                                          userValue.imagenUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) {
+                                            return Image.asset(
+                                              "assets/images/avatar.png",
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                        : Image.asset(
+                                          "assets/images/avatar.png",
+                                          fit: BoxFit.cover,
+                                        ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user!.nombreCompleto,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
-                                      size: 16,
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    userValue.nombreCompleto,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      user!.calificacion.toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 16,
                                       ),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    // const Text(
-                                    //   "(120+ review)",
-                                    //   style: TextStyle(
-                                    //     color: Colors.white60,
-                                    //     fontSize: 14,
-                                    //   ),
-                                    // ),
-                                  ],
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  user!.rol!,
-                                  style: const TextStyle(
-                                    color: AppColor.textInput,
-                                    fontSize: 14,
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        userValue.calificacion.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    userValue.rol!,
+                                    style: const TextStyle(
+                                      color: AppColor.textInput,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                   ListTile(
                     leading: SvgPicture.asset(
                       "assets/icons/ic_solicitar.svg",
@@ -289,7 +292,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ],
         ),
       ),
-
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
@@ -299,16 +301,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mapStyle: widget.mapStyle,
             onMapLoaded: (isLoaded) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted && _mapLoaded != isLoaded) {
-                  setState(() {
-                    _mapLoaded = isLoaded;
-                  });
+                if (mounted && _mapLoaded.value != isLoaded) {
+                  _mapLoaded.value = isLoaded;
                 }
               });
             },
             onMenuPressed: _openDrawer,
           ),
-          if (!_mapLoaded) const Positioned.fill(child: SkeletonHome()),
+          ValueListenableBuilder<bool>(
+            valueListenable: _mapLoaded,
+            builder: (context, loaded, _) {
+              if (loaded) return const SizedBox.shrink();
+              return const Positioned.fill(child: SkeletonHome());
+            },
+          ),
         ],
       ),
     );
