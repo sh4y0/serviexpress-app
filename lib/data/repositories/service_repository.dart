@@ -66,7 +66,7 @@ class ServiceRepository {
           audioUrls.add(url);
         }
       }
-
+      
       final updatedService = ServiceModel(
         id: serviceId,
         categoria: service.categoria,

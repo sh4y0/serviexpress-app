@@ -15,7 +15,7 @@ class UserViewModel extends StateNotifier<ResultState<UserModel>> {
 
   Future<void> updateUserById(
     String uid,
-    Map<String, dynamic> dataToUpdate,
+    Map<String, String> dataToUpdate,
   ) async {
     state = const Loading();
     final result = await UserRepository.instance.updateUserById(
