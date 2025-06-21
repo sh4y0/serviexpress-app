@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
@@ -102,7 +103,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   }
 
   void _listenToAuthViewModel() {
-    ref.listen<ResultState>(authViewModelProvider, (_, next) async {
+    ref.listen<ResultState>(authViewModelProvider, (_, next) {
       switch (next) {
         case Idle():
           LoadingScreen.hide();
@@ -112,63 +113,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           break;
         case Success(data: final data):
           LoadingScreen.hide();
-
           if (mounted && data is AuthResult) {
-            final role = data.userModel.rol;
-            UserPreferences.saveUserId(data.userModel.uid);
-            if (data.needsProfileCompletion) {
-              if (mounted) {
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.completeProfile,
-                  arguments: data.userModel,
-                );
-              }
-              return;
-            }
-
-            if (data.isNewUser && !data.needsProfileCompletion) {
-              if (mounted) {
-                Alerts.instance.showSuccessAlert(
-                  context,
-                  "¡Registro exitoso! Bienvenido a ServiExpress",
-                  onOk: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      AppRoutes.home,
-                      (route) => false,
-                      arguments: MapStyleLoader.cachedStyle,
-                    );
-                    //   if (mounted) {
-                    //   setState(() {
-                    //     _isLogin = true;
-                    //   });
-                    // }
-                  },
-                );
-              }
-            } else {
-              if (role == "Trabajador") {
-                if (mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRoutes.homeProvider,
-                    (route) => false,
-                  );
-                }
-              } else if (role == "Cliente") {
-                if (mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRoutes.home,
-                    (route) => false,
-                    arguments: MapStyleLoader.cachedStyle,
-                  );
-                }
-              }
-            }
+            _handleLoginSuccess(data);
           }
-
           break;
         case Failure(error: final error):
           LoadingScreen.hide();
@@ -178,6 +125,62 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           break;
       }
     });
+  }
+
+  Future<void> _handleLoginSuccess(AuthResult data) async {
+    UserPreferences.saveUserId(data.userModel.uid);
+
+    if (data.needsProfileCompletion) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.completeProfile,
+          arguments: data.userModel,
+        );
+      }
+      return;
+    }
+
+    final role = data.userModel.rol;
+
+    if (data.isNewUser) {
+      if (mounted) {
+        Alerts.instance.showSuccessAlert(
+          context,
+          "¡Registro exitoso! Bienvenido a ServiExpress",
+          onOk: () => _checkPermissionsAndNavigate(role ?? "Trabajador"),
+        );
+      }
+    } else {
+      await _checkPermissionsAndNavigate(role ?? "Cliente");
+    }
+  }
+
+  Future<void> _checkPermissionsAndNavigate(String role) async {
+    if (!mounted) return;
+
+    final permission = await Geolocator.checkPermission();
+    final hasPermission =
+        permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+
+    if (hasPermission) {
+      final String targetRoute =
+          (role == "Trabajador") ? AppRoutes.homeProvider : AppRoutes.home;
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        targetRoute,
+        (route) => false,
+        arguments: MapStyleLoader.cachedStyle,
+      );
+    } else {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.locationPermissions,
+        (route) => false,
+      );
+    }
   }
 
   void _toggleAuthMode() {
@@ -211,15 +214,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               );
             }
 
-            return ValueListenableBuilder<bool>(
-              valueListenable: _isLogin,
-              builder: (context, isLogin, _) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 65,
-                    horizontal: 24,
-                  ),
-                  child: Column(
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _isLogin,
+                builder: (context, isLogin, _) {
+                  return Column(
                     children: [
                       _AuthHeader(isLogin: isLogin, onToggle: _toggleAuthMode),
                       const SizedBox(height: 35),
@@ -292,76 +292,10 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                         },
                       ),
                     ],
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             );
-
-            // return SingleChildScrollView(
-            //   padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-            //   child: Column(
-            //     children: [
-            //       _AuthHeader(isLogin: _isLogin, onToggle: _toggleAuthMode),
-            //       const SizedBox(height: 35),
-            //       AnimatedCrossFade(
-            //         crossFadeState:
-            //             _isLogin
-            //                 ? CrossFadeState.showFirst
-            //                 : CrossFadeState.showSecond,
-            //         firstChild: _LoginFormWidget(
-            //           formKey: _formLoginKey,
-            //           emailController: _emailLoginController,
-            //           passwordController: _passwordLoginController,
-            //           obscurePassword: _obscurePasswordLogin,
-            //           onTogglePasswordVisibility:
-            //               () => setState(
-            //                 () =>
-            //                     _obscurePasswordLogin = !_obscurePasswordLogin,
-            //               ),
-            //           onLogin: _performLogin,
-            //           onForgotPassword: () {
-            //             Navigator.pushNamed(
-            //               context,
-            //               AppRoutes.recoveryPassword,
-            //             );
-            //           },
-            //           onSwitchToSignup: _toggleAuthMode,
-            //           ref: ref,
-            //         ),
-            //         secondChild: _SignupFormWidget(
-            //           formKey: _formSignupKey,
-            //           usuarioController: _usuarioSignupController,
-            //           dniController: _dniSignupController,
-            //           emailController: _emailSignupController,
-            //           passwordController: _passwordSignupController,
-            //           obscurePassword: _obscurePasswordSignup,
-            //           onTogglePasswordVisibility:
-            //               () => setState(
-            //                 () =>
-            //                     _obscurePasswordSignup =
-            //                         !_obscurePasswordSignup,
-            //               ),
-            //           onSignup: _performSignup,
-            //           onSwitchToLogin: _toggleAuthMode,
-            //           ref: ref,
-            //         ),
-            //         duration: const Duration(milliseconds: 500),
-            //         firstCurve: Curves.easeOutQuart,
-            //         secondCurve: Curves.easeInQuart,
-            //         sizeCurve: Curves.easeInOutCubic,
-            //         layoutBuilder: (topChild, topKey, bottomChild, bottomKey) {
-            //           return Stack(
-            //             clipBehavior: Clip.none,
-            //             children: [
-            //               Positioned(key: bottomKey, child: bottomChild),
-            //               Positioned(key: topKey, child: topChild),
-            //             ],
-            //           );
-            //         },
-            //       ),
-            //     ],
-            //   ),
-            // );
           },
         ),
       ),

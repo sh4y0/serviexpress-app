@@ -15,6 +15,7 @@ import 'package:serviexpress_app/presentation/widgets/category_button.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
+import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -53,7 +54,8 @@ class HomePageContent extends StatefulWidget {
   State<HomePageContent> createState() => _HomePageContentState();
 }
 
-class _HomePageContentState extends State<HomePageContent> {
+class _HomePageContentState extends State<HomePageContent>
+    with TickerProviderStateMixin {
   static const LatLng _center = LatLng(-8.073506, -79.057020);
   static const double _zoomLevelFar = 14.0;
   static const double _zoomLevelClose = 16.5;
@@ -96,7 +98,7 @@ class _HomePageContentState extends State<HomePageContent> {
   MarkerId? _currentlyOpenInfoWindowMarkerId;
   BitmapDescriptor? _locationMarkerIcon;
   BitmapDescriptor? _providerMarkerIcon;
-  late GoogleMapController mapController;
+  GoogleMapController? mapController;
   String? _categoriaTemporalDeSheet2;
 
   final ValueNotifier<bool> _shouldShowSecondTutorialStepNotifier =
@@ -105,21 +107,174 @@ class _HomePageContentState extends State<HomePageContent> {
   final GlobalKey _firstCategoryKey = GlobalKey();
   final GlobalKey _locationButtonKey = GlobalKey();
   final GlobalKey _describirServicioKey = GlobalKey();
+  final GlobalKey _describirServicioDetalladoPhotosKey = GlobalKey();
+  final GlobalKey _describirServicioDetalladoVoiceKey = GlobalKey();
+
   TutorialCoachMark? _tutorialCoachMark;
   final List<TargetFocus> _targets = [];
   StreamSubscription<Set<UserModel>>? _userStreamSubscription;
 
+  final ValueNotifier<bool> _isSearchingAnimationActive = ValueNotifier(false);
+  final ValueNotifier<Offset?> _animationPositionNotifier = ValueNotifier(null);
+
+  AnimationController? _zoomAnimationController;
+  Animation<double>? _zoomAnimation;
+
+  final ValueNotifier<LocationBannerState> _locationBannerStateNotifier =
+      ValueNotifier(LocationBannerState.hidden);
+
+  late EnhancedLocationService _locationService;
+
+  bool _isTutorialShown = false;
+
   @override
   void initState() {
     super.initState();
-    _setupLocation();
+
+    _locationService = EnhancedLocationService();
+    _setupLocationListener();
+    _initializeLocationService();
     _loadMarkerIcon();
     _loadProviderMarkerIcon();
-    _initializeLocation();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupKeyboardListener();
     });
+  }
+
+  Future<void> _initializeLocationService() async {
+    await _locationService.initialize();
+    _setupLocation();
+  }
+
+  void _setupLocationListener() {
+    _locationService.addListener(_onLocationStateChanged);
+  }
+
+  void _onLocationStateChanged() {
+    if (!mounted) return;
+    final state = _locationService.currentState;
+
+    LocationBannerState newBannerState;
+
+    if (_locationService.shouldShowNotFoundBanner) {
+      newBannerState = LocationBannerState.notFound;
+    } else if (_locationService.shouldShowSearchingBanner) {
+      newBannerState = LocationBannerState.searching;
+    } else {
+      newBannerState = LocationBannerState.hidden;
+    }
+
+    if (_locationBannerStateNotifier.value != newBannerState) {
+      _locationBannerStateNotifier.value = newBannerState;
+    }
+
+    if (state == LocationState.found &&
+        _locationService.currentPosition != null) {
+      final pos = _locationService.currentPosition!;
+
+      _currentPositionNotifier.value = LatLng(pos.latitude, pos.longitude);
+      _updateMarkers();
+
+      if (!_isZoomedIn) {
+        _isZoomedIn = true;
+        _animateCameraBasedOnZoomState();
+      }
+
+      if (mapController != null && !_isTutorialShown) {
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted) {
+            _checkAndShowTutorial();
+            _isTutorialShown = true;
+          }
+        });
+      }
+    }
+  }
+
+  void _setupLocation() async {
+    final state = _locationService.currentState;
+    if (state == LocationState.serviceDisabled) {
+      _locationBannerStateNotifier.value = LocationBannerState.notFound;
+    }
+  }
+
+  void _animateMapZoomOut(LatLng center) {
+    if (mapController == null) return;
+
+    _zoomAnimationController?.dispose();
+
+    _zoomAnimationController = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    );
+
+    _zoomAnimation = Tween<double>(
+      begin: _zoomLevelClose,
+      end: _zoomLevelFar,
+    ).animate(
+      CurvedAnimation(
+        parent: _zoomAnimationController!,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _activeProgrammaticOperationId =
+        'smooth_zoom_out_${DateTime.now().millisecondsSinceEpoch}';
+    _movementController.startProgrammaticMove(_activeProgrammaticOperationId!);
+
+    _zoomAnimationController!.addListener(() async {
+      if (mounted) {
+        mapController!.moveCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: center, zoom: _zoomAnimation!.value),
+          ),
+        );
+      }
+
+      if (_isSearchingAnimationActive.value) {
+        try {
+          final screenCoordinate = await mapController!.getScreenCoordinate(
+            center,
+          );
+          final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
+          _animationPositionNotifier.value = Offset(
+            screenCoordinate.x / devicePixelRatio,
+            screenCoordinate.y / devicePixelRatio,
+          );
+        } catch (e) {
+          debugPrint("Error recalculando la coordenada en el listener: $e");
+        }
+      }
+    });
+
+    _zoomAnimationController!.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          _zoomAnimationController?.dispose();
+          _zoomAnimationController = null;
+          _zoomAnimation = null;
+        }
+      }
+    });
+
+    _zoomAnimationController!.forward();
+  }
+
+  Future<void> _startSearchProcess() async {
+    final currentPosition = _currentPositionNotifier.value;
+    if (currentPosition == null) return;
+
+    _isSearchingAnimationActive.value = true;
+
+    _animateMapZoomOut(currentPosition);
+  }
+
+  void _handleSolicitarServicio(bool? shouldStart) {
+    if (shouldStart ?? false) {
+      _startSearchProcess();
+    }
   }
 
   void _showFirstTutorialStep() {
@@ -179,10 +334,6 @@ class _HomePageContentState extends State<HomePageContent> {
     );
   }
 
-  void _setupLocation() async {
-    await LocationMapsService().initialize();
-  }
-
   void _setupKeyboardListener() {
     final mediaQuery = MediaQuery.of(context);
     _keyboardHeight.value = mediaQuery.viewInsets.bottom;
@@ -202,36 +353,16 @@ class _HomePageContentState extends State<HomePageContent> {
     }
   }
 
-  Future<void> _initializeLocation() async {
-  bool hasPermission = await _checkLocationPermission();
-  if (!hasPermission) return;
-  
-  try {
-    final position = await LocationMapsService().getCurrentPosition();
-    final newPosition = LatLng(position.latitude, position.longitude);
-    _currentPositionNotifier.value = newPosition;
-    _updateMarkers();
-  } catch (e) {
-    debugPrint('Error al inicializar la ubicación: $e');
-  }
-}
-
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         widget.onMapLoaded(true);
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            //_showFirstTutorialStep();
-            _checkAndShowTutorial();
-          }
-        });
       }
     });
   }
 
-   void _checkAndShowTutorial() async {
+  void _checkAndShowTutorial() async {
     final prefs = await SharedPreferences.getInstance();
     final bool tutorialMostrado = prefs.getBool('tutorial_mostrado') ?? false;
 
@@ -245,8 +376,8 @@ class _HomePageContentState extends State<HomePageContent> {
   void _loadMarkerIcon() async {
     try {
       _locationMarkerIcon = await BitmapDescriptor.asset(
-        const ImageConfiguration(size: Size(25, 25)),
-        'assets/icons/ic_location_red.png',
+        const ImageConfiguration(size: Size(26, 26)),
+        'assets/icons/ic_location.png',
       );
       _updateMarkers();
     } catch (e) {
@@ -256,25 +387,21 @@ class _HomePageContentState extends State<HomePageContent> {
     }
   }
 
-  Future<bool> _checkLocationPermission() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('El servicio de ubicación está desactivado'),
-          ),
-        );
-      }
-      return false;
+  void _onLocationPermissionTap() {
+    final state = _locationService.currentState;
+    if (state == LocationState.serviceDisabled) {
+      _locationService.requestLocationService();
+    } else if (state == LocationState.permissionDenied) {
+      _locationService.requestLocationPermission();
     }
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return false;
-    }
-    if (permission == LocationPermission.deniedForever) return false;
-    return true;
+  }
+
+  void _onSearchCancel() {
+    _locationBannerStateNotifier.value = LocationBannerState.hidden;
+  }
+
+  void _onBannerDismiss() {
+    _locationBannerStateNotifier.value = LocationBannerState.hidden;
   }
 
   Future<void> _toggleZoom() async {
@@ -287,6 +414,8 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   void _animateCameraBasedOnZoomState() {
+    if (mapController == null) return;
+
     _activeProgrammaticOperationId =
         'zoom_toggle_${DateTime.now().millisecondsSinceEpoch}';
     _movementController.startProgrammaticMove(_activeProgrammaticOperationId!);
@@ -296,13 +425,13 @@ class _HomePageContentState extends State<HomePageContent> {
       _activeProgrammaticOperationId = null;
       return;
     }
-    mapController.animateCamera(
+    mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: currentPosition,
           zoom: _zoomLevelClose,
           bearing: 0.0,
-          tilt: 45.0,
+          tilt: 0.0,
         ),
       ),
       duration: const Duration(milliseconds: 500),
@@ -310,20 +439,27 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   Future<void> _getCurrentLocation({bool forceUpdate = false}) async {
-    bool hasPermission = await _checkLocationPermission();
-    if (!hasPermission) return;
     try {
-      Position position = await LocationMapsService().getCurrentPosition();
-      final newPosition = LatLng(position.latitude, position.longitude);
-      bool shouldUpdate =
-          forceUpdate ||
-          _currentPositionNotifier.value == null ||
-          _calculateDistance(_currentPositionNotifier.value!, newPosition) > 5;
-      if (shouldUpdate) {
-        _currentPositionNotifier.value = newPosition;
-        _updateMarkers();
-        if (forceUpdate) _isZoomedIn = true;
-        _animateCameraBasedOnZoomState();
+      if (_locationService.currentState != LocationState.found) {
+        await _locationService.retryLocation();
+        return;
+      }
+
+      final position = _locationService.currentPosition;
+      if (position != null) {
+        final newPosition = LatLng(position.latitude, position.longitude);
+        bool shouldUpdate =
+            forceUpdate ||
+            _currentPositionNotifier.value == null ||
+            _calculateDistance(_currentPositionNotifier.value!, newPosition) >
+                5;
+
+        if (shouldUpdate) {
+          _currentPositionNotifier.value = newPosition;
+          _updateMarkers();
+          if (forceUpdate) _isZoomedIn = true;
+          _animateCameraBasedOnZoomState();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -363,12 +499,6 @@ class _HomePageContentState extends State<HomePageContent> {
       );
     }
 
-    if (currentPosition != null && _isTappedSolicitarServicioNotifier.value) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _startLocationAnimation(currentPosition);
-      });
-    }
-
     for (var provider in _currentProvidersNotifier.value) {
       final markerId = MarkerId('provider_${provider.uid}');
       newMarkers.add(
@@ -389,22 +519,6 @@ class _HomePageContentState extends State<HomePageContent> {
       );
     }
     _markersNotifier.value = newMarkers;
-  }
-
-  void _startLocationAnimation(LatLng position) async {
-    try {
-      await AnimationHome.startAnimation(
-        context,
-        mapController,
-        position,
-        _locationMarkerIcon,
-        onComplete: () {
-          if (mounted) _isTappedSolicitarServicioNotifier.value = false;
-        },
-      );
-    } catch (e) {
-      if (mounted) _isTappedSolicitarServicioNotifier.value = false;
-    }
   }
 
   void _onCategorySelected(int index) {
@@ -452,7 +566,10 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   void _adjustCameraToShowAllMarkers() {
-    if (_currentProvidersNotifier.value.isEmpty) return;
+    if (_currentProvidersNotifier.value.isEmpty || mapController == null) {
+      return;
+    }
+
     Set<UserModel> providers = _currentProvidersNotifier.value;
     double minLat = providers.first.latitud!;
     double maxLat = providers.first.latitud!;
@@ -479,7 +596,7 @@ class _HomePageContentState extends State<HomePageContent> {
     minLng -= padding;
     maxLng += padding;
 
-    mapController.animateCamera(
+    mapController!.animateCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
           southwest: LatLng(minLat, minLng),
@@ -498,8 +615,8 @@ class _HomePageContentState extends State<HomePageContent> {
   }
 
   void _hideCurrentlyOpenInfoWindow() {
-    if (_currentlyOpenInfoWindowMarkerId != null) {
-      mapController.hideMarkerInfoWindow(_currentlyOpenInfoWindowMarkerId!);
+    if (_currentlyOpenInfoWindowMarkerId != null && mapController != null) {
+      mapController!.hideMarkerInfoWindow(_currentlyOpenInfoWindowMarkerId!);
       _currentlyOpenInfoWindowMarkerId = null;
     }
   }
@@ -548,7 +665,8 @@ class _HomePageContentState extends State<HomePageContent> {
   Future<void> _attemptToShowMarkersTutorial() async {
     if (_hasShownMarkerTutorialNotifier.value ||
         _currentProvidersNotifier.value.isEmpty ||
-        !mounted) {
+        !mounted ||
+        mapController == null) {
       return;
     }
 
@@ -562,7 +680,7 @@ class _HomePageContentState extends State<HomePageContent> {
     for (final provider in _currentProvidersNotifier.value) {
       try {
         final latLng = LatLng(provider.latitud!, provider.longitud!);
-        final screenCoordinate = await mapController.getScreenCoordinate(
+        final screenCoordinate = await mapController!.getScreenCoordinate(
           latLng,
         );
         final bool isVisible =
@@ -597,6 +715,7 @@ class _HomePageContentState extends State<HomePageContent> {
       targetPosition: targetPosition,
       shape: ShapeLightFocus.Circle,
       radius: 15,
+      enableTargetTab: false,
       contents: [
         TargetContent(
           align: ContentAlign.bottom,
@@ -633,7 +752,8 @@ class _HomePageContentState extends State<HomePageContent> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
+                      backgroundColor: const Color.fromRGBO(56, 109, 243, 1),
+                      padding: const EdgeInsets.all(8),
                       minimumSize: const Size(0, 0),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
@@ -745,6 +865,130 @@ class _HomePageContentState extends State<HomePageContent> {
     _tutorialCoachMark = TutorialCoachMark(
       targets: _targets,
       onClickTarget: (target) => _requestService(),
+      //textSkip: "FINALIZAR",
+      hideSkip: true,
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+      // onFinish: () => _marcarTutorialComoMostrado(),
+      // onSkip: () {
+      //   _marcarTutorialComoMostrado();
+      //   return true;
+      // },
+    )..show(context: context);
+  }
+
+  void _showFifthTutorialStep() {
+    _targets.clear();
+    _targets.add(
+      TargetFocus(
+        identify: "describir-servicio-detallado-photos-key",
+        keyTarget: _describirServicioDetalladoPhotosKey,
+        shape: ShapeLightFocus.RRect,
+        enableTargetTab: false,
+        radius: 10,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Agrega mas detalles",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Puedes agregar fotos o videos para que el proveedor tenga mas detalles",
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        _tutorialCoachMark?.finish();
+                        _showSixthTutorialStep();
+                      },
+                      icon: const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        "Siguiente",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color.fromRGBO(56, 109, 243, 1),
+                        padding: const EdgeInsets.all(8),
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: _targets,
+      //onClickTarget: (target) => _requestService(),
+      hideSkip: true,
+      paddingFocus: 10,
+      opacityShadow: 0.8,
+    )..show(context: context);
+  }
+
+  void _showSixthTutorialStep() {
+    _targets.clear();
+    _targets.add(
+      TargetFocus(
+        identify: "describir-servicio-detallado-voice-key",
+        keyTarget: _describirServicioDetalladoVoiceKey,
+        shape: ShapeLightFocus.Circle,
+        radius: 10,
+        enableTargetTab: false,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: const Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "¿No quieres escribir? Usa el micrófono",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Mantén presionado este ícono para grabar",
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    _tutorialCoachMark = TutorialCoachMark(
+      targets: _targets,
       textSkip: "FINALIZAR",
       paddingFocus: 10,
       opacityShadow: 0.8,
@@ -752,14 +996,13 @@ class _HomePageContentState extends State<HomePageContent> {
       onSkip: () {
         _marcarTutorialComoMostrado();
         return true;
-      }
+      },
     )..show(context: context);
   }
 
   Future<void> _marcarTutorialComoMostrado() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('tutorial_mostrado', true);
-
   }
 
   void _showFallbackTutorial() {
@@ -784,11 +1027,11 @@ class _HomePageContentState extends State<HomePageContent> {
           align: ContentAlign.bottom,
           child: Container(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
+            child: const Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Proveedores en el Mapa",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -796,31 +1039,31 @@ class _HomePageContentState extends State<HomePageContent> {
                     fontSize: 18.0,
                   ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
+                SizedBox(height: 10),
+                Text(
                   "Aun no hay proveedores disponibles en el mapa para esta categoría",
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () {
-                      _tutorialCoachMark?.finish();
-                      _showLocationButtonTutorial();
-                    },
-                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
-                    label: const Text(
-                      "Siguiente",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                ),
+                SizedBox(height: 20),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton.icon(
+                //     onPressed: () {
+                //       _tutorialCoachMark?.finish();
+                //       _showLocationButtonTutorial();
+                //     },
+                //     icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                //     label: const Text(
+                //       "Siguiente",
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //     style: TextButton.styleFrom(
+                //       padding: EdgeInsets.zero,
+                //       minimumSize: const Size(0, 0),
+                //       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -837,6 +1080,7 @@ class _HomePageContentState extends State<HomePageContent> {
 
   void _requestService() {
     _isSheetVisibleSolicitarServicioNotifier.value = true;
+    Future.delayed(const Duration(seconds: 1), _showFifthTutorialStep);
   }
 
   void _handleSheetDismissedSolicitarServicio() {
@@ -870,12 +1114,12 @@ class _HomePageContentState extends State<HomePageContent> {
         isSheetVisibleSolicitarServicio ?? false;
   }
 
-  void _isSolicitudServicioOnTapped(bool? isSolicitarServicio) {
-    _isTappedSolicitarServicioNotifier.value = isSolicitarServicio ?? false;
-    if (_isTappedSolicitarServicioNotifier.value) {
-      _updateMarkers();
-    }
-  }
+  // void _isSolicitudServicioOnTapped(bool? isSolicitarServicio) {
+  //   _isTappedSolicitarServicioNotifier.value = isSolicitarServicio ?? false;
+  //   if (_isTappedSolicitarServicioNotifier.value) {
+  //     _updateMarkers();
+  //   }
+  // }
 
   // void _agregarProveedor(UserModel proveedor) {
   //   final currentList = List<UserModel>.from(
@@ -910,353 +1154,403 @@ class _HomePageContentState extends State<HomePageContent> {
     final double topPaddingHeight = 60.0 + 25.0 + mediaQuery.padding.top;
     final double bottomSheetInitialHeight = mediaQuery.size.height * 0.34;
 
-    return Stack(
-      children: [
-        ValueListenableBuilder<Set<Marker>>(
-          valueListenable: _markersNotifier,
-          builder: (context, markers, _) {
-            return GoogleMap(
-              onMapCreated: _onMapCreated,
-              style: widget.mapStyle,
-              initialCameraPosition: const CameraPosition(
-                target: _center,
-                zoom: _zoomLevelFar,
-              ),
-              markers: markers,
-              zoomControlsEnabled: false,
-              compassEnabled: false,
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              mapToolbarEnabled: false,
-              onCameraMove: _onCameraMove,
-              onCameraIdle: _onCameraIdle,
-              padding: EdgeInsets.only(
-                top: topPaddingHeight,
-                bottom: bottomSheetInitialHeight,
-              ),
-            );
-          },
-        ),
-
-        Positioned(
-          top: mediaQuery.padding.top,
-          left: 6,
-          right: 6,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: _categoriaErrorNotifier,
-            builder: (context, hasError, _) {
-              return Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 25,
+    return ValueListenableBuilder<LocationBannerState>(
+      valueListenable: _locationBannerStateNotifier,
+      builder: (context, bannerState, _) {
+        return LocationBannerController(
+          bannerState: bannerState,
+          onLocationPermissionTap: _onLocationPermissionTap,
+          onSearchCancel: _onSearchCancel,
+          onBannerDismiss: _onBannerDismiss,
+          child: Stack(
+            children: [
+              ValueListenableBuilder<Set<Marker>>(
+                valueListenable: _markersNotifier,
+                builder: (context, markers, _) {
+                  return GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    style: widget.mapStyle,
+                    initialCameraPosition: const CameraPosition(
+                      target: _center,
+                      zoom: _zoomLevelFar,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 40),
-                        SizedBox(
-                          height: 60,
-                          child: CategoryButton(
-                            categoriaError: hasError,
-                            selectedCategoryIndexNotifier:
-                                _selectedCategoryIndex,
-                            firstCategoryKey: _firstCategoryKey,
-                            onCategorySelected:
-                                (category) => _onCategorySelected(category),
-                          ),
-                        ),
-                        if (hasError)
-                          const Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              "Selecciona una categoria",
-                              style: TextStyle(color: Colors.redAccent),
-                            ),
-                          ),
-                      ],
+                    markers: markers,
+                    zoomControlsEnabled: false,
+                    compassEnabled: false,
+                    myLocationEnabled: false,
+                    myLocationButtonEnabled: false,
+                    mapToolbarEnabled: false,
+                    onCameraMove: _onCameraMove,
+                    onCameraIdle: _onCameraIdle,
+                    padding: EdgeInsets.only(
+                      top: topPaddingHeight,
+                      bottom: bottomSheetInitialHeight,
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-
-        Positioned(
-          top: 0,
-          left: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: widget.onMenuPressed,
-                customBorder: const CircleBorder(),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF303F9F),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black26, blurRadius: 5),
-                    ],
-                  ),
-                  child: const Icon(Icons.menu, color: Colors.white),
-                ),
-              ),
-            ),
-          ),
-        ),
-
-        ValueListenableBuilder<bool>(
-          valueListenable: _shouldShowSheet,
-          builder: (context, shouldShow, _) {
-            return AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: shouldShow ? 0 : -mediaQuery.size.height,
-              child: ValueListenableBuilder<Set<UserModel>>(
-                valueListenable: _currentProvidersNotifier,
-                builder: (context, proveedores, _) {
-                  return Stack(
-                    children: [
-                      AnimatedPositioned(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        left: 0,
-                        right: 0,
-                        bottom:
-                            shouldShow
-                                ? 0
-                                : -MediaQuery.of(context).size.height,
-                        top: 0,
-                        child: DraggableSheetSolicitarServicio(
-                          detallarServicioKey: _describirServicioKey,
-                          targetInitialSize: 0.21,
-                          minSheetSize: 0.21,
-                          maxSheetSize: 0.21,
-                          snapPoints: const [0.35],
-                          onTapPressed: () {
-                            if (_selectedCategoryIndex.value == -1) {
-                              _categoriaErrorNotifier.value = true;
-                              return;
-                            }
-                            _requestService();
-                          },
-                          onCategoriaError:
-                              () => _categoriaErrorNotifier.value = true,
-                          categoriaError: _categoriaErrorNotifier.value,
-                          selectedCategoryIndex: _selectedCategoryIndex.value,
-                          onAbrirDetallesPressed:
-                              (isVisible) => _abrirSheetDetalladoDesdeSheet2(
-                                isSheetVisibleSolicitarServicio: isVisible,
-                              ),
-                          datosSolicitudExistente:
-                              _datosSolicitudGuardadaNotifier.value,
-                          onProveedores: proveedores,
-                          isSolicitudGuardada:
-                              _isSolicitudGuardadaNotifier.value,
-                          onPressedSolicitarServicio:
-                              _isSolicitudServicioOnTapped,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: mediaQuery.size.height * 0.22,
-                        right: 10,
-                        child: FloatingActionButton(
-                          key: _locationButtonKey,
-                          heroTag: 'fabHomeRightsheet',
-                          shape: const CircleBorder(),
-                          backgroundColor: const Color(0xFF4a66ff),
-                          onPressed: _toggleZoom,
-                          child: SvgPicture.asset(
-                            'assets/icons/ic_current_location.svg',
-                            width: 26,
-                            height: 26,
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   );
                 },
               ),
-            );
-          },
-        ),
 
-        // ValueListenableBuilder<bool>(
-        //   valueListenable: _shouldShowSheet,
-        //   builder: (context, shouldShow, _) {
-        //     return AnimatedPositioned(
-        //       duration: const Duration(milliseconds: 300),
-        //       curve: Curves.easeInOut,
-        //       top: 0,
-        //       left: 0,
-        //       right: 0,
-        //       bottom: shouldShow ? 0 : -mediaQuery.size.height,
-        //       child: ValueListenableBuilder<List<UserModel>>(
-        //         valueListenable: _proveedoresSeleccionadosNotifier,
-        //         builder: (context, proveedoresSeleccionados, _) {
-        //           return ValueListenableBuilder<bool>(
-        //             valueListenable: _isProveedorAgregadoNotifier,
-        //             builder: (context, isProveedorAgregado, _) {
-        //               final bool hayProveedores =
-        //                   isProveedorAgregado &&
-        //                   proveedoresSeleccionados.isNotEmpty;
-        //               final double minSheetSize = hayProveedores ? 0.36 : 0.21;
-        //               final double maxSheetSize = hayProveedores ? 0.36 : 0.21;
-        //               final List<double> snapPoints =
-        //                   hayProveedores ? [0.21, 0.36] : [0.35];
-
-        //               return Stack(
-        //                 children: [
-        //                   AnimatedPositioned(
-        //                     duration: const Duration(milliseconds: 200),
-        //                     curve: Curves.easeInOut,
-        //                     left: 0,
-        //                     right: 0,
-        //                     bottom:
-        //                         shouldShow
-        //                             ? 0
-        //                             : -MediaQuery.of(context).size.height,
-        //                     top: 0,
-        //                     child: DraggableSheetSolicitarServicio(
-        //                       detallarServicioKey: _describirServicioKey,
-        //                       targetInitialSize: minSheetSize,
-        //                       minSheetSize: minSheetSize,
-        //                       maxSheetSize: maxSheetSize,
-        //                       snapPoints: snapPoints,
-        //                       onTapPressed: () {
-        //                         if (_selectedCategoryIndex.value == -1) {
-        //                           _categoriaErrorNotifier.value = true;
-        //                           return;
-        //                         }
-        //                         _requestService();
-        //                       },
-        //                       onCategoriaError: () => _categoriaErrorNotifier.value = true,
-        //                       categoriaError: _categoriaErrorNotifier.value,
-        //                       selectedCategoryIndex: _selectedCategoryIndex.value,
-        //                       onAbrirDetallesPressed:
-        //                           (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
-        //                       datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
-        //                       proveedoresSeleccionados: proveedoresSeleccionados,
-        //                       onProveedorRemovido: _removerProveedor,
-        //                       onProveedorTapped: _abrirDetalleProveedor,
-        //                       isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
-        //                       isProveedorAgregado: isProveedorAgregado,
-        //                       onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
-        //                     ),
-        //                   ),
-        //                   Positioned(
-        //                     bottom:
-        //                         (hayProveedores
-        //                             ? mediaQuery.size.height * 0.37
-        //                             : mediaQuery.size.height * 0.22),
-        //                     right: 10,
-        //                     child: FloatingActionButton(
-        //                       key: _locationButtonKey,
-        //                       heroTag: 'fabHomeRightsheet',
-        //                       shape: const CircleBorder(),
-        //                       backgroundColor: const Color(0xFF4a66ff),
-        //                       onPressed: _toggleZoom,
-        //                       child: SvgPicture.asset(
-        //                         'assets/icons/ic_current_location.svg',
-        //                         width: 26,
-        //                         height: 26,
-        //                         colorFilter: const ColorFilter.mode(
-        //                           Colors.white,
-        //                           BlendMode.srcIn,
-        //                         ),
-        //                       ),
-        //                     ),
-        //                   ),
-        //                 ],
-        //               );
-        //             },
-        //           );
-        //         },
-        //       ),
-        //     );
-        //   },
-        // ),
-        ValueListenableBuilder<bool>(
-          valueListenable: _isSheetVisibleSolicitarServicioNotifier,
-          builder: (context, isVisible, _) {
-            if (!isVisible) return const SizedBox.shrink();
-            return Positioned.fill(
-              child: DraggableSheetSolicitarServicioDetallado(
-                targetInitialSize: 0.95,
-                minSheetSize: 0.0,
-                maxSheetSize: 0.95,
-                snapPoints: const [0.0, 0.95],
-                onDismiss: _handleSheetDismissedSolicitarServicio,
-                initialData:
-                    _datosSolicitudGuardadaNotifier.value ??
-                    ServiceModel(
-                      categoria: _categoriaTemporalDeSheet2,
-                      id: '',
-                      descripcion: '',
-                      estado: '',
-                      clientId: '',
-                      workerId: '',
-                    ),
-                onGuardarSolicitudCallback:
-                    (data) => _manejarGuardadoDesdeSheetDetallado(data),
-                selectedCategoryIndex: _selectedCategoryIndex.value,
-                isSolicitudEnviada:
-                    (isEnviada) =>
-                        _isSolicitudGuardadaNotifier.value = isEnviada,
+              Positioned(
+                top: mediaQuery.padding.top,
+                left: 6,
+                right: 6,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _categoriaErrorNotifier,
+                  builder: (context, hasError, _) {
+                    return Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 25,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 40),
+                              SizedBox(
+                                height: 60,
+                                child: CategoryButton(
+                                  categoriaError: hasError,
+                                  selectedCategoryIndexNotifier:
+                                      _selectedCategoryIndex,
+                                  firstCategoryKey: _firstCategoryKey,
+                                  onCategorySelected:
+                                      (category) =>
+                                          _onCategorySelected(category),
+                                ),
+                              ),
+                              if (hasError)
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    "Selecciona una categoria",
+                                    style: TextStyle(color: Colors.redAccent),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            );
-          },
-        ),
 
-        ValueListenableBuilder<bool>(
-          valueListenable: _isSheetVisibleDetalleProveedorNotifier,
-          builder: (context, isVisible, _) {
-            if (!isVisible) return const SizedBox.shrink();
-            return Positioned.fill(
-              child: Stack(
-                children: [
-                  ModalBarrier(
-                    color: Colors.black.withAlpha((0.3 * 255).toInt()),
-                    dismissible: true,
-                    onDismiss: _handleSheetDismissedDetalleProveedor,
+              Positioned(
+                top: 0,
+                left: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: widget.onMenuPressed,
+                      customBorder: const CircleBorder(),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF303F9F),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black26, blurRadius: 5),
+                          ],
+                        ),
+                        child: const Icon(Icons.menu, color: Colors.white),
+                      ),
+                    ),
                   ),
-                  Positioned.fill(
-                    child: ValueListenableBuilder<UserModel?>(
-                      valueListenable: _selectedProviderNotifier,
-                      builder: (context, selectedProvider, _) {
-                        return DraggableSheetDetalleProveedor(
-                          targetInitialSize: 0.57,
-                          minSheetSize: 0.0,
-                          maxSheetSize: 0.95,
-                          snapPoints: const [0.0, 0.57, 0.95],
-                          onDismiss: _handleSheetDismissedDetalleProveedor,
-                          //onProveedorAgregado: _agregarProveedor,
-                          selectedProvider: selectedProvider,
-                          isProveedorAgregado:
-                              (isAgregado) =>
-                                  _isProveedorAgregadoNotifier.value =
-                                      isAgregado,
+                ),
+              ),
+
+              ValueListenableBuilder<bool>(
+                valueListenable: _shouldShowSheet,
+                builder: (context, shouldShow, _) {
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: shouldShow ? 0 : -mediaQuery.size.height,
+                    child: ValueListenableBuilder<Set<UserModel>>(
+                      valueListenable: _currentProvidersNotifier,
+                      builder: (context, proveedores, _) {
+                        return Stack(
+                          children: [
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                              left: 0,
+                              right: 0,
+                              bottom:
+                                  shouldShow
+                                      ? 0
+                                      : -MediaQuery.of(context).size.height,
+                              top: 0,
+                              child: DraggableSheetSolicitarServicio(
+                                detallarServicioKey: _describirServicioKey,
+                                targetInitialSize: 0.21,
+                                minSheetSize: 0.21,
+                                maxSheetSize: 0.21,
+                                snapPoints: const [0.35],
+                                onTapPressed: () {
+                                  if (_selectedCategoryIndex.value == -1) {
+                                    _categoriaErrorNotifier.value = true;
+                                    return;
+                                  }
+                                  _requestService();
+                                },
+                                onCategoriaError:
+                                    () => _categoriaErrorNotifier.value = true,
+                                categoriaError: _categoriaErrorNotifier.value,
+                                selectedCategoryIndex:
+                                    _selectedCategoryIndex.value,
+                                onAbrirDetallesPressed:
+                                    (isVisible) =>
+                                        _abrirSheetDetalladoDesdeSheet2(
+                                          isSheetVisibleSolicitarServicio:
+                                              isVisible,
+                                        ),
+                                datosSolicitudExistente:
+                                    _datosSolicitudGuardadaNotifier.value,
+                                onProveedores: proveedores,
+                                isSolicitudGuardada:
+                                    _isSolicitudGuardadaNotifier.value,
+                                onPressedSolicitarServicio:
+                                    _handleSolicitarServicio,
+                                //_isSolicitudServicioOnTapped,
+                              ),
+                            ),
+
+                            ValueListenableBuilder<bool>(
+                              valueListenable: _isSearchingAnimationActive,
+                              builder: (context, isActive, child) {
+                                if (!isActive) return const SizedBox.shrink();
+
+                                return ValueListenableBuilder<Offset?>(
+                                  valueListenable: _animationPositionNotifier,
+                                  builder: (context, position, _) {
+                                    if (position == null) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Positioned(
+                                      left: position.dx - 60,
+                                      top: position.dy - 60,
+                                      child: AnimationHome(
+                                        onAnimationComplete: () {
+                                          _isSearchingAnimationActive.value =
+                                              false;
+                                          _animationPositionNotifier.value =
+                                              null;
+                                        },
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+
+                            Positioned(
+                              bottom: mediaQuery.size.height * 0.22,
+                              right: 10,
+                              child: FloatingActionButton(
+                                key: _locationButtonKey,
+                                heroTag: 'fabHomeRightsheet',
+                                shape: const CircleBorder(),
+                                backgroundColor: const Color(0xFF4a66ff),
+                                onPressed: _toggleZoom,
+                                child: SvgPicture.asset(
+                                  'assets/icons/ic_current_location.svg',
+                                  width: 26,
+                                  height: 26,
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.white,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ],
+
+              // ValueListenableBuilder<bool>(
+              //   valueListenable: _shouldShowSheet,
+              //   builder: (context, shouldShow, _) {
+              //     return AnimatedPositioned(
+              //       duration: const Duration(milliseconds: 300),
+              //       curve: Curves.easeInOut,
+              //       top: 0,
+              //       left: 0,
+              //       right: 0,
+              //       bottom: shouldShow ? 0 : -mediaQuery.size.height,
+              //       child: ValueListenableBuilder<List<UserModel>>(
+              //         valueListenable: _proveedoresSeleccionadosNotifier,
+              //         builder: (context, proveedoresSeleccionados, _) {
+              //           return ValueListenableBuilder<bool>(
+              //             valueListenable: _isProveedorAgregadoNotifier,
+              //             builder: (context, isProveedorAgregado, _) {
+              //               final bool hayProveedores =
+              //                   isProveedorAgregado &&
+              //                   proveedoresSeleccionados.isNotEmpty;
+              //               final double minSheetSize = hayProveedores ? 0.36 : 0.21;
+              //               final double maxSheetSize = hayProveedores ? 0.36 : 0.21;
+              //               final List<double> snapPoints =
+              //                   hayProveedores ? [0.21, 0.36] : [0.35];
+
+              //               return Stack(
+              //                 children: [
+              //                   AnimatedPositioned(
+              //                     duration: const Duration(milliseconds: 200),
+              //                     curve: Curves.easeInOut,
+              //                     left: 0,
+              //                     right: 0,
+              //                     bottom:
+              //                         shouldShow
+              //                             ? 0
+              //                             : -MediaQuery.of(context).size.height,
+              //                     top: 0,
+              //                     child: DraggableSheetSolicitarServicio(
+              //                       detallarServicioKey: _describirServicioKey,
+              //                       targetInitialSize: minSheetSize,
+              //                       minSheetSize: minSheetSize,
+              //                       maxSheetSize: maxSheetSize,
+              //                       snapPoints: snapPoints,
+              //                       onTapPressed: () {
+              //                         if (_selectedCategoryIndex.value == -1) {
+              //                           _categoriaErrorNotifier.value = true;
+              //                           return;
+              //                         }
+              //                         _requestService();
+              //                       },
+              //                       onCategoriaError: () => _categoriaErrorNotifier.value = true,
+              //                       categoriaError: _categoriaErrorNotifier.value,
+              //                       selectedCategoryIndex: _selectedCategoryIndex.value,
+              //                       onAbrirDetallesPressed:
+              //                           (isVisible) => _abrirSheetDetalladoDesdeSheet2(isSheetVisibleSolicitarServicio:isVisible),
+              //                       datosSolicitudExistente: _datosSolicitudGuardadaNotifier.value,
+              //                       proveedoresSeleccionados: proveedoresSeleccionados,
+              //                       onProveedorRemovido: _removerProveedor,
+              //                       onProveedorTapped: _abrirDetalleProveedor,
+              //                       isSolicitudGuardada: _isSolicitudGuardadaNotifier.value,
+              //                       isProveedorAgregado: isProveedorAgregado,
+              //                       onPressedSolicitarServicio: _isSolicitudServicioOnTapped,
+              //                     ),
+              //                   ),
+              //                   Positioned(
+              //                     bottom:
+              //                         (hayProveedores
+              //                             ? mediaQuery.size.height * 0.37
+              //                             : mediaQuery.size.height * 0.22),
+              //                     right: 10,
+              //                     child: FloatingActionButton(
+              //                       key: _locationButtonKey,
+              //                       heroTag: 'fabHomeRightsheet',
+              //                       shape: const CircleBorder(),
+              //                       backgroundColor: const Color(0xFF4a66ff),
+              //                       onPressed: _toggleZoom,
+              //                       child: SvgPicture.asset(
+              //                         'assets/icons/ic_current_location.svg',
+              //                         width: 26,
+              //                         height: 26,
+              //                         colorFilter: const ColorFilter.mode(
+              //                           Colors.white,
+              //                           BlendMode.srcIn,
+              //                         ),
+              //                       ),
+              //                     ),
+              //                   ),
+              //                 ],
+              //               );
+              //             },
+              //           );
+              //         },
+              //       ),
+              //     );
+              //   },
+              // ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSheetVisibleSolicitarServicioNotifier,
+                builder: (context, isVisible, _) {
+                  if (!isVisible) return const SizedBox.shrink();
+                  return Positioned.fill(
+                    child: DraggableSheetSolicitarServicioDetallado(
+                      globalKeyServicioDetalladoPhotos:
+                          _describirServicioDetalladoPhotosKey,
+                      globalKeyServicioDetalladoVoice:
+                          _describirServicioDetalladoVoiceKey,
+                      targetInitialSize: 0.95,
+                      minSheetSize: 0.0,
+                      maxSheetSize: 0.95,
+                      snapPoints: const [0.0, 0.95],
+                      onDismiss: _handleSheetDismissedSolicitarServicio,
+                      initialData:
+                          _datosSolicitudGuardadaNotifier.value ??
+                          ServiceModel(
+                            categoria: _categoriaTemporalDeSheet2,
+                            id: '',
+                            descripcion: '',
+                            estado: '',
+                            clientId: '',
+                            workerId: '',
+                          ),
+                      onGuardarSolicitudCallback:
+                          (data) => _manejarGuardadoDesdeSheetDetallado(data),
+                      selectedCategoryIndex: _selectedCategoryIndex.value,
+                      isSolicitudEnviada:
+                          (isEnviada) =>
+                              _isSolicitudGuardadaNotifier.value = isEnviada,
+                    ),
+                  );
+                },
+              ),
+
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSheetVisibleDetalleProveedorNotifier,
+                builder: (context, isVisible, _) {
+                  if (!isVisible) return const SizedBox.shrink();
+                  return Positioned.fill(
+                    child: Stack(
+                      children: [
+                        ModalBarrier(
+                          color: Colors.black.withAlpha((0.3 * 255).toInt()),
+                          dismissible: true,
+                          onDismiss: _handleSheetDismissedDetalleProveedor,
+                        ),
+                        Positioned.fill(
+                          child: ValueListenableBuilder<UserModel?>(
+                            valueListenable: _selectedProviderNotifier,
+                            builder: (context, selectedProvider, _) {
+                              return DraggableSheetDetalleProveedor(
+                                targetInitialSize: 0.57,
+                                minSheetSize: 0.0,
+                                maxSheetSize: 0.95,
+                                snapPoints: const [0.0, 0.57, 0.95],
+                                onDismiss:
+                                    _handleSheetDismissedDetalleProveedor,
+                                //onProveedorAgregado: _agregarProveedor,
+                                selectedProvider: selectedProvider,
+                                isProveedorAgregado:
+                                    (isAgregado) =>
+                                        _isProveedorAgregadoNotifier.value =
+                                            isAgregado,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1281,6 +1575,9 @@ class _HomePageContentState extends State<HomePageContent> {
     _shouldShowSecondTutorialStepNotifier.dispose();
     _mapInteractionTimer?.cancel();
     _userStreamSubscription?.cancel();
+    _isSearchingAnimationActive.dispose();
+    _animationPositionNotifier.dispose();
+    _zoomAnimationController?.dispose();
     super.dispose();
   }
 }

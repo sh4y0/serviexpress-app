@@ -9,6 +9,8 @@ import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/form_multimedia.dart';
 
 class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
+  final GlobalKey globalKeyServicioDetalladoPhotos;
+  final GlobalKey globalKeyServicioDetalladoVoice;
   final VoidCallback? onDismiss;
   final double targetInitialSize;
   final double minSheetSize;
@@ -36,6 +38,8 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
     required this.onGuardarSolicitudCallback,
     required this.selectedCategoryIndex,
     required this.isSolicitudEnviada,
+    required this.globalKeyServicioDetalladoPhotos,
+    required this.globalKeyServicioDetalladoVoice,
   });
   @override
   State<DraggableSheetSolicitarServicioDetallado> createState() =>
@@ -253,7 +257,13 @@ class DraggableSheetState
                                   ),
                                 ),
 
-                                FormMultimedia(key: _formMultimediaKey),
+                                FormMultimedia(
+                                  key: _formMultimediaKey,
+                                  keyServicioDetalladoPhotos:
+                                      widget.globalKeyServicioDetalladoPhotos,
+                                  keyServicioDetalladoVoice:
+                                      widget.globalKeyServicioDetalladoVoice,
+                                ),
                                 const SizedBox(height: 12),
 
                                 SizedBox(

@@ -9,6 +9,8 @@ import 'package:record/record.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
 
 class FormMultimedia extends StatefulWidget {
+  final GlobalKey keyServicioDetalladoPhotos;
+  final GlobalKey keyServicioDetalladoVoice;
   final Function(
     String text,
     List<File> images,
@@ -17,7 +19,12 @@ class FormMultimedia extends StatefulWidget {
   )?
   onSubmit;
 
-  const FormMultimedia({super.key, this.onSubmit});
+  const FormMultimedia({
+    super.key,
+    this.onSubmit,
+    required this.keyServicioDetalladoPhotos,
+    required this.keyServicioDetalladoVoice,
+  });
 
   @override
   State<FormMultimedia> createState() => FormularioMultimediaState();
@@ -186,7 +193,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
         final dir = await getApplicationDocumentsDirectory();
         final path = p.join(
           dir.path,
-          'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+          'audio_${DateTime.now().millisecondsSinceEpoch}.mp3',
         );
         await _audioRecorder.start(
           const RecordConfig(encoder: AudioEncoder.aacLc),
@@ -721,6 +728,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
+                  key: widget.keyServicioDetalladoPhotos,
                   margin: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
@@ -778,6 +786,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                           ? _pulseAnimation.value
                                           : 1.0),
                                   child: Container(
+                                    key: widget.keyServicioDetalladoVoice,
                                     width: 48,
                                     height: 48,
                                     decoration: BoxDecoration(
