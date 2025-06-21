@@ -55,9 +55,9 @@ class ServiceRepository {
       if (service.audioFiles != null) {
         for (int i = 0; i < service.audioFiles!.length; i++) {
           final String fileName =
-              '${serviceId}audio${(i + 1).toString().padLeft(3, '0')}.m4a';
+              '${serviceId}_audio_${(i + 1).toString().padLeft(3, '0')}.mp3';
           final ref = _storage.ref().child('services/audios/$fileName');
-          final metadata = SettableMetadata(contentType: 'audio/m4a');
+          final metadata = SettableMetadata(contentType: 'audio/mp3');
           final uploadTask = await ref.putFile(
             service.audioFiles![i],
             metadata,
