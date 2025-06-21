@@ -71,8 +71,8 @@ dependencies:
   path_provider: ^2.1.5
   file_picker: ^10.2.0
   firebase_crashlytics: ^4.3.7
-  signature: ^6.3.0
   geocoding: ^4.0.0
+  signature: ^6.3.0
 
 dev_dependencies:
   flutter_test:
