@@ -12,6 +12,7 @@ import 'package:serviexpress_app/presentation/pages/home_provider.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
+import 'package:serviexpress_app/presentation/widgets/location_permission.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
 import 'package:sizer/sizer.dart';
 
@@ -47,6 +48,10 @@ class Serviexpress extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => const AuthPageRecoveryPassword(),
                 );
+              case AppRoutes.locationPermissions:
+                return MaterialPageRoute(
+                  builder: (context) => const LocationPermission(),
+                );
               case AppRoutes.verified:
                 return MaterialPageRoute(
                   builder: (context) => const Verification(),
@@ -73,17 +78,8 @@ class Serviexpress extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => const StartPage(),
                 );
-              //  default:
-              //   return MaterialPageRoute(
-              //     builder: (context) => const AuthPage(),
-              //   );
             }
           },
-          //   getPages: [
-          //     GetPage(name: "/", page: () => const StartPage()),
-          //     GetPage(name: "/login", page: () => const AuthPage()),
-          //     //GetPage(name: "/signUp", page: () => const SignUp()),
-          // ],
         );
       },
     );
