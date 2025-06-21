@@ -52,7 +52,7 @@ class ServiceModel {
           json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fotos: json['fotos'] != null ? List<String>.from(json['fotos']) : null,
       videos: json['videos'] != null ? List<String>.from(json['videos']) : null,
-      audios: json['audio'] != null ? List<String>.from(json['audios']) : null,
+      audios: json['audios'] != null ? List<String>.from(json['audios']) : null,
       fechaCreacion:
           json['fechaCreacion'] != null
               ? (json['fechaCreacion'] as Timestamp).toDate()

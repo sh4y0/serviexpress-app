@@ -193,7 +193,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
         final dir = await getApplicationDocumentsDirectory();
         final path = p.join(
           dir.path,
-          'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+          'audio_${DateTime.now().millisecondsSinceEpoch}.mp3',
         );
         await _audioRecorder.start(
           const RecordConfig(encoder: AudioEncoder.aacLc),

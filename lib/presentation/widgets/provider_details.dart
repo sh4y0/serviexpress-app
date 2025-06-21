@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/service/location_service.dart';
+import 'package:serviexpress_app/presentation/widgets/audio_item.dart';
+import 'package:serviexpress_app/presentation/widgets/video_item.dart';
 
 class ProviderDetails extends StatefulWidget {
   final ServiceComplete service;
@@ -28,8 +30,21 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final serviceData = widget.service.service;
+
+    final bool hayMultimedia =
+        (serviceData.fotos?.isNotEmpty ?? false) ||
+        (serviceData.videos?.isNotEmpty ?? false) ||
+        (serviceData.audios?.isNotEmpty ?? false);
+
+    final double minSheetSize = hayMultimedia ? 0.30 : 0.3;
+    final double maxSheetSize = hayMultimedia ? 0.8 : 0.65;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.service.cliente.nombreCompleto)),
+      appBar: AppBar(
+        backgroundColor: AppColor.bgChat,
+        title: Text(widget.service.cliente.nombreCompleto),
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           GoogleMap(
@@ -42,8 +57,8 @@ class _ProviderDetailsState extends State<ProviderDetails> {
           ),
           DraggableScrollableSheet(
             initialChildSize: 0.30,
-            minChildSize: 0.30,
-            maxChildSize: 0.8, //mod 8
+            minChildSize: minSheetSize,
+            maxChildSize: maxSheetSize, //mod 8
             builder: (context, scrollController) {
               return ScreenClientData(
                 service: widget.service,
@@ -74,12 +89,23 @@ class ScreenClientData extends StatefulWidget {
 class _ScreenClientDataState extends State<ScreenClientData> {
   String? presupuestoPersonalizado;
   String? propuestaTexto;
+
+  // bool isVideoUrl(String url) {
+  //   final uri = Uri.tryParse(url);
+  //   if (uri == null) return false;
+
+  //   final path = uri.path.toLowerCase();
+  //   return path.endsWith(".mp4") ||
+  //       url.contains(".mov") ||
+  //       url.contains(".avi");
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
         color: AppColor.bgCard,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -196,11 +222,14 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                       "assets/icons/ic_location.svg",
                                     ),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      direccion,
-                                      style: const TextStyle(
-                                        color: AppColor.txtPrice,
-                                        fontWeight: FontWeight.bold,
+                                    Expanded(
+                                      child: Text(
+                                        maxLines: 2,
+                                        direccion,
+                                        style: const TextStyle(
+                                          color: AppColor.txtPrice,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -271,9 +300,10 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 15),
+
                   if (widget.service.service.fotos != null &&
-                      widget.service.service.fotos!.isNotEmpty)
+                      widget.service.service.fotos!.isNotEmpty) ...[
+                    const SizedBox(height: 15),
                     SizedBox(
                       height: 90,
                       child: ListView.separated(
@@ -282,35 +312,155 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         separatorBuilder:
                             (context, index) => const SizedBox(width: 8),
                         itemBuilder: (context, index) {
-                          return Image.asset(
-                            widget.service.service.fotos![index],
-                            width: 90,
-                            height: 90,
+                          return GestureDetector(
+                            onTap: () {
+                              final photos = widget.service.service.fotos!;
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (context) {
+                                  return Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 175,
+                                    ),
+                                    child: Center(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: PageView.builder(
+                                          controller: PageController(
+                                            initialPage: index,
+                                          ),
+                                          itemCount: photos.length,
+                                          itemBuilder: (context, pageIndex) {
+                                            return InteractiveViewer(
+                                              child: Center(
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: Image.network(
+                                                    photos[pageIndex],
+                                                    fit: BoxFit.contain,
+                                                    errorBuilder: (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Image.asset(
+                                                        "assets/images/img_services.png",
+                                                        fit: BoxFit.contain,
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                widget.service.service.fotos![index],
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (
+                                  context,
+                                  child,
+                                  loadingProgress,
+                                ) {
+                                  if (loadingProgress == null) return child;
+                                  return const SizedBox(
+                                    width: 90,
+                                    height: 90,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    "assets/images/img_services.png",
+                                    width: 90,
+                                    height: 90,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              ),
+                            ),
                           );
                         },
                       ),
                     ),
+                  ],
 
-                  widget.service.service.videos != null &&
-                          widget.service.service.videos!.isNotEmpty
-                      ? SizedBox(
-                        height: 90,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: widget.service.service.videos!.length,
-                          separatorBuilder:
-                              (context, index) => const SizedBox(width: 8),
-                          itemBuilder: (context, index) {
+                  if (widget.service.service.videos != null &&
+                      widget.service.service.videos!.isNotEmpty) ...[
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      height: 90,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.service.service.videos!.length,
+                        separatorBuilder:
+                            (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final url = widget.service.service.videos![index];
+                          if (url.isEmpty) {
                             return Image.asset(
-                              widget.service.service.videos![index],
+                              "assets/images/img_services.png",
                               width: 90,
                               height: 90,
+                              fit: BoxFit.cover,
                             );
-                          },
-                        ),
-                      )
-                      : const SizedBox.shrink(),
-                  const SizedBox(height: 15),
+                          }
+                          return SizedBox(
+                            width: 90,
+                            height: 90,
+                            child: VideoItem(url: url),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+
+                  if (widget.service.service.audios != null &&
+                      widget.service.service.audios!.isNotEmpty) ...[
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      height: 70,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemCount: widget.service.service.audios!.length,
+                        itemBuilder: (context, index) {
+                          final audioUrl =
+                              widget.service.service.audios![index];
+                          return audioUrl.isEmpty
+                              ? const SizedBox(
+                                width: 200,
+                                child: Center(
+                                  child: Text(
+                                    "Audio Vacío",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              )
+                              : AudioItem(url: audioUrl);
+                        },
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
                   const Text(
                     "Ingresa el precio:",
                     style: TextStyle(
@@ -319,60 +469,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  // Row(
-                  //   children: [
-                  //   Expanded(
-                  //     child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.start,
-                  //     children: List.generate(precio.length, (index) {
-                  //       final isSelected = selectedPrecio == index;
-                  //       return Padding(
-                  //       padding: EdgeInsets.only(right: index < precio.length - 1 ? 10 : 0),
-                  //       child: GestureDetector(
-                  //         onTap: () {
-                  //         setState(() {
-                  //           selectedPrecio = index;
-                  //         });
-                  //         },
-                  //         child: Container(
-                  //         padding: const EdgeInsets.symmetric(
-                  //           vertical: 8,
-                  //           horizontal: 12,
-                  //         ),
-                  //         decoration: BoxDecoration(
-                  //           color: isSelected ? AppColor.btnColor : Colors.transparent,
-                  //           borderRadius: BorderRadius.circular(6),
-                  //           border: Border.all(
-                  //           color: isSelected ? AppColor.btnColor : AppColor.btnColor,
-                  //           width: 1.5,
-                  //           ),
-                  //         ),
-                  //         child: Text(
-                  //           "\$${precio[index]}",
-                  //           style: TextStyle(
-                  //           color: isSelected ? Colors.white : AppColor.btnColor,
-                  //           fontWeight: FontWeight.bold,
-                  //           ),
-                  //         ),
-                  //         ),
-                  //       ),
-                  //       );
-                  //     }),
-                  //     ),
-                  //   ),
-                  //   TextButton.icon(
-                  //     onPressed: () {
-                  //     mostrarPropuesta(context);
-                  //     },
-                  //     label: const Text("Otro"),
-                  //     icon: const Icon(Icons.add),
-                  //     style: ButtonStyle(
-                  //     overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  //     splashFactory: NoSplash.splashFactory,
-                  //     ),
-                  //   ),
-                  //   ],
-                  // ),
+                  
                   const SizedBox(height: 10),
                   InputPresupuestoLauncher(
                     presupuesto: presupuestoPersonalizado,
@@ -461,7 +558,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Presupuesto",
+          "Precio",
           style: TextStyle(
             color: Colors.white,
             fontSize: 17,
@@ -492,7 +589,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
             Expanded(
               child: TextField(
                 controller: _controller,
-                style: const TextStyle(color: AppColor.bgMsgUser, fontSize: 18),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -541,7 +638,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
         TextField(
           controller: _descripcionController,
           maxLines: 6,
-          style: const TextStyle(color: AppColor.bgMsgUser),
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

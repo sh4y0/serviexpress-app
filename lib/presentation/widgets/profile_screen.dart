@@ -1,6 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
@@ -23,6 +28,8 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   UserModel? user;
+  final ImagePicker _picker = ImagePicker();
+  XFile? _selectedImage;
 
   void _logout(BuildContext context) {
     showDialog(
@@ -112,6 +119,177 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _getUserById();
   }
 
+  void _showImageSourceOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: AppColor.bgCard,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                ),
+              ),
+              child: Wrap(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera),
+                    title: const Text("Tomar Foto"),
+                    onTap: () => _pickImage(ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: const Text("Subir Foto"),
+                    onTap: () => _pickImage(ImageSource.gallery),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.close),
+                    title: const Text("Cancelar"),
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = pickedFile;
+        });
+        Navigator.of(context).pop();
+        _showConfirmDialog();
+      }
+    } catch (e) {
+      Alerts.instance.showErrorAlert(
+        context,
+        "No se pudo seleccionar la imagen.",
+      );
+    }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: AppColor.bgCard,
+            title: const Center(
+              child: Text(
+                "Confirmar imagen de perfil",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            content: CircleAvatar(
+              radius: 90,
+              backgroundImage: FileImage(File(_selectedImage!.path)),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _selectedImage = null;
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancelar"),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColor.btnColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () => _uploadAndRefreshUser(),
+                child: const Text(
+                  "Aceptar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+            actionsAlignment: MainAxisAlignment.center,
+          ),
+    );
+  }
+
+  Future<void> _uploadAndRefreshUser() async {
+    if (_selectedImage == null) return;
+
+    try {
+      LoadingScreen.show(context);
+
+      final uid = await UserPreferences.getUserId();
+      if (uid == null) throw Exception("Usuario no autenticado");
+
+      await UserRepository.instance.addUserProfilePhoto(
+        File(_selectedImage!.path),
+        uid,
+      );
+
+      _getUserById();
+
+      setState(() {
+        _selectedImage = null;
+      });
+
+      Navigator.of(context).pop();
+      Alerts.instance.showSuccessAlert(
+        context,
+        "Imagen actualizada exitosamente",
+      );
+    } catch (e) {
+      Alerts.instance.showErrorAlert(
+        context,
+        "Error al subir la imagen: ${e.toString()}",
+      );
+    } finally {
+      LoadingScreen.hide();
+    }
+  }
+
+  void _showFullImage(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: InteractiveViewer(
+                child:
+                    _selectedImage != null
+                        ? Image.file(File(_selectedImage!.path))
+                        : (user!.imagenUrl != null &&
+                                user!.imagenUrl!.isNotEmpty
+                            ? Image.network(user!.imagenUrl!)
+                            : Image.asset("assets/images/avatar.png")),
+              ),
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _listenToViewModel();
@@ -175,42 +353,54 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           child: Stack(
                             alignment: Alignment.bottomRight,
                             children: [
-                              CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Colors.white,
-                                child: ClipOval(
-                                  child: SizedBox(
-                                    width: 140,
-                                    height: 140,
-                                    child:
-                                        user!.imagenUrl != null &&
-                                                user!.imagenUrl!.isNotEmpty
-                                            ? FadeInImage.assetNetwork(
-                                              placeholder:
-                                                  "assets/images/avatar.png",
-                                              image: user!.imagenUrl!,
-                                              fit: BoxFit.cover,
-                                              imageErrorBuilder: (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) {
-                                                return Image.asset(
-                                                  "assets/images/avatar.png",
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            )
-                                            : Image.asset(
-                                              "assets/images/avatar.png",
-                                              fit: BoxFit.cover,
-                                            ),
+                              GestureDetector(
+                                onTap: () {
+                                  _showFullImage(context);
+                                },
+                                child: CircleAvatar(
+                                  radius: 70,
+                                  backgroundColor: Colors.white,
+                                  child: ClipOval(
+                                    child: SizedBox(
+                                      width: 140,
+                                      height: 140,
+                                      child:
+                                          _selectedImage != null
+                                              ? Image.file(
+                                                File(_selectedImage!.path),
+                                                fit: BoxFit.cover,
+                                              )
+                                              : (user!.imagenUrl != null &&
+                                                      user!
+                                                          .imagenUrl!
+                                                          .isNotEmpty
+                                                  ? FadeInImage.assetNetwork(
+                                                    placeholder:
+                                                        "assets/images/avatar.png",
+                                                    image: user!.imagenUrl!,
+                                                    fit: BoxFit.cover,
+                                                    imageErrorBuilder: (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Image.asset(
+                                                        "assets/images/avatar.png",
+                                                        fit: BoxFit.cover,
+                                                      );
+                                                    },
+                                                  )
+                                                  : Image.asset(
+                                                    "assets/images/avatar.png",
+                                                    fit: BoxFit.cover,
+                                                  )),
+                                    ),
                                   ),
                                 ),
                               ),
                               Positioned(
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: _showImageSourceOptions,
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: Colors.grey[100],
