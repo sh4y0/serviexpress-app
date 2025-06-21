@@ -55,14 +55,18 @@ class ServiceRepository {
       if (service.audioFiles != null) {
         for (int i = 0; i < service.audioFiles!.length; i++) {
           final String fileName =
-              '${serviceId}_audio_${(i + 1).toString().padLeft(3, '0')}';
+              '${serviceId}audio${(i + 1).toString().padLeft(3, '0')}.m4a';
           final ref = _storage.ref().child('services/audios/$fileName');
-          final uploadTask = await ref.putFile(service.audioFiles![i]);
+          final metadata = SettableMetadata(contentType: 'audio/m4a');
+          final uploadTask = await ref.putFile(
+            service.audioFiles![i],
+            metadata,
+          );
           final url = await uploadTask.ref.getDownloadURL();
           audioUrls.add(url);
         }
       }
-
+      
       final updatedService = ServiceModel(
         id: serviceId,
         categoria: service.categoria,

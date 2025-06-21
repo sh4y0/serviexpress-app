@@ -12,7 +12,6 @@ import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
-import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
@@ -160,7 +159,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   }
 
   void _setupLocation() async {
-    await LocationMapsService().initialize();
+   // await LocationMapsService().initialize();
   }
 
   Future<String> _getUserId(String senderId) async {
