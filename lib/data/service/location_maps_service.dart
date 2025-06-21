@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:logging/logging.dart';
-import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 
 enum LocationState {
