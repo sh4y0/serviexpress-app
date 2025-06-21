@@ -115,7 +115,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           LoadingScreen.hide();
           if (mounted && data is AuthResult) {
             _handleLoginSuccess(data);
-          }
+          }        
           break;
         case Failure(error: final error):
           LoadingScreen.hide();
