@@ -147,7 +147,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     } else {
       ref.read(userViewModelProvider.notifier).updateUserById(widget.data.uid, {
         "dni": _dniController.text.trim(),
-        "especialidad": categoriaSeleccionada.value,
+        "especialidad": categoriaSeleccionada.value ?? "",
         "descripcion": _experienciaController.text.trim(),
       });
     }
