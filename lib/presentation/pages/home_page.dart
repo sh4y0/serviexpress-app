@@ -121,10 +121,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       return Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 30,
-                          horizontal: 20,
+                          horizontal: 10,
                         ),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             ClipOval(
                               child: SizedBox(
@@ -132,10 +133,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 height: 60,
                                 child:
                                     userValue.imagenUrl!.isNotEmpty
-                                        ? Image.network(
-                                          userValue.imagenUrl!,
+                                        ? FadeInImage.assetNetwork(
+                                          placeholder:
+                                              "assets/images/avatar.png",
+                                          image: userValue.imagenUrl!,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (
+                                          imageErrorBuilder: (
                                             context,
                                             error,
                                             stackTrace,
@@ -164,6 +167,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       fontSize: 17,
                                       fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 5),
                                   Row(
@@ -192,6 +197,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     ),
                                   ),
                                 ],
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.of(context)
+                                    .push(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => const ProfileScreen(
+                                              isProvider: false,
+                                            ),
+                                      ),
+                                    )
+                                    .then((_) {
+                                      _getUserById();
+                                    });
+                              },
+                              icon: SvgPicture.asset(
+                                "assets/icons/ic_edit.svg",
+                                colorFilter: const ColorFilter.mode(
+                                  Colors.white,
+                                  BlendMode.srcIn,
+                                ),
                               ),
                             ),
                           ],
@@ -226,12 +255,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     },
                   ),
                   ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_historial.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
+                    leading: const Image(
+                      image: AssetImage("assets/icons/ic_change.png"),
+                      color: Colors.white,
+                      width: 25,
+                      height: 25,
                     ),
                     title: Text(
                       isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
@@ -250,26 +278,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           (route) => false,
                         );
                       }
-                    },
-                  ),
-                  ListTile(
-                    leading: SvgPicture.asset(
-                      "assets/icons/ic_person.svg",
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    title: const Text("Perfil"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  const ProfileScreen(isProvider: false),
-                        ),
-                      );
                     },
                   ),
                 ],
