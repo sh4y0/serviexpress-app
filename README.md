@@ -176,6 +176,6 @@ Queda estrictamente prohibido el uso, copia, modificación, redistribución o ex
 
 Para obtener permisos especiales o licencias de uso, por favor contacta directamente con los autores.
 
-Para más información, contáctanos a: serviexpress.dev@gmail.com
+Para más información, contáctanos a: serviexpressdev@gmail.com
 
 ---
