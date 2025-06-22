@@ -252,35 +252,39 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserProfilePhoto(File photo, String uid) async {
+  Future<void> addUserProfilePhoto(File photo) async {
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) throw Exception("Usuario no autenticado");
     try {
       final storageRef = _storage
           .ref()
           .child('users/profile_photos')
-          .child('$uid.jpg');
+          .child('$userId.jpg');
 
       final uploadTask = await storageRef.putFile(photo);
 
       final imageUrl = await uploadTask.ref.getDownloadURL();
 
-      final userDoc = _firestore.collection('users').doc(uid);
+      final userDoc = _firestore.collection('users').doc(userId);
       await userDoc.update({'imagenUrl': imageUrl});
     } catch (e) {
       throw ErrorMapper.map(e);
     }
   }
 
-  Future<void> addUserDNIPhoto(File front, File back, String uid) async {
+  Future<void> addUserDNIPhoto(File front, File back) async {
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) throw Exception("Usuario no autenticado");
     try {
       final frontRef = _storage
           .ref()
           .child('users/dni_photos')
-          .child('${uid}_front.jpg');
+          .child('${userId}_front.jpg');
 
       final backRef = _storage
           .ref()
           .child('users/dni_photos')
-          .child('${uid}_back.jpg');
+          .child('${userId}_back.jpg');
 
       final frontUploadTask = await frontRef.putFile(front);
       final backUploadTask = await backRef.putFile(back);
@@ -288,7 +292,7 @@ class UserRepository {
       final frontUrl = await frontUploadTask.ref.getDownloadURL();
       final backUrl = await backUploadTask.ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'dniFrontImageUrl': frontUrl,
         'dniBackImageUrl': backUrl,
       });
@@ -297,7 +301,9 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserCriminalRecord(File file, String uid) async {
+  Future<void> addUserCriminalRecord(File file) async {
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) throw Exception("Usuario no autenticado");
     try {
       final fileExtension = file.path.split('.').last.toLowerCase();
       if (fileExtension != 'pdf' && fileExtension != 'docx') {
@@ -306,14 +312,34 @@ class UserRepository {
       final fileRef = _storage
           .ref()
           .child('users/criminal_records')
-          .child('$uid.$fileExtension');
+          .child('$userId.$fileExtension');
 
       final uploadTask = await fileRef.putFile(file);
       final fileUrl = await uploadTask.ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'criminalRecordUrl': fileUrl,
       });
+    } catch (e) {
+      throw ErrorMapper.map(e);
+    }
+  }
+
+  Future<void> addUserSignature(File photo, String uid) async {
+    final userId = await UserPreferences.getUserId();
+    if (userId == null) throw Exception("Usuario no autenticado");
+    try {
+      final storageRef = _storage
+          .ref()
+          .child('users/signatures')
+          .child('$userId.jpg');
+
+      final uploadTask = await storageRef.putFile(photo);
+
+      final imageUrl = await uploadTask.ref.getDownloadURL();
+
+      final userDoc = _firestore.collection('users').doc(userId);
+      await userDoc.update({'signatureUrl': imageUrl});
     } catch (e) {
       throw ErrorMapper.map(e);
     }

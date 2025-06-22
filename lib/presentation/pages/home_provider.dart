@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
@@ -12,9 +13,11 @@ import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
+import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
@@ -48,6 +51,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   final ValueNotifier<UserModel?> user = ValueNotifier<UserModel?>(null);
   final Set<String> _processedServiceIds = {};
+  late EnhancedLocationService _locationService;
+  final ValueNotifier<LocationBannerState> _locationBannerStateNotifier =
+      ValueNotifier(LocationBannerState.hidden);
+  final ValueNotifier<LatLng?> _currentPositionNotifier = ValueNotifier(null);
 
   void _logout(BuildContext context) {
     showDialog(
@@ -100,6 +107,9 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   void initState() {
     super.initState();
     _getUserById();
+    _locationService = EnhancedLocationService();
+    _setupLocationListener();
+    _initializeLocationService();
     _setStateSwitch();
     _screens = [
       () => _buildHomeProvider(),
@@ -109,7 +119,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       () => const ProfileScreen(isProvider: true),
     ];
     _setupToken();
-    _setupLocation();
     _notificationSubscription = NotificationManager().notificationStream.listen(
       (RemoteMessage message) async {
         final fcmMessage = FCMMessage.fromRemoteMessage(message);
@@ -151,8 +160,46 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     await NotificationManager().initialize();
   }
 
+  void _setupLocationListener() {
+    _locationService.addListener(_onLocationStateChanged);
+  }
+
+  void _onLocationStateChanged() {
+    if (!mounted) return;
+    final state = _locationService.currentState;
+
+    LocationBannerState newBannerState;
+
+    if (_locationService.shouldShowNotFoundBanner) {
+      newBannerState = LocationBannerState.notFound;
+    } else if (_locationService.shouldShowSearchingBanner) {
+      newBannerState = LocationBannerState.searching;
+    } else {
+      newBannerState = LocationBannerState.hidden;
+    }
+
+    if (_locationBannerStateNotifier.value != newBannerState) {
+      _locationBannerStateNotifier.value = newBannerState;
+    }
+
+    if (state == LocationState.found &&
+        _locationService.currentPosition != null) {
+      final pos = _locationService.currentPosition!;
+
+      _currentPositionNotifier.value = LatLng(pos.latitude, pos.longitude);
+    }
+  }
+
   void _setupLocation() async {
-   // await LocationMapsService().initialize();
+    final state = _locationService.currentState;
+    if (state == LocationState.serviceDisabled) {
+      _locationBannerStateNotifier.value = LocationBannerState.notFound;
+    }
+  }
+
+  Future<void> _initializeLocationService() async {
+    await _locationService.initialize();
+    _setupLocation();
   }
 
   Future<String> _getUserId(String senderId) async {

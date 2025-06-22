@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'package:serviexpress_app/config/app_routes.dart';
-import 'package:serviexpress_app/config/navigation_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
-import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 @pragma('vm:entry-point')
 class NotificationManager {
@@ -43,14 +39,6 @@ class NotificationManager {
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
       await UserRepository.instance.updateUserToken(userId, newToken);
     });
-
-    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
-    if (initialMessage != null) {
-      final payload = initialMessage.data['idServicio'];
-      if (payload != null) {
-        _handleMessageOpenedApp(payload);
-      }
-    }
 
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
@@ -144,19 +132,6 @@ class NotificationManager {
       body: body,
       payload: payload,
     );
-  }
-
-  void _handleMessageOpenedApp(String payload) async {
-    final serviceId = payload;
-    final service = await ServiceRepository.instance.getService(serviceId);
-    await MapStyleLoader.loadStyle();
-
-    if (service != null) {
-      NavigationConfig.navigateTo(
-        AppRoutes.providerDetails,
-        arguments: {'service': service, 'mapStyle': MapStyleLoader.cachedStyle},
-      );
-    }
   }
 
   void dispose() {
