@@ -505,7 +505,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                 ),
                                 decoration: InputDecoration(
                                   hintText:
-                                      "Cuéntanos con más detalle qué necesitas...",
+                                      "Bríndanos más detalles de tu solicitud...",
                                   hintStyle: TextStyle(
                                     color:
                                         descripcionErrorNotifier.value
@@ -590,10 +590,12 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                     onRemove: () => _removeAudio(index),
                                   ),
                             );
+                            
                           },
                         );
                       },
                     ),
+                    const SizedBox(height: 10,),
                     ValueListenableBuilder<List<File>>(
                       valueListenable: imagesNotifier,
                       builder: (context, images, _) {
@@ -710,7 +712,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                         );
                       },
                     ),
-                    const SizedBox(height: 12),
+                    //const SizedBox(height: 12),
                   ],
                 ),
               );

@@ -247,142 +247,155 @@ class DraggableSheetSolicitarServicioState
                               //       },
                               //     ),
                               //   ),
-                              Container(
-                                key: widget.detallarServicioKey,
-                                margin: const EdgeInsets.only(
-                                  top: 15,
-                                  bottom: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(38, 48, 137, 1),
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(
-                                        (0.1 * 255).toInt(),
-                                      ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
+                              ValueListenableBuilder<bool>(
+                                valueListenable: _descripcionError,
+                                builder: (context, isError, child) {
+                                  return Container(
+                                    key: widget.detallarServicioKey,
+                                    margin: const EdgeInsets.only(
+                                      top: 15,
+                                      bottom: 12,
                                     ),
-                                  ],
-                                  border:
-                                      _descripcionError.value &&
-                                              !widget.isSolicitudGuardada
-                                          ? Border.all(
-                                            color: Colors.red,
-                                            width: 1.5,
-                                          )
-                                          : null,
-                                  // (_descripcionError &&
-                                  //         !widget.isSolicitudGuardada)
-                                  //     ? Border.all(
-                                  //       color: Colors.red,
-                                  //       width: 1.5,
-                                  //     )
-                                  //     : null,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
+                                    decoration: BoxDecoration(
+                                      color: const Color.fromRGBO(
+                                        38,
+                                        48,
+                                        137,
+                                        1,
                                       ),
-                                      child: Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 5,
-                                            ),
-                                            child: SvgCache.getIconSvg(
-                                              'assets/icons/ic_message_form.svg',
-                                              color:
-                                                  _descripcionError.value &&
-                                                          !widget
-                                                              .isSolicitudGuardada
-                                                      ? Colors.red
-                                                      : const Color.fromRGBO(
-                                                        194,
-                                                        215,
-                                                        255,
-                                                        0.6,
-                                                      ),
-                                            ),
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(
+                                            (0.1 * 255).toInt(),
                                           ),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                TextField(
-                                                  controller:
-                                                      _descripcionController,
-                                                  focusNode: focusNodePrimero,
-                                                  maxLines: null,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14,
-                                                  ),
-                                                  decoration: InputDecoration(
-                                                    hintText:
-                                                        widget.isSolicitudGuardada
-                                                            ? "Toca aqui para editar tu solicitud..."
-                                                            : "Describe el servicio que necesitas...",
-                                                    hintStyle: TextStyle(
-                                                      color:
-                                                          _descripcionError
-                                                                      .value &&
-                                                                  !widget
-                                                                      .isSolicitudGuardada
-                                                              ? Colors.red
-                                                              : const Color.fromRGBO(
-                                                                194,
-                                                                215,
-                                                                255,
-                                                                0.6,
-                                                              ),
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                    ),
-                                                    border: InputBorder.none,
-                                                    enabledBorder:
-                                                        InputBorder.none,
-                                                    focusedBorder:
-                                                        InputBorder.none,
-                                                  ),
-                                                  showCursor: false,
-                                                  onTap: () {
-                                                    focusNodePrimero.unfocus();
-                                                    bool?
-                                                    isSheetVisibleSolicitarServicio =
-                                                        true;
-                                                    widget.onAbrirDetallesPressed(
-                                                      isSheetVisibleSolicitarServicio,
-                                                    );
-                                                  },
-                                                  // onChanged: (_) {
-
-                                                  //   if (_descripcionController
-                                                  //       .text
-                                                  //       .trim()
-                                                  //       .isNotEmpty) {
-                                                  //     if (_descripcionError) {
-                                                  //       setState(() {
-                                                  //         _descripcionError =
-                                                  //             false;
-                                                  //       });
-                                                  //     }
-                                                  //   }
-                                                  // },
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                      border:
+                                          _descripcionError.value &&
+                                                  !widget.isSolicitudGuardada
+                                              ? Border.all(
+                                                color: Colors.red,
+                                                width: 1.5,
+                                              )
+                                              : null,
+                                      // (_descripcionError &&
+                                      //         !widget.isSolicitudGuardada)
+                                      //     ? Border.all(
+                                      //       color: Colors.red,
+                                      //       width: 1.5,
+                                      //     )
+                                      //     : null,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 5,
                                                 ),
-                                              ],
-                                            ),
+                                                child: SvgCache.getIconSvg(
+                                                  'assets/icons/ic_message_form.svg',
+                                                  color:
+                                                      _descripcionError.value &&
+                                                              !widget
+                                                                  .isSolicitudGuardada
+                                                          ? Colors.red
+                                                          : const Color.fromRGBO(
+                                                            194,
+                                                            215,
+                                                            255,
+                                                            0.6,
+                                                          ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    TextField(
+                                                      controller:
+                                                          _descripcionController,
+                                                      focusNode:
+                                                          focusNodePrimero,
+                                                      maxLines: null,
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14,
+                                                      ),
+                                                      decoration: InputDecoration(
+                                                        hintText:
+                                                            widget.isSolicitudGuardada
+                                                                ? "Toca aqui para editar tu solicitud..."
+                                                                : "Describe el servicio que necesitas...",
+                                                        hintStyle: TextStyle(
+                                                          color:
+                                                              _descripcionError
+                                                                          .value &&
+                                                                      !widget
+                                                                          .isSolicitudGuardada
+                                                                  ? Colors.red
+                                                                  : const Color.fromRGBO(
+                                                                    194,
+                                                                    215,
+                                                                    255,
+                                                                    0.6,
+                                                                  ),
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                        border:
+                                                            InputBorder.none,
+                                                        enabledBorder:
+                                                            InputBorder.none,
+                                                        focusedBorder:
+                                                            InputBorder.none,
+                                                      ),
+                                                      showCursor: false,
+                                                      onTap: () {
+                                                        focusNodePrimero
+                                                            .unfocus();
+                                                        bool?
+                                                        isSheetVisibleSolicitarServicio =
+                                                            true;
+                                                        widget.onAbrirDetallesPressed(
+                                                          isSheetVisibleSolicitarServicio,
+                                                        );
+                                                      },
+                                                      // onChanged: (_) {
+
+                                                      //   if (_descripcionController
+                                                      //       .text
+                                                      //       .trim()
+                                                      //       .isNotEmpty) {
+                                                      //     if (_descripcionError) {
+                                                      //       setState(() {
+                                                      //         _descripcionError =
+                                                      //             false;
+                                                      //       });
+                                                      //     }
+                                                      //   }
+                                                      // },
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 10),
 
@@ -403,32 +416,8 @@ class DraggableSheetSolicitarServicioState
                                       _descripcionError.value = false;
                                     }
 
-                                    // if (_descripcionController.text.trim().isEmpty) {
-                                    //   setState(() {
-                                    //     _descripcionError = true;
-                                    //     });
-                                    //   return;
-
-                                    // } else {
-                                    //   setState(() {
-                                    //     _descripcionError = false;
-                                    //   });
-                                    // }
-
                                     widget.onPressedSolicitarServicio!(true);
 
-                                    // if (widget.datosSolicitudExistente != null) {
-                                    //   if (widget.proveedoresSeleccionados.isNotEmpty) {
-                                    //     for (var proveedor in widget.proveedoresSeleccionados) {
-                                    //       proveedoresSeleccionadosId.add(proveedor.uid);
-                                    //     }
-                                    //   }
-                                    //   await ServiceRepository.instance
-                                    //       .createService(
-                                    //         proveedoresSeleccionadosId,
-                                    //         widget.datosSolicitudExistente!,
-                                    //       );
-                                    // }
                                     if (widget.datosSolicitudExistente !=
                                         null) {
                                       if (widget.onProveedores.isNotEmpty) {
