@@ -13,13 +13,23 @@ class AuthViewModel extends StateNotifier<ResultState> {
 
   Future<void> loginWithProvider(String providerName) async {
     state = const Loading();
-    final result = await AuthRepository.instance.loginWithProvider(providerName);
+    final result = await AuthRepository.instance.loginWithProvider(
+      providerName,
+    );
     state = result;
   }
 
-  Future<void> registerUser(String email, String password, String username) async {
+  Future<void> registerUser(
+    String email,
+    String password,
+    String username,
+  ) async {
     state = const Loading();
-    final result = await AuthRepository.instance.registerUser(email, password, username);
+    final result = await AuthRepository.instance.registerUser(
+      email,
+      password,
+      username,
+    );
     state = result;
   }
 
@@ -29,11 +39,11 @@ class AuthViewModel extends StateNotifier<ResultState> {
     state = result;
   }
 
-  void logout() {
-    state = const Loading();
-    final result = AuthRepository.instance.logout();
-    state = result;
-  }
+  // void logout() {
+  //   state = const Loading();
+  //   final result = AuthRepository.instance.logout();
+  //   state = result;
+  // }
 
   Future<void> loginWithGoogle() => loginWithProvider('google');
   Future<void> loginWithFacebook() => loginWithProvider('facebook');
