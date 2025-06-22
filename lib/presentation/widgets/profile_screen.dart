@@ -490,7 +490,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   if (route != null) {
                                     if (route == AppRoutes.home) {
                                       final mapStyle =
-                                          MapStyleLoader.cachedStyle;
+                                          await MapStyleLoader.loadStyle();
                                       Navigator.of(
                                         context,
                                       ).pushNamedAndRemoveUntil(
@@ -571,7 +571,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   if (option["route"] != null) {
                                     if (option["route"] == AppRoutes.home) {
                                       final mapStyle =
-                                          MapStyleLoader.loadStyle();
+                                          await MapStyleLoader.loadStyle();
                                       Navigator.of(
                                         context,
                                       ).pushNamedAndRemoveUntil(
