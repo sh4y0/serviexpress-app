@@ -129,8 +129,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             ClipOval(
                               child: SizedBox(
-                                width: 60,
-                                height: 60,
+                                width: 72,
+                                height: 72,
                                 child:
                                     userValue.imagenUrl!.isNotEmpty
                                         ? FadeInImage.assetNetwork(
