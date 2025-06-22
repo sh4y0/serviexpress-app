@@ -9,7 +9,6 @@ class ServiceModel {
   String estado;
   String clientId;
   String? workerId;
-  double? precio;
   List<String>? fotos;
   List<String>? videos;
   List<String>? audios;
@@ -19,6 +18,7 @@ class ServiceModel {
   List<File>? videosFiles;
   List<File>? audioFiles;
   Set<String>? workersId;
+  String? propuestaId;
 
   ServiceModel({
     required this.id,
@@ -27,17 +27,16 @@ class ServiceModel {
     required this.estado,
     required this.clientId,
     this.workerId,
-    this.precio,
     this.fotos,
     this.videos,
     this.audios,
     this.fechaCreacion,
     this.fechaFinalizacion,
-
     this.fotosFiles,
     this.videosFiles,
     this.audioFiles,
     this.workersId,
+    this.propuestaId,
   });
 
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
@@ -48,8 +47,6 @@ class ServiceModel {
       estado: json['estado'] ?? '',
       clientId: json['clientId'] ?? '',
       workerId: json['workerId'] ?? '',
-      precio:
-          json['precio'] != null ? (json['precio'] as num).toDouble() : null,
       fotos: json['fotos'] != null ? List<String>.from(json['fotos']) : null,
       videos: json['videos'] != null ? List<String>.from(json['videos']) : null,
       audios: json['audios'] != null ? List<String>.from(json['audios']) : null,
@@ -65,6 +62,7 @@ class ServiceModel {
           json['workersId'] != null
               ? Set<String>.from(json['workersId'])
               : null,
+      propuestaId: json['propuestaId'] ?? '',
     );
   }
 
@@ -76,7 +74,6 @@ class ServiceModel {
       'estado': estado,
       'clientId': clientId,
       'workerId': workerId,
-      'precio': precio,
       'fotos': fotos,
       'videos': videos,
       'audios': audios,
@@ -87,6 +84,7 @@ class ServiceModel {
               ? Timestamp.fromDate(fechaFinalizacion!)
               : null,
       'workersId': workersId,
+      'propuestaId': propuestaId ?? '',
     };
   }
 }
