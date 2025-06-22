@@ -1092,7 +1092,9 @@ class _HomePageContentState extends State<HomePageContent>
   void _manejarGuardadoDesdeSheetDetallado(ServiceModel data) {
     if (mounted) {
       _datosSolicitudGuardadaNotifier.value = data;
+      _isSolicitudGuardadaNotifier.value = true;
       _isSheetVisibleSolicitarServicioNotifier.value = false;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -1501,9 +1503,9 @@ class _HomePageContentState extends State<HomePageContent>
                       onGuardarSolicitudCallback:
                           (data) => _manejarGuardadoDesdeSheetDetallado(data),
                       selectedCategoryIndex: _selectedCategoryIndex.value,
-                      isSolicitudEnviada:
-                          (isEnviada) =>
-                              _isSolicitudGuardadaNotifier.value = isEnviada,
+                      // isSolicitudEnviada:
+                      //     (isEnviada) =>
+                      //         _isSolicitudGuardadaNotifier.value = isEnviada,
                     ),
                   );
                 },
