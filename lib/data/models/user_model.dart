@@ -23,6 +23,7 @@ class UserModel {
   final String? dniFrontImageUrl;
   final String? dniBackImageUrl;
   final String? criminalRecordUrl;
+  final String? signatureUrl;
   final bool isActive;
   final bool isAvailable;
 
@@ -49,6 +50,7 @@ class UserModel {
     this.dniFrontImageUrl,
     this.dniBackImageUrl,
     this.criminalRecordUrl,
+    this.signatureUrl,
     this.isActive = true,
     this.isAvailable = true,
   });
@@ -83,6 +85,7 @@ class UserModel {
       dniFrontImageUrl: json['dniFrontImageUrl'] ?? '',
       dniBackImageUrl: json['dniBackImageUrl'] ?? '',
       criminalRecordUrl: json['criminalRecordUrl'] ?? '',
+      signatureUrl: json['signatureUrl'] ?? '',
       isActive: json['isActive'] ?? true,
       isAvailable: json['isAvailable'] ?? true,
     );
@@ -112,6 +115,7 @@ class UserModel {
       'dniFrontImageUrl': dniFrontImageUrl,
       'dniBackImageUrl': dniBackImageUrl,
       'criminalRecordUrl': criminalRecordUrl,
+      'signatureUrl': signatureUrl,
       'isActive': isActive,
       'isAvailable': isAvailable,
     };

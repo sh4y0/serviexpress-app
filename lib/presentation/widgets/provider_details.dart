@@ -469,7 +469,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 10),
                   InputPresupuestoLauncher(
                     presupuesto: presupuestoPersonalizado,
