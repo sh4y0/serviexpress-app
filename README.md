@@ -33,6 +33,7 @@ Con un enfoque en la experiencia del usuario, **ServiExpress** permite explorar,
 - [Arquitectura](#arquitectura)
 - [Autores](#autores)
 - [Estado del Proyecto](#estado-del-proyecto)
+- [Licencia](#licencia)
 
 ---
 
@@ -163,5 +164,18 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
 En desarrollo activo
 Próximas funcionalidades:
 
-* Mejora en perfil profesional
-* Mejora de seguimiento en tiempo real
+* Mejora de la verificación del Trabajador
+
+---
+
+## Licencia
+
+Este proyecto está protegido bajo la cláusula de **"Todos los derechos reservados"**.
+
+Queda estrictamente prohibido el uso, copia, modificación, redistribución o explotación comercial del código fuente o elementos de este proyecto sin autorización expresa de los propietarios de ServiExpress.
+
+Para obtener permisos especiales o licencias de uso, por favor contacta directamente con los autores.
+
+Para más información, contáctanos a: serviexpress.dev@gmail.com
+
+---
