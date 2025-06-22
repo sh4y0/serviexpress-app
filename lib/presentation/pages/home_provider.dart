@@ -152,7 +152,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   }
 
   void _setupLocation() async {
-   // await LocationMapsService().initialize();
+    // await LocationMapsService().initialize();
   }
 
   Future<String> _getUserId(String senderId) async {
@@ -402,10 +402,11 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                         Padding(
                           padding: const EdgeInsets.symmetric(
                             vertical: 30,
-                            horizontal: 20,
+                            horizontal: 10,
                           ),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ClipOval(
                                 child: SizedBox(
@@ -413,10 +414,12 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                   height: 60,
                                   child:
                                       user.imagenUrl!.isNotEmpty
-                                          ? Image.network(
-                                            user.imagenUrl!,
+                                          ? FadeInImage.assetNetwork(
+                                            placeholder:
+                                                "assets/images/avatar.png",
+                                            image: user.imagenUrl!,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (
+                                            imageErrorBuilder: (
                                               context,
                                               error,
                                               stackTrace,
@@ -445,6 +448,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 5),
                                     Row(
@@ -483,6 +488,30 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                   ],
                                 ),
                               ),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  Navigator.of(context)
+                                      .push(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => const ProfileScreen(
+                                                isProvider: false,
+                                              ),
+                                        ),
+                                      )
+                                      .then((_) {
+                                        _getUserById();
+                                      });
+                                },
+                                icon: SvgPicture.asset(
+                                  "assets/icons/ic_edit.svg",
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.white,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -513,12 +542,11 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                         },
                       ),
                       ListTile(
-                        leading: SvgPicture.asset(
-                          "assets/icons/ic_historial.svg",
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
+                        leading: const Image(
+                          image: AssetImage("assets/icons/ic_change.png"),
+                          color: Colors.white,
+                          width: 25,
+                          height: 25,
                         ),
                         title: Text(
                           isProvider
@@ -540,26 +568,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                               (route) => false,
                             );
                           }
-                        },
-                      ),
-                      ListTile(
-                        leading: SvgPicture.asset(
-                          "assets/icons/ic_person.svg",
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        title: const Text("Perfil"),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const ProfileScreen(isProvider: false),
-                            ),
-                          );
                         },
                       ),
                     ],
