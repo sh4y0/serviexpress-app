@@ -23,7 +23,7 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
   final Function(ServiceModel) onGuardarSolicitudCallback;
 
   final int selectedCategoryIndex;
-  final Function(bool) isSolicitudEnviada;
+  //final Function(bool) isSolicitudEnviada;
 
   const DraggableSheetSolicitarServicioDetallado({
     super.key,
@@ -37,7 +37,7 @@ class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
     this.initialData,
     required this.onGuardarSolicitudCallback,
     required this.selectedCategoryIndex,
-    required this.isSolicitudEnviada,
+    //required this.isSolicitudEnviada,
     required this.globalKeyServicioDetalladoPhotos,
     required this.globalKeyServicioDetalladoVoice,
   });
@@ -173,7 +173,7 @@ class DraggableSheetState
       audioFiles: audio,
     );
 
-    widget.isSolicitudEnviada(true);
+   //widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
   }
 
@@ -250,10 +250,11 @@ class DraggableSheetState
                                 ),
                                 const SizedBox(height: 10),
                                 const Text(
-                                  'Brinda más detalle al Proveedor',
+                                  'Cuéntanos Más',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 15,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold
                                   ),
                                 ),
 
