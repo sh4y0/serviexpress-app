@@ -377,7 +377,7 @@ class _HomePageContentState extends State<HomePageContent>
     try {
       _locationMarkerIcon = await BitmapDescriptor.asset(
         const ImageConfiguration(size: Size(26, 26)),
-        'assets/icons/ic_location.png',
+        'assets/icons/ic_location_red.png',
       );
       _updateMarkers();
     } catch (e) {

@@ -17,6 +17,7 @@ import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/desactive_account_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/skeleton_profile.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final bool isProvider;
@@ -289,6 +290,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     _listenToViewModel();
+    if (user == null) {
+      return const SkeletonProfile();
+    }
     final options = [
       {
         "iconPath": "assets/icons/ic_privacidad.svg",
