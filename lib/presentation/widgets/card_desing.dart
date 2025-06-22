@@ -206,45 +206,47 @@ class CardDesing extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: AppColor.bgMsgUser,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: onViewDetails,
-                        child: const Text("Ver más"),
-                      ),
-                      // child: ElevatedButton(
-                      //
-                      //   style: ElevatedButton.styleFrom(
+                      // child: TextButton(
+                      //   style: TextButton.styleFrom(
                       //     backgroundColor: AppColor.bgMsgUser,
-                      //   ),
-                      //   child: const Text(
-                      //     "Ver detalles",
-                      //     style: TextStyle(
-                      //       color: Colors.white,
-                      //       fontSize: 16,
-                      //       fontWeight: FontWeight.bold,
+                      //     foregroundColor: Colors.white,
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(8),
                       //     ),
                       //   ),
+                      //   onPressed: onViewDetails,
+                      //   child: const Text("Ver más"),
                       // ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: const Color.fromRGBO(56, 109, 243, 1),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      child: ElevatedButton(
+                        onPressed:onViewDetails,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColor.bgMsgUser,
+                        ),
+                        child: const Text(
+                          "Ver detalles",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        onPressed: onViewDetails,
-                        child: const Text("Aceptar"),
                       ),
+                    ),
+                    //const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: TextButton(
+                    //     style: TextButton.styleFrom(
+                    //       backgroundColor: const Color.fromRGBO(56, 109, 243, 1),
+                    //       foregroundColor: Colors.white,
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //     ),
+                    //     onPressed: () {
+                          
+                    //     },
+                    //     child: const Text("Aceptar"),
+                    //   ),
                       // child: ElevatedButton(
                       //   onPressed: () {
                       //     // Acción para aceptar
@@ -261,7 +263,7 @@ class CardDesing extends StatelessWidget {
                       //     ),
                       //   ),
                       // ),
-                    ),
+                    //),
                   ],
                 ),
               ],
