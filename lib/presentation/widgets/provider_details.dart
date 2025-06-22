@@ -40,11 +40,6 @@ class _ProviderDetailsState extends State<ProviderDetails> {
     final double minSheetSize = hayMultimedia ? 0.30 : 0.3;
     final double maxSheetSize = hayMultimedia ? 0.8 : 0.65;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColor.bgChat,
-        title: Text(widget.service.cliente.nombreCompleto),
-        centerTitle: true,
-      ),
       body: Stack(
         children: [
           GoogleMap(
@@ -55,6 +50,32 @@ class _ProviderDetailsState extends State<ProviderDetails> {
             ),
             onMapCreated: _onMapCreated,
           ),
+
+          Positioned(
+            top: 0,
+            left: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: InkWell(
+                  onTap: () {},
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF303F9F),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black26, blurRadius: 5),
+                      ],
+                    ),
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: minSheetSize,
