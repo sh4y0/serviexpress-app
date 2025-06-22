@@ -240,12 +240,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       LoadingScreen.show(context);
 
-      final uid = await UserPreferences.getUserId();
-      if (uid == null) throw Exception("Usuario no autenticado");
-
       await UserRepository.instance.addUserProfilePhoto(
         File(_selectedImage!.path),
-        uid,
       );
 
       _getUserById();

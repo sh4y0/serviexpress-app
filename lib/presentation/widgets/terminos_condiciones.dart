@@ -25,13 +25,11 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
     exportPenColor: Colors.black,
   );
 
-  bool mostrarControles = false;
+  final ValueNotifier<bool> mostrarControles = ValueNotifier<bool>(false);
 
   void _mostrarFirma() {
-    setState(() {
-      mostrarControles = true;
-      widget.mostrarBotonAceptar.value = true;
-    });
+    mostrarControles.value = true;
+    widget.mostrarBotonAceptar.value = true;
 
     showModalBottomSheet(
       context: context,
@@ -143,64 +141,73 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                 ),
               ),
               const SizedBox(height: 30),
-              if (mostrarControles)
-                Column(
-                  children: [
-                    ValueListenableBuilder<bool>(
-                      valueListenable: widget.aceptado,
-                      builder:
-                          (context, value, _) => Row(
-                            children: [
-                              Checkbox(
-                                value: value,
-                                activeColor: AppColor.btnColor,
-                                onChanged: (newValue) {
-                                  widget.aceptado.value = newValue!;
-                                },
-                              ),
-                              const Expanded(
-                                child: Text(
-                                  "Aceptar términos y condiciones",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
+              ValueListenableBuilder<bool>(
+                valueListenable: mostrarControles,
+                builder: (context, mostrar, _) {
+                  if (!mostrar) return const SizedBox.shrink();
+                  return Column(
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: widget.aceptado,
+                        builder:
+                            (context, value, _) => Row(
+                              children: [
+                                Checkbox(
+                                  value: value,
+                                  activeColor: AppColor.btnColor,
+                                  onChanged: (newValue) {
+                                    widget.aceptado.value = newValue!;
+                                  },
+                                ),
+                                const Expanded(
+                                  child: Text(
+                                    "Aceptar términos y condiciones",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                    ),
-                    const SizedBox(height: 5),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: widget.firmado,
-                      builder:
-                          (context, firmado, _) =>
-                              firmado
-                                  ? Container(
-                                    //alignment: Alignment.centerLeft,
-                                    width:
-                                        MediaQuery.of(context).size.width - 40,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.white30),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Signature(
-                                        controller: _firmaController,
-                                        width:
-                                            MediaQuery.of(context).size.width -
-                                            40,
-                                        height: 60,
-                                        backgroundColor: Colors.transparent,
+                              ],
+                            ),
+                      ),
+                      const SizedBox(height: 5),
+                      ValueListenableBuilder<bool>(
+                        valueListenable: widget.firmado,
+                        builder:
+                            (context, firmado, _) =>
+                                firmado
+                                    ? Container(
+                                      width:
+                                          MediaQuery.of(context).size.width -
+                                          40,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.white30,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                    ),
-                                  )
-                                  : const SizedBox.shrink(),
-                    ),
-                  ],
-                ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Signature(
+                                          controller: _firmaController,
+                                          width:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width -
+                                              40,
+                                          height: 60,
+                                          backgroundColor: Colors.transparent,
+                                        ),
+                                      ),
+                                    )
+                                    : const SizedBox.shrink(),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),
