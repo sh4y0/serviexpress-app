@@ -3,30 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class Antecedentes extends StatefulWidget {
-  const Antecedentes({super.key});
+  final ValueNotifier<String?> fileNameNotifier;
+  const Antecedentes({super.key, required this.fileNameNotifier});
 
   @override
   State<Antecedentes> createState() => _AntecedentesState();
 }
 
 class _AntecedentesState extends State<Antecedentes> {
-  final ValueNotifier<String?> _fileNameNotifier = ValueNotifier<String?>(null);
-
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ["pdf", "dcx"],
     );
     if (result != null) {
-      _fileNameNotifier.value = result.files.single.name;
-    } else {
+      widget.fileNameNotifier.value = result.files.single.name;
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _fileNameNotifier.dispose();    
   }
 
   @override
@@ -64,27 +56,36 @@ class _AntecedentesState extends State<Antecedentes> {
                       color: AppColor.bgCard,
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add,
-                          color: AppColor.btnColor.withAlpha(110),
-                          size: 50,
-                        ),
-                        ValueListenableBuilder<String?>(
-                          valueListenable: _fileNameNotifier,
-                          builder: (context, value, _) {
-                            return Text(
-                              value ?? "Subir archivo",
+                    child: ValueListenableBuilder<String?>(
+                      valueListenable: widget.fileNameNotifier,
+                      builder: (context, value, _) {
+                        final bool fileUploaded = value != null;
+
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              fileUploaded
+                                  ? Icons.check_circle_outline
+                                  : Icons.add,
+                              color:
+                                  fileUploaded
+                                      ? Colors.green
+                                      : AppColor.btnColor.withAlpha(110),
+                              size: 50,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              fileUploaded ? value! : "Subir archivo",
                               style: TextStyle(
                                 color: AppColor.btnColor.withAlpha(110),
                                 fontSize: 14,
                               ),
-                            );
-                          },
-                        ),
-                      ],
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
