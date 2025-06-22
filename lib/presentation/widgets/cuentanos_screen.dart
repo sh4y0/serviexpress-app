@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +51,15 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   final ValueNotifier<bool> _aceptado = ValueNotifier(false);
   final ValueNotifier<bool> _firmado = ValueNotifier(false);
 
+  final ValueNotifier<bool> _imagenesDniValidas = ValueNotifier(false);
+  final ValueNotifier<File?> _dniFrontImage = ValueNotifier<File?>(null);
+  final ValueNotifier<File?> _dniBackImage = ValueNotifier<File?>(null);
+  final ValueNotifier<File?> _profileImage = ValueNotifier<File?>(null);
+
+  final ValueNotifier<String?> antecedentesFileNameNotifier = ValueNotifier(
+    null,
+  );
+
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _experienciaController = TextEditingController();
   late Future<void> _preloadFuture;
@@ -81,6 +92,10 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     _controller.dispose();
     _aceptado.dispose();
     _firmado.dispose();
+    _imagenesDniValidas.dispose();
+    _dniFrontImage.dispose();
+    _dniBackImage.dispose();
+    _profileImage.dispose();
     super.dispose();
   }
 
@@ -115,42 +130,58 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       );
     }
     if (_currentPage.value == 1) {
+      final bool dniFrontUploaded = _dniFrontImage.value != null;
+      final bool dniBackUploaded = _dniBackImage.value != null;
+
+      _imagenesDniValidas.value = dniFrontUploaded && dniBackUploaded;
+
+      if (!_imagenesDniValidas.value) {
+        Alerts.instance.showErrorAlert(
+          context,
+          "Debes subir las fotos frontal y trasera de tu DNI",
+        );
+        return;
+      }
+
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
     if (_currentPage.value == 2) {
+      if (antecedentesFileNameNotifier.value == null) {
+        Alerts.instance.showErrorAlert(
+          context,
+          "Debes subir un archivo PDF o DCX para continuar.",
+        );
+        return;
+      }
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
     }
     if (_currentPage.value == 3) {
-      // if (!_aceptado.value) {
-      //   Alerts.instance.showErrorAlert(
-      //     context,
-      //     "Debes aceptar los términos y condiciones.",
-      //   );
-      //   return;
-      // }
+      if (!_aceptado.value) {
+        Alerts.instance.showErrorAlert(
+          context,
+          "Debes aceptar los términos y condiciones.",
+        );
+        return;
+      }
 
-      // if (!_firmado.value) {
-      //   Alerts.instance.showErrorAlert(context, "Debes firmar para continuar.");
-      //   return;
-      // }
+      if (!_firmado.value) {
+        Alerts.instance.showErrorAlert(context, "Debes firmar para continuar.");
+        return;
+      }
 
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-    } else {
       ref.read(userViewModelProvider.notifier).updateUserById(widget.data.uid, {
         "dni": _dniController.text.trim(),
         "especialidad": categoriaSeleccionada.value ?? "",
         "descripcion": _experienciaController.text.trim(),
       });
     }
+    return;
   }
 
   @override
@@ -221,14 +252,22 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                   onPageChanged: (index) => _currentPage.value = index,
                   children: [
                     _buildCuentanosPaso(),
-                    const Verifiquemos(),
-                    const Antecedentes(),
+                    Verifiquemos(
+                      dniFrontImage: _dniFrontImage,
+                      dniBackImage: _dniBackImage,
+                      profileImage: _profileImage,
+                    ),
+                    Antecedentes(
+                      fileNameNotifier: antecedentesFileNameNotifier,
+                    ),
                     TerminosCondiciones(
                       aceptado: _aceptado,
+                      onAceptar: () {
+                        _onNext();
+                      },
                       firmado: _firmado,
-                      mostrarBotonAceptar: _mostrarAceptar,
                     ),
-                    const Verification(),
+                    //const Verification(),
                   ],
                 ),
               ),
@@ -236,22 +275,50 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
               ValueListenableBuilder2<int, bool>(
                 first: _currentPage,
                 second: _mostrarAceptar,
-                builder: (context, currentPage, mostrar, _) {
-                  if (currentPage == 3 && !mostrar) {
-                    return const SizedBox.shrink();
-                  }
+                builder: (context, currentPage, _, __) {
+                  if (currentPage == 3) return const SizedBox.shrink();
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: ElevatedButton(
-                      onPressed: _onNext,
-                      child: Text(
-                        currentPage < 3 ? "Siguiente" : "Aceptar",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                    child: Row(
+                      children: [
+                        if (currentPage > 0)
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColor.bgCard,
+                              ),
+                              onPressed: () {
+                                _controller.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.ease,
+                                );
+                              },
+                              child: const Text(
+                                "Atrás",
+                                style: TextStyle(
+                                  color: AppColor.bgAll,
+                                  fontSize: 17,
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (currentPage > 0) const SizedBox(width: 10),
+
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _onNext,
+                            child: const Text(
+                              "Siguiente",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   );
                 },
