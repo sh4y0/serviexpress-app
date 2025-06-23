@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
@@ -241,11 +240,9 @@ class AuthRepository {
       if (userId == null) {
         return const Failure(UnknownError("No hay usuario autenticado."));
       }
+      await UserRepository.instance.updateUserToken(userId, "");
       _auth.signOut();
       _auth.authStateChanges().first;
-
-      await UserRepository.instance.updateUserToken(userId, "");
-      await FirebaseMessaging.instance.deleteToken();
       return const Success("Cierre de sesión exitoso");
     } catch (_) {
       return const Failure(UnknownError("Error al cerrar sesión"));

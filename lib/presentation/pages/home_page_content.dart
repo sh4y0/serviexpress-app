@@ -19,6 +19,7 @@ import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_
 import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class MapMovementController {
   bool _isProgrammaticMove = false;
@@ -1645,7 +1646,10 @@ class _HomePageContentState extends State<HomePageContent>
                       left: 50,
                       child: TextButton(
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 30,
+                            vertical: 10,
+                          ),
                           backgroundColor: AppColor.bgVerification,
                         ),
                         onPressed: () {},
