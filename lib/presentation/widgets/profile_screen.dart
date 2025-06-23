@@ -240,9 +240,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       LoadingScreen.show(context);
 
-      await UserRepository.instance.addUserProfilePhoto(
-        File(_selectedImage!.path),
-      );
+      final bytes = await _selectedImage!.readAsBytes();
+
+      await UserRepository.instance.addUserProfilePhoto(bytes);
 
       _getUserById();
 
