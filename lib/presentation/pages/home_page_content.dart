@@ -482,7 +482,7 @@ class _HomePageContentState extends State<HomePageContent>
     );
   }
 
-  void _updateMarkers() {
+  void _updateMarkers() async {
     final currentPosition = _currentPositionNotifier.value;
     Set<Marker> newMarkers = {};
 
@@ -499,8 +499,12 @@ class _HomePageContentState extends State<HomePageContent>
       );
     }
 
+    //var indice = 0;
     for (var provider in _currentProvidersNotifier.value) {
+      //var category = CategoryMock.getCategories()[indice];
       final markerId = MarkerId('provider_${provider.uid}');
+      //final icon = await getProviderIconXCategory(category.iconPath);
+
       newMarkers.add(
         Marker(
           markerId: markerId,
@@ -520,6 +524,26 @@ class _HomePageContentState extends State<HomePageContent>
     }
     _markersNotifier.value = newMarkers;
   }
+
+  // Future<BitmapDescriptor> getProviderIconXCategory(String iconPath) async {
+  //   try {
+  //     _providerMarkerIcon = await BitmapDescriptor.asset(
+  //       ImageConfiguration(
+  //         devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+  //         size: const Size(24, 24),
+  //       ),
+  //       iconPath,
+  //     );
+  //   } catch (e) {
+  //     debugPrint('Error cargando icono de proveedor: $e');
+  //     _providerMarkerIcon = BitmapDescriptor.defaultMarkerWithHue(
+  //       BitmapDescriptor.hueBlue,
+  //     );
+  //   }
+
+  //   return _providerMarkerIcon ??
+  //       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
+  // }
 
   void _onCategorySelected(int index) {
     _selectedCategoryIndex.value = index;
@@ -1289,38 +1313,54 @@ class _HomePageContentState extends State<HomePageContent>
                                       ? 0
                                       : -MediaQuery.of(context).size.height,
                               top: 0,
-                              child: DraggableSheetSolicitarServicio(
-                                detallarServicioKey: _describirServicioKey,
-                                targetInitialSize: 0.21,
-                                minSheetSize: 0.21,
-                                maxSheetSize: 0.21,
-                                snapPoints: const [0.35],
-                                onTapPressed: () {
-                                  if (_selectedCategoryIndex.value == -1) {
-                                    _categoriaErrorNotifier.value = true;
-                                    return;
-                                  }
-                                  _requestService();
-                                },
-                                onCategoriaError:
-                                    () => _categoriaErrorNotifier.value = true,
-                                categoriaError: _categoriaErrorNotifier.value,
-                                selectedCategoryIndex:
-                                    _selectedCategoryIndex.value,
-                                onAbrirDetallesPressed:
-                                    (isVisible) =>
-                                        _abrirSheetDetalladoDesdeSheet2(
-                                          isSheetVisibleSolicitarServicio:
+                              child: ValueListenableBuilder<bool>(
+                                valueListenable: _isSolicitudGuardadaNotifier,
+                                builder: (context, isGuardada, child) {
+                                  return ValueListenableBuilder<ServiceModel?>(
+                                    valueListenable:
+                                        _datosSolicitudGuardadaNotifier,
+                                    builder: (context, datosGuardados, _) {
+                                      return DraggableSheetSolicitarServicio(
+                                        detallarServicioKey:
+                                            _describirServicioKey,
+                                        targetInitialSize: 0.21,
+                                        minSheetSize: 0.21,
+                                        maxSheetSize: 0.21,
+                                        snapPoints: const [0.35],
+                                        onTapPressed: () {
+                                          if (_selectedCategoryIndex.value ==
+                                              -1) {
+                                            _categoriaErrorNotifier.value =
+                                                true;
+                                            return;
+                                          }
+                                          _requestService();
+                                        },
+                                        onCategoriaError:
+                                            () =>
+                                                _categoriaErrorNotifier.value =
+                                                    true,
+                                        categoriaError:
+                                            _categoriaErrorNotifier.value,
+                                        selectedCategoryIndex:
+                                            _selectedCategoryIndex.value,
+                                        onAbrirDetallesPressed:
+                                            (
                                               isVisible,
-                                        ),
-                                datosSolicitudExistente:
-                                    _datosSolicitudGuardadaNotifier.value,
-                                onProveedores: proveedores,
-                                isSolicitudGuardada:
-                                    _isSolicitudGuardadaNotifier.value,
-                                onPressedSolicitarServicio:
-                                    _handleSolicitarServicio,
-                                //_isSolicitudServicioOnTapped,
+                                            ) => _abrirSheetDetalladoDesdeSheet2(
+                                              isSheetVisibleSolicitarServicio:
+                                                  isVisible,
+                                            ),
+                                        datosSolicitudExistente: datosGuardados,
+                                        onProveedores: proveedores,
+                                        isSolicitudGuardada: isGuardada,
+                                        onPressedSolicitarServicio:
+                                            _handleSolicitarServicio,
+                                        //_isSolicitudServicioOnTapped,
+                                      );
+                                    },
+                                  );
+                                },
                               ),
                             ),
 
