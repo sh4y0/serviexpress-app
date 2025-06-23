@@ -590,12 +590,11 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                     onRemove: () => _removeAudio(index),
                                   ),
                             );
-                            
                           },
                         );
                       },
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(height: 10),
                     ValueListenableBuilder<List<File>>(
                       valueListenable: imagesNotifier,
                       builder: (context, images, _) {

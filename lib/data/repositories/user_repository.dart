@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
+import 'package:serviexpress_app/core/utils/image_compressor.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/datasources/reniec_api.dart';
@@ -253,16 +254,18 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserProfilePhoto(File photo) async {
+  Future<void> addUserProfilePhoto(Uint8List photoBytes) async {
     final userId = await UserPreferences.getUserId();
     if (userId == null) throw Exception("Usuario no autenticado");
+
     try {
       final storageRef = _storage
           .ref()
           .child('users/profile_photos')
           .child('$userId.jpg');
 
-      final uploadTask = await storageRef.putFile(photo);
+      final compressed = await ImageCompressor.compressUint8List(photoBytes);
+      final uploadTask = await storageRef.putData(compressed);
 
       final imageUrl = await uploadTask.ref.getDownloadURL();
 
@@ -273,13 +276,15 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserDNIPhoto(File? front, File? back) async {
+  Future<void> addUserDNIPhoto(Uint8List? front, Uint8List? back) async {
     final userId = await UserPreferences.getUserId();
     if (userId == null) throw Exception("Usuario no autenticado");
+
     try {
       if (front == null || back == null) {
         throw Exception('Ambas fotos del DNI son requeridas.');
       }
+
       final frontRef = _storage
           .ref()
           .child('users/dni_photos')
@@ -290,8 +295,11 @@ class UserRepository {
           .child('users/dni_photos')
           .child('${userId}_back.jpg');
 
-      final frontUploadTask = await frontRef.putFile(front);
-      final backUploadTask = await backRef.putFile(back);
+      final dniCompressedFront = await ImageCompressor.compressUint8List(front);
+      final dniCompressedBack = await ImageCompressor.compressUint8List(back);
+
+      final frontUploadTask = await frontRef.putData(dniCompressedFront);
+      final backUploadTask = await backRef.putData(dniCompressedBack);
 
       final frontUrl = await frontUploadTask.ref.getDownloadURL();
       final backUrl = await backUploadTask.ref.getDownloadURL();
