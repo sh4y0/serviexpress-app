@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
@@ -521,7 +522,70 @@ class _HomePageContentState extends State<HomePageContent>
     _markersNotifier.value = newMarkers;
   }
 
-  void _onCategorySelected(int index) {
+  void _onCategorySelected(int index) async {
+    if (_isSolicitudGuardadaNotifier.value &&
+        index != _selectedCategoryIndex.value) {
+      bool? confirmarCambio = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: AppColor.bgCard,
+            title: const Text(
+              "Cambiar Categoria",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              "Ya hay una solicitud guardada con una categoría seleccionada. "
+              "¿Estás seguro de que deseas cambiar la categoría? Esto eliminará la solicitud actual.",
+              style: TextStyle(color: AppColor.txtBooking),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(backgroundColor: AppColor.btnColor),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  "Si, cambiar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmarCambio != true) return;
+
+      _datosSolicitudGuardadaNotifier.value = null;
+      _isSolicitudGuardadaNotifier.value = false;
+      _isProveedorAgregadoNotifier.value = false;
+      _selectedProviderNotifier.value = null;
+      _proveedoresSeleccionadosNotifier.value = [];
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(
+            "Categoria cambiada exitosamente",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+
     _selectedCategoryIndex.value = index;
     _categoriaErrorNotifier.value = false;
 
