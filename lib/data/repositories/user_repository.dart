@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -272,10 +273,13 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserDNIPhoto(File front, File back) async {
+  Future<void> addUserDNIPhoto(File? front, File? back) async {
     final userId = await UserPreferences.getUserId();
     if (userId == null) throw Exception("Usuario no autenticado");
     try {
+      if (front == null || back == null) {
+        throw Exception('Ambas fotos del DNI son requeridas.');
+      }
       final frontRef = _storage
           .ref()
           .child('users/dni_photos')
@@ -301,10 +305,13 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserCriminalRecord(File file) async {
+  Future<void> addUserCriminalRecord(File? file) async {
     final userId = await UserPreferences.getUserId();
     if (userId == null) throw Exception("Usuario no autenticado");
     try {
+      if (file == null) {
+        throw Exception('El archivo de antecedentes penales es requerido.');
+      }
       final fileExtension = file.path.split('.').last.toLowerCase();
       if (fileExtension != 'pdf' && fileExtension != 'docx') {
         throw Exception('Solo se permiten archivos PDF o DOCX.');
@@ -325,16 +332,19 @@ class UserRepository {
     }
   }
 
-  Future<void> addUserSignature(File photo, String uid) async {
+  Future<void> addUserSignature(Uint8List firmaBytes) async {
     final userId = await UserPreferences.getUserId();
     if (userId == null) throw Exception("Usuario no autenticado");
     try {
       final storageRef = _storage
           .ref()
           .child('users/signatures')
-          .child('$userId.jpg');
+          .child('$userId.png');
 
-      final uploadTask = await storageRef.putFile(photo);
+      final uploadTask = await storageRef.putData(
+        firmaBytes,
+        SettableMetadata(contentType: 'image/png'),
+      );
 
       final imageUrl = await uploadTask.ref.getDownloadURL();
 
@@ -343,5 +353,42 @@ class UserRepository {
     } catch (e) {
       throw ErrorMapper.map(e);
     }
+  }
+
+  Future<void> updateUserCuentanosById(
+    Map<String, dynamic> dataToUpdate,
+  ) async {
+    final uid = await UserPreferences.getUserId();
+    if (uid == null) throw Exception("Usuario no autenticado");
+    final docRef = _firestore.collection('users').doc(uid);
+    final doc = await docRef.get();
+
+    if (!doc.exists) {
+      throw const UserNotFound("Usuario no encontrado para editar.");
+    }
+
+    if (dataToUpdate.containsKey('dni')) {
+      final dni = dataToUpdate['dni'] as String;
+
+      final dniResult = await ReniecApi.instance.searchByDNI(dni);
+
+      if (dniResult is! Success) {
+        throw const UnknownError("No se pudo obtener los datos del DNI.");
+      }
+
+      final Map<String, dynamic> dniData = (dniResult as Success).data;
+      final String nombres = dniData['nombres'] ?? '';
+      final String apellidoPaterno = dniData['apellidoPaterno'] ?? '';
+      final String apellidoMaterno = dniData['apellidoMaterno'] ?? '';
+      final String nombreCompleto =
+          "$nombres $apellidoPaterno $apellidoMaterno";
+
+      dataToUpdate['nombres'] = nombres;
+      dataToUpdate['apellidoPaterno'] = apellidoPaterno;
+      dataToUpdate['apellidoMaterno'] = apellidoMaterno;
+      dataToUpdate['nombreCompleto'] = nombreCompleto;
+    }
+
+    await docRef.update(dataToUpdate);
   }
 }

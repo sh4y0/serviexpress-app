@@ -5,17 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
+import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
-import 'package:serviexpress_app/core/utils/result_state.dart';
-import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/presentation/pages/auth_page.dart';
-import 'package:serviexpress_app/presentation/pages/verification.dart';
-import 'package:serviexpress_app/presentation/viewmodels/user_view_model.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/show_super.dart';
 import 'package:serviexpress_app/presentation/widgets/terminos_condiciones.dart';
 import 'package:serviexpress_app/presentation/widgets/verifiquemos.dart';
@@ -62,28 +58,28 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
 
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _experienciaController = TextEditingController();
-  late Future<void> _preloadFuture;
+  // late Future<void> _preloadFuture;
 
   @override
   void initState() {
     super.initState();
-    _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
+    // _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
   }
 
-  Future<void> _precacheSvgs() async {
-    final svgPaths = [
-      "assets/icons/ic_person.svg",
-      "assets/icons/ic_pass.svg",
-      "assets/icons/ic_email.svg",
-      "assets/icons/ic_facebook.svg",
-      "assets/icons/ic_google.svg",
-      "assets/icons/ic_apple.svg",
-    ];
+  // Future<void> _precacheSvgs() async {
+  //   final svgPaths = [
+  //     "assets/icons/ic_person.svg",
+  //     "assets/icons/ic_pass.svg",
+  //     "assets/icons/ic_email.svg",
+  //     "assets/icons/ic_facebook.svg",
+  //     "assets/icons/ic_google.svg",
+  //     "assets/icons/ic_apple.svg",
+  //   ];
 
-    for (final path in svgPaths) {
-      SvgCache.getIconSvg(path);
-    }
-  }
+  //   for (final path in svgPaths) {
+  //     SvgCache.getIconSvg(path);
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -113,7 +109,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
     );
   }
 
-  void _onNext() {
+  void _onNext() async {
     if (_currentPage.value == 0) {
       if (_dniController.text.isEmpty ||
           categoriaSeleccionada.value == null ||
@@ -124,16 +120,34 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         );
         return;
       }
-      _controller.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
+
+      LoadingScreen.show(context);
+      try {
+        await UserRepository.instance.updateUserCuentanosById({
+          "dni": _dniController.text.trim(),
+          "especialidad": categoriaSeleccionada.value ?? "",
+          "descripcion": _experienciaController.text,
+        });
+        LoadingScreen.hide();
+
+        _controller.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+      } catch (e) {
+        LoadingScreen.hide();
+        Alerts.instance.showErrorAlert(context, ErrorMapper.map(e).message);
+      }
+      return;
     }
+
     if (_currentPage.value == 1) {
       final bool dniFrontUploaded = _dniFrontImage.value != null;
       final bool dniBackUploaded = _dniBackImage.value != null;
+      final bool profileImageUploaded = _profileImage.value != null;
 
-      _imagenesDniValidas.value = dniFrontUploaded && dniBackUploaded;
+      _imagenesDniValidas.value =
+          dniFrontUploaded && dniBackUploaded && profileImageUploaded;
 
       if (!_imagenesDniValidas.value) {
         Alerts.instance.showErrorAlert(
@@ -143,11 +157,21 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         return;
       }
 
+      LoadingScreen.show(context);
+      await UserRepository.instance.addUserProfilePhoto(_profileImage.value!);
+      await UserRepository.instance.addUserDNIPhoto(
+        _dniFrontImage.value,
+        _dniBackImage.value,
+      );
+      LoadingScreen.hide();
+
       _controller.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
+      return;
     }
+
     if (_currentPage.value == 2) {
       if (antecedentesFileNameNotifier.value == null) {
         Alerts.instance.showErrorAlert(
@@ -160,7 +184,9 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
+      return;
     }
+
     if (_currentPage.value == 3) {
       if (!_aceptado.value) {
         Alerts.instance.showErrorAlert(
@@ -175,48 +201,19 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         return;
       }
 
-      ref.read(userViewModelProvider.notifier).updateUserById(widget.data.uid, {
-        "dni": _dniController.text.trim(),
-        "especialidad": categoriaSeleccionada.value ?? "",
-        "descripcion": _experienciaController.text.trim(),
-      });
+      Alerts.instance.showSuccessAlert(
+        context,
+        "¡Registro completado exitosamente!",
+        onOk: () {
+          Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
+        },
+      );
+      return;
     }
-    return;
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<ResultState>(userViewModelProvider, (previous, next) async {
-      switch (next) {
-        case Idle():
-          LoadingScreen.hide();
-          break;
-        case Loading():
-          _preloadFuture;
-          LoadingScreen.show(context);
-          break;
-        case Success():
-          LoadingScreen.hide();
-          if (mounted) {
-            await UserPreferences.saveUserId(widget.data.uid);
-            Alerts.instance.showSuccessAlert(
-              context,
-              "Ahora puedes disfrutar de nuestros servicios.",
-              onOk: () {
-                Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
-              },
-            );
-          }
-          break;
-        case Failure(:final error):
-          LoadingScreen.hide();
-          if (mounted) {
-            Alerts.instance.showErrorAlert(context, error.message);
-          }
-          break;
-      }
-    });
-
     return Scaffold(
       body: Container(
         width: double.infinity,
