@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/loading_screen.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 
 class Antecedentes extends StatefulWidget {
   final ValueNotifier<String?> fileNameNotifier;
@@ -14,10 +18,16 @@ class _AntecedentesState extends State<Antecedentes> {
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ["pdf", "dcx"],
+      allowedExtensions: ["pdf", "docx"],
     );
     if (result != null) {
       widget.fileNameNotifier.value = result.files.single.name;
+      if (result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        LoadingScreen.show(context);
+        await UserRepository.instance.addUserCriminalRecord(file);
+        LoadingScreen.hide();
+      }
     }
   }
 
@@ -76,7 +86,7 @@ class _AntecedentesState extends State<Antecedentes> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              fileUploaded ? value! : "Subir archivo",
+                              fileUploaded ? value : "Subir archivo",
                               style: TextStyle(
                                 color: AppColor.btnColor.withAlpha(110),
                                 fontSize: 14,
