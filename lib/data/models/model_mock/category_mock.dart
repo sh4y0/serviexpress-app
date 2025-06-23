@@ -14,37 +14,37 @@ class CategoryMock{
       CategoryModel(
         id: '1',
         name: 'Limpieza',
-        iconPath: 'assets/icons/ic_clean2.svg',
+        iconPath: 'assets/icons/ic_clean3.png',
       ),
       CategoryModel(
         id: '2',
         name: 'Tecno',
-        iconPath: 'assets/icons/ic_laptop.svg',
+        iconPath: 'assets/icons/ic_laptop2.png',
       ),
       CategoryModel(
         id: '3',
         name: 'Soldadura',
-        iconPath: 'assets/icons/ic_welding.svg',
+        iconPath: 'assets/icons/ic_welding2.png',
       ),
       CategoryModel(
         id: '4',
         name: 'Electricidad',
-        iconPath: 'assets/icons/ic_electricity.svg',
+        iconPath: 'assets/icons/ic_electricity2.png',
       ),
       CategoryModel(
         id: '5',
         name: 'Pintura',
-        iconPath: 'assets/icons/ic_brush.svg',
+        iconPath: 'assets/icons/ic_brush2.png',
       ),
       CategoryModel(
         id: '6',
         name: 'Plomeria',
-        iconPath: 'assets/icons/ic_plumber.svg',
+        iconPath: 'assets/icons/ic_plumber2.png',
       ),
       CategoryModel(
         id: '7',
         name: 'Stripper',
-        iconPath: 'assets/icons/ic_repair.svg',
+        iconPath: 'assets/icons/ic_stripper.png',
       ),
     ];
   }

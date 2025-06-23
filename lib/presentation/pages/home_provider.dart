@@ -295,6 +295,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                           secondaryAnimation,
                                         ) => ProviderDetails(
                                           service: serviceForCliente,
+                                          position: _currentPositionNotifier.value,
                                           mapStyle: MapStyleLoader.cachedStyle,
                                         ),
                                     transitionsBuilder: _transition,
