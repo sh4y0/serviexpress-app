@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 
 class Alerts {
   Alerts._privateConstructor();
@@ -47,6 +48,36 @@ class Alerts {
     return result;
   }
 
+  Future<void> showLogoutAlert(BuildContext context) async {
+    await _showAnimatedDialog(
+      context,
+      message: "¿Estás seguro de que deseas cerrar sesión?",
+      isError: false,
+      isConfirmation: true,
+      confirmText: "Cerrar Sesión",
+      cancelText: "Cancelar",
+      customIcon: Icons.warning_amber_rounded,
+      iconColor: Colors.redAccent,
+      confirmButtonColor: Colors.redAccent,
+      onOk: () {
+        AuthRepository.instance.logout();
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil("/login", (route) => false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Sesión cerrada",
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Color(0xFF101328),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _showAnimatedDialog(
     BuildContext context, {
     required String message,
@@ -56,6 +87,9 @@ class Alerts {
     VoidCallback? onCancel,
     String confirmText = "Sí",
     String cancelText = "Cancelar",
+    IconData? customIcon,
+    Color? confirmButtonColor,
+    Color? iconColor,
   }) {
     return showGeneralDialog(
       context: context,
@@ -82,19 +116,22 @@ class Alerts {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isConfirmation
-                        ? Icons.help_outline
-                        : isError
-                        ? Icons.error_outline
-                        : Icons.check_circle_outline,
+                    customIcon ??
+                        (isConfirmation
+                            ? Icons.help_outline
+                            : isError
+                            ? Icons.error_outline
+                            : Icons.check_circle_outline),
                     color:
-                        isConfirmation
+                        iconColor ??
+                        (isConfirmation
                             ? Colors.amberAccent
                             : isError
                             ? Colors.redAccent
-                            : const Color(0xFF4A66FF),
+                            : const Color(0xFF4A66FF)),
                     size: 60,
                   ),
+
                   const SizedBox(height: 16),
                   Text(
                     message,
@@ -122,7 +159,8 @@ class Alerts {
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A66FF),
+                            backgroundColor:
+                                confirmButtonColor ?? const Color(0xFF4A66FF),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
