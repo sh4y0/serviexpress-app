@@ -65,8 +65,7 @@ class CategoryButton extends StatelessWidget {
                         category.iconPath,
                         width: 17,
                         height: 17,
-                        color: 
-                          isSelected ? Colors.white : AppColor.textInput,
+                        color: isSelected ? Colors.white : AppColor.textInput,
                       ),
                       const SizedBox(width: 3),
                       Text(

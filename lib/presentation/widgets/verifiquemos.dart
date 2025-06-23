@@ -1,13 +1,13 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class Verifiquemos extends StatefulWidget {
-  final ValueNotifier<File?> dniFrontImage;
-  final ValueNotifier<File?> dniBackImage;
-  final ValueNotifier<File?> profileImage;
+  final ValueNotifier<Uint8List?> dniFrontImage;
+  final ValueNotifier<Uint8List?> dniBackImage;
+  final ValueNotifier<Uint8List?> profileImage;
 
   const Verifiquemos({
     super.key,
@@ -26,16 +26,16 @@ class _VerifiquemosState extends State<Verifiquemos> {
   Future<void> _pickImage(ImageSource source, String type) async {
     final XFile? pickedFile = await _picker.pickImage(source: source);
     if (pickedFile != null) {
-      final file = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
       switch (type) {
         case "front":
-          widget.dniFrontImage.value = file;
+          widget.dniFrontImage.value = bytes;
           break;
         case "back":
-          widget.dniBackImage.value = file;
+          widget.dniBackImage.value = bytes;
           break;
         case "profile":
-          widget.profileImage.value = file;
+          widget.profileImage.value = bytes;
           break;
       }
     }
@@ -147,7 +147,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
 
   Widget _buildPhotoBox(
     String label,
-    ValueNotifier<File?> imageNotifier,
+    ValueNotifier<Uint8List?> imageNotifier,
     String type, {
     bool isCircular = false,
   }) {
@@ -161,9 +161,9 @@ class _VerifiquemosState extends State<Verifiquemos> {
             style: const TextStyle(color: AppColor.txtDn, fontSize: 14),
           ),
           const SizedBox(height: 10),
-          ValueListenableBuilder<File?>(
+          ValueListenableBuilder<Uint8List?>(
             valueListenable: imageNotifier,
-            builder: (context, imageFile, _) {
+            builder: (context, imageData, _) {
               return Container(
                 width: isCircular ? 120 : 170,
                 height: 120,
@@ -171,15 +171,15 @@ class _VerifiquemosState extends State<Verifiquemos> {
                   color: AppColor.bgCard,
                   borderRadius: BorderRadius.circular(isCircular ? 100 : 5),
                   image:
-                      imageFile != null
+                      imageData != null
                           ? DecorationImage(
-                            image: FileImage(imageFile),
+                            image: MemoryImage(imageData),
                             fit: BoxFit.cover,
                           )
                           : null,
                 ),
                 child:
-                    imageFile == null
+                    imageData == null
                         ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
