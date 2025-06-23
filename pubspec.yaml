@@ -74,6 +74,7 @@ dependencies:
   geocoding: ^4.0.0
   signature: ^6.3.0
   flutter_polyline_points: ^2.1.0
+  flutter_image_compress: ^2.4.0
 
 dev_dependencies:
   flutter_test:
