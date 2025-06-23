@@ -27,6 +27,7 @@ class NotificationManager {
       badge: true,
       sound: true,
     );
+
     final userId = await UserPreferences.getUserId();
     if (userId == null) return;
 
@@ -75,6 +76,8 @@ class NotificationManager {
       priority: Priority.high,
       icon: '@mipmap/ic_notification',
       largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_large_notification'),
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('notification'),
     );
 
     const notificationDetails = NotificationDetails(android: androidDetails);
