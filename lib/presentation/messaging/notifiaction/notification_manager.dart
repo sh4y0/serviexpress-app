@@ -46,16 +46,16 @@ class NotificationManager {
     const initSettings = InitializationSettings(android: androidSettings);
     await _localNotifications.initialize(
       initSettings,
-      onDidReceiveNotificationResponse: (details) {
-        // Aquí puedes manejar acciones al tocar la notificación
-      },
+      // onDidReceiveNotificationResponse: (details) {
+      //   // Aquí puedes manejar acciones al tocar la notificación
+      // },
     );
 
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      // Aquí puedes manejar navegación o acciones específicas
-    });
+    // FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    //   // Aquí puedes manejar navegación o acciones específicas
+    // });
   }
 
   Future<String?> getDeviceToken() async {
@@ -94,7 +94,7 @@ class NotificationManager {
 
     final title = notification?.title ?? data['title'] ?? 'Notificación';
     final body =
-        notification?.body ?? data['body'] ?? 'Tienes un nuevo mensaje.';
+        notification?.body ?? data['body'] ?? 'Tienes un nuevo servicio.';
 
     _notificationStreamController.add(message);
 
@@ -109,23 +109,19 @@ class NotificationManager {
     );
   }
 
-  @pragma('vm:entry-point')
   static Future<void> handleBackgroundMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
 
     final data = message.data;
     final notification = message.notification;
-    final title =
-        message.notification?.title ?? data['title'] ?? 'Notificación';
-    final body =
-        message.notification?.body ??
-        data['body'] ??
-        'Tienes un nuevo mensaje.';
-    final payload = data['idServicio'];
 
     if (notification != null) {
       return;
     }
+
+    final title = data['title'] ?? 'Notificación';
+    final body = data['body'] ?? 'Tienes un nuevo servicio.';
+    final payload = data['idServicio'];
 
     await NotificationManager().showLocalNotification(
       title: title,

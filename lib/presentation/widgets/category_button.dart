@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 
@@ -66,8 +65,7 @@ class CategoryButton extends StatelessWidget {
                         category.iconPath,
                         width: 17,
                         height: 17,
-                        color: 
-                          isSelected ? Colors.white : AppColor.textInput,
+                        color: isSelected ? Colors.white : AppColor.textInput,
                       ),
                       const SizedBox(width: 3),
                       Text(
