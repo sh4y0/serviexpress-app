@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/loading_screen.dart';
+import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:signature/signature.dart';
 
 class TerminosCondiciones extends StatefulWidget {
@@ -10,7 +12,12 @@ class TerminosCondiciones extends StatefulWidget {
   final ValueNotifier<bool> firmado;
   final VoidCallback? onAceptar;
 
-  const TerminosCondiciones({super.key, required this.aceptado, this.onAceptar, required this.firmado});
+  const TerminosCondiciones({
+    super.key,
+    required this.aceptado,
+    this.onAceptar,
+    required this.firmado,
+  });
 
   @override
   State<TerminosCondiciones> createState() => _TerminosCondicionesState();
@@ -88,6 +95,10 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                                     resultado is Uint8List) {
                                   firmaNotifier.value = resultado;
                                   widget.firmado.value = true;
+                                  LoadingScreen.show(context);
+                                  await UserRepository.instance
+                                      .addUserSignature(firmaNotifier.value!);
+                                  LoadingScreen.hide();
                                 }
                               },
                               child: Container(
