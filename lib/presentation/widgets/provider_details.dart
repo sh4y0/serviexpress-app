@@ -236,13 +236,28 @@ class _ProviderDetailsState extends State<ProviderDetails> {
         (serviceData.audios?.isNotEmpty ?? false);
 
     final double minSheetSize = hayMultimedia ? 0.30 : 0.3;
-    final double maxSheetSize = hayMultimedia ? 0.8 : 0.65;
+    final double maxSheetSize = hayMultimedia ? 0.8 : 0.68;
 
     final mediaQuery = MediaQuery.of(context);
     final double topPaddingHeight = 60.0 + 25.0 + mediaQuery.padding.top;
     final double bottomSheetInitialHeight = mediaQuery.size.height * 0.34;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Transform.translate(
+            offset: const Offset(4, 0),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          ),
+          style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+        ),
+      ),
       body: Stack(
         children: [
           ValueListenableBuilder<Set<Polyline>>(
@@ -272,39 +287,17 @@ class _ProviderDetailsState extends State<ProviderDetails> {
             },
           ),
 
-          Positioned(
-            top: 0,
-            left: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  onTap: () {},
-                  customBorder: const CircleBorder(),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF303F9F),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(color: Colors.black26, blurRadius: 5),
-                      ],
-                    ),
-                    child: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: minSheetSize,
             maxChildSize: maxSheetSize, //mod 8
             builder: (context, scrollController) {
-              return ScreenClientData(
-                service: widget.service,
-                scrollController: scrollController,
+              return SafeArea(
+                top: true,
+                child: ScreenClientData(
+                  service: widget.service,
+                  scrollController: scrollController,
+                ),
               );
             },
           ),
@@ -356,7 +349,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
           children: [
             Container(
               height: 5,
-              margin: const EdgeInsets.only(bottom: 20, left: 80, right: 80),
+              margin: const EdgeInsets.only(bottom: 15, left: 80, right: 80),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: AppColor.dotColor,
@@ -369,6 +362,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -499,21 +493,21 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColor.txtPrice,
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: IconButton(
-                          onPressed: () {},
-                          icon: SvgPicture.asset(
-                            "assets/icons/ic_gochat.svg",
-                            width: 25,
-                            height: 25,
-                          ),
-                          color: Colors.white,
-                        ),
-                      ),
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //     color: AppColor.txtPrice,
+                      //     borderRadius: BorderRadius.circular(50),
+                      //   ),
+                      //   child: IconButton(
+                      //     onPressed: () {},
+                      //     icon: SvgPicture.asset(
+                      //       "assets/icons/ic_gochat.svg",
+                      //       width: 25,
+                      //       height: 25,
+                      //     ),
+                      //     color: Colors.white,
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 15),
@@ -987,6 +981,7 @@ class InputPresupuestoLauncher extends StatelessWidget {
                       fontSize: 18,
                     ),
                     decoration: const InputDecoration(
+                      suffixIcon: Icon(Icons.edit, color: Colors.white),
                       border: InputBorder.none,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.only(
