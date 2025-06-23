@@ -7,10 +7,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
@@ -56,53 +56,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       ValueNotifier(LocationBannerState.hidden);
   final ValueNotifier<LatLng?> _currentPositionNotifier = ValueNotifier(null);
 
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColor.bgMsgClient,
-            title: const Text("Cerrar Sesion"),
-            content: const Text("¿Estás seguro de que deseas cerrar sesión?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  AuthRepository.instance.logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil("/login", (route) => false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Sesión cerrada",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: AppColor.bgMsgClient,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                child: const Text(
-                  "Cerrar Sesion",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -116,7 +69,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
       () => const Center(
         child: Text("Conversar", style: TextStyle(fontSize: 25)),
       ),
-      () => const ProfileScreen(isProvider: true),
+      () => const ProfileScreen(),
     ];
     _setupToken();
     _notificationSubscription = NotificationManager().notificationStream.listen(
@@ -295,7 +248,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                           secondaryAnimation,
                                         ) => ProviderDetails(
                                           service: serviceForCliente,
-                                          position: _currentPositionNotifier.value,
+                                          position:
+                                              _currentPositionNotifier.value,
                                           mapStyle: MapStyleLoader.cachedStyle,
                                         ),
                                     transitionsBuilder: _transition,
@@ -543,9 +497,8 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                       .push(
                                         MaterialPageRoute(
                                           builder:
-                                              (context) => const ProfileScreen(
-                                                isProvider: false,
-                                              ),
+                                              (context) =>
+                                                  const ProfileScreen(),
                                         ),
                                       )
                                       .then((_) {
@@ -625,13 +578,16 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   leading: SvgPicture.asset(
                     "assets/icons/ic_exit.svg",
                     colorFilter: const ColorFilter.mode(
-                      Colors.white,
+                      Colors.red,
                       BlendMode.srcIn,
                     ),
                   ),
-                  title: const Text("Cerrar Sesión"),
+                  title: const Text(
+                    "Cerrar Sesión",
+                    style: TextStyle(color: Colors.red),
+                  ),
                   onTap: () {
-                    _logout(context);
+                    Alerts.instance.showLogoutAlert(context);
                   },
                 ),
                 const SizedBox(height: 16),

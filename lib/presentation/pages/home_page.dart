@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/pages/home_page_content.dart';
@@ -39,53 +39,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _openDrawer() {
     _scaffoldKey.currentState?.openDrawer();
-  }
-
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColor.bgMsgClient,
-            title: const Text("Cerrar Sesion"),
-            content: const Text("¿Estás seguro de que deseas cerrar sesión?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  AuthRepository.instance.logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil("/login", (route) => false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Sesión cerrada",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: AppColor.bgMsgClient,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                child: const Text(
-                  "Cerrar Sesion",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
   }
 
   void _getUserById() async {
@@ -206,9 +159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     .push(
                                       MaterialPageRoute(
                                         builder:
-                                            (context) => const ProfileScreen(
-                                              isProvider: false,
-                                            ),
+                                            (context) => const ProfileScreen(),
                                       ),
                                     )
                                     .then((_) {
@@ -287,13 +238,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               leading: SvgPicture.asset(
                 "assets/icons/ic_exit.svg",
                 colorFilter: const ColorFilter.mode(
-                  Colors.white,
+                  Colors.red,
                   BlendMode.srcIn,
                 ),
               ),
-              title: const Text("Cerrar Sesión"),
+              title: const Text(
+                "Cerrar Sesión",
+                style: TextStyle(color: Colors.red),
+              ),
               onTap: () {
-                _logout(context);
+                Alerts.instance.showLogoutAlert(context);
               },
             ),
             const SizedBox(height: 16),

@@ -59,10 +59,6 @@ class NotificationManager {
     // });
   }
 
-  Future<String?> getDeviceToken() async {
-    return await _firebaseMessaging.getToken();
-  }
-
   Future<void> showLocalNotification({
     required String title,
     required String body,
