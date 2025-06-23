@@ -49,8 +49,9 @@ class Serviexpress extends StatelessWidget {
                   builder: (context) => const AuthPageRecoveryPassword(),
                 );
               case AppRoutes.locationPermissions:
+                final args = settings.arguments as String;
                 return MaterialPageRoute(
-                  builder: (context) => const LocationPermission(),
+                  builder: (context) => LocationPermission(role: args),
                 );
               case AppRoutes.verified:
                 return MaterialPageRoute(

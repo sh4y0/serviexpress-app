@@ -128,6 +128,8 @@ class _HomePageContentState extends State<HomePageContent>
 
   bool _isTutorialShown = false;
 
+  final ValueNotifier<bool> _shouldShowContentTop = ValueNotifier(true);
+
   @override
   void initState() {
     super.initState();
@@ -234,6 +236,7 @@ class _HomePageContentState extends State<HomePageContent>
       }
 
       if (_isSearchingAnimationActive.value) {
+        _shouldShowContentTop.value = false;
         try {
           final screenCoordinate = await mapController!.getScreenCoordinate(
             center,
@@ -370,6 +373,7 @@ class _HomePageContentState extends State<HomePageContent>
     if (!tutorialMostrado) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showFirstTutorialStep();
+        prefs.setBool("tutorial_mostrado", true);
       });
     }
   }
@@ -546,7 +550,72 @@ class _HomePageContentState extends State<HomePageContent>
   //       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
   // }
 
-  void _onCategorySelected(int index) {
+  void _onCategorySelected(int index) async {
+    //_changeOnCategorySelected(index);
+
+    if (_isSolicitudGuardadaNotifier.value &&
+        index != _selectedCategoryIndex.value) {
+      bool? confirmarCambio = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: AppColor.bgCard,
+            title: const Text(
+              "Cambiar Categoria",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: const Text(
+              "Ya hay una solicitud guardada con una categoría seleccionada. "
+              "¿Estás seguro de que deseas cambiar la categoría? Esto eliminará la solicitud actual.",
+              style: TextStyle(color: AppColor.txtBooking),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text(
+                  "Cancelar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(backgroundColor: AppColor.btnColor),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  "Si, cambiar",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmarCambio != true) return;
+
+      _datosSolicitudGuardadaNotifier.value = null;
+      _isSolicitudGuardadaNotifier.value = false;
+      _isProveedorAgregadoNotifier.value = false;
+      _selectedProviderNotifier.value = null;
+      _proveedoresSeleccionadosNotifier.value = [];
+
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text(
+            "Categoria cambiada exitosamente",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+
     _selectedCategoryIndex.value = index;
     _categoriaErrorNotifier.value = false;
 
@@ -1217,76 +1286,90 @@ class _HomePageContentState extends State<HomePageContent>
                 },
               ),
 
-              Positioned(
-                top: mediaQuery.padding.top,
-                left: 6,
-                right: 6,
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: _categoriaErrorNotifier,
-                  builder: (context, hasError, _) {
-                    return Column(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 25,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 40),
-                              SizedBox(
-                                height: 60,
-                                child: CategoryButton(
-                                  categoriaError: hasError,
-                                  selectedCategoryIndexNotifier:
-                                      _selectedCategoryIndex,
-                                  firstCategoryKey: _firstCategoryKey,
-                                  onCategorySelected:
-                                      (category) =>
-                                          _onCategorySelected(category),
-                                ),
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSearchingAnimationActive,
+                builder: (context, isActive, child) {
+                  if (isActive) return const SizedBox.shrink();
+                  return Positioned(
+                    top: mediaQuery.padding.top,
+                    left: 6,
+                    right: 6,
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: _categoriaErrorNotifier,
+                      builder: (context, hasError, _) {
+                        return Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 25,
                               ),
-                              if (hasError)
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Text(
-                                    "Selecciona una categoria",
-                                    style: TextStyle(color: Colors.redAccent),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 40),
+                                  SizedBox(
+                                    height: 60,
+                                    child: CategoryButton(
+                                      categoriaError: hasError,
+                                      selectedCategoryIndexNotifier:
+                                          _selectedCategoryIndex,
+                                      firstCategoryKey: _firstCategoryKey,
+                                      onCategorySelected:
+                                          (category) =>
+                                              _onCategorySelected(category),
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                                  if (hasError)
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Selecciona una categoria",
+                                        style: TextStyle(
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
 
-              Positioned(
-                top: 0,
-                left: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InkWell(
-                      onTap: widget.onMenuPressed,
-                      customBorder: const CircleBorder(),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF303F9F),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black26, blurRadius: 5),
-                          ],
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSearchingAnimationActive,
+                builder: (context, isActive, child) {
+                  if (isActive) return const SizedBox.shrink();
+                  return Positioned(
+                    top: 0,
+                    left: 0,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: InkWell(
+                          onTap: widget.onMenuPressed,
+                          customBorder: const CircleBorder(),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF303F9F),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(color: Colors.black26, blurRadius: 5),
+                              ],
+                            ),
+                            child: const Icon(Icons.menu, color: Colors.white),
+                          ),
                         ),
-                        child: const Icon(Icons.menu, color: Colors.white),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
 
               ValueListenableBuilder<bool>(
@@ -1553,40 +1636,66 @@ class _HomePageContentState extends State<HomePageContent>
               ),
 
               ValueListenableBuilder<bool>(
-                valueListenable: _isSheetVisibleDetalleProveedorNotifier,
-                builder: (context, isVisible, _) {
-                  if (!isVisible) return const SizedBox.shrink();
-                  return Positioned.fill(
-                    child: Stack(
-                      children: [
-                        ModalBarrier(
-                          color: Colors.black.withAlpha((0.3 * 255).toInt()),
-                          dismissible: true,
-                          onDismiss: _handleSheetDismissedDetalleProveedor,
+                valueListenable: _isSearchingAnimationActive,
+                builder: (context, isActive, child) {
+                  if (isActive) {
+                    return Positioned(
+                      bottom: 40,
+                      right: 50,
+                      left: 50,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                          backgroundColor: AppColor.bgVerification,
                         ),
-                        Positioned.fill(
-                          child: ValueListenableBuilder<UserModel?>(
-                            valueListenable: _selectedProviderNotifier,
-                            builder: (context, selectedProvider, _) {
-                              return DraggableSheetDetalleProveedor(
-                                targetInitialSize: 0.57,
-                                minSheetSize: 0.0,
-                                maxSheetSize: 0.95,
-                                snapPoints: const [0.0, 0.57, 0.95],
-                                onDismiss:
-                                    _handleSheetDismissedDetalleProveedor,
-                                //onProveedorAgregado: _agregarProveedor,
-                                selectedProvider: selectedProvider,
-                                isProveedorAgregado:
-                                    (isAgregado) =>
-                                        _isProveedorAgregadoNotifier.value =
-                                            isAgregado,
-                              );
-                            },
-                          ),
+                        onPressed: () {},
+                        child: const Text(
+                          "Cancelar Solicitud",
+                          style: TextStyle(color: Colors.white, fontSize: 17),
                         ),
-                      ],
-                    ),
+                      ),
+                    );
+                  }
+
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: _isSheetVisibleDetalleProveedorNotifier,
+                    builder: (context, isVisible, _) {
+                      if (!isVisible) return const SizedBox.shrink();
+                      return Positioned.fill(
+                        child: Stack(
+                          children: [
+                            ModalBarrier(
+                              color: Colors.black.withAlpha(
+                                (0.3 * 255).toInt(),
+                              ),
+                              dismissible: true,
+                              onDismiss: _handleSheetDismissedDetalleProveedor,
+                            ),
+                            Positioned.fill(
+                              child: ValueListenableBuilder<UserModel?>(
+                                valueListenable: _selectedProviderNotifier,
+                                builder: (context, selectedProvider, _) {
+                                  return DraggableSheetDetalleProveedor(
+                                    targetInitialSize: 0.57,
+                                    minSheetSize: 0.0,
+                                    maxSheetSize: 0.95,
+                                    snapPoints: const [0.0, 0.57, 0.95],
+                                    onDismiss:
+                                        _handleSheetDismissedDetalleProveedor,
+                                    //onProveedorAgregado: _agregarProveedor,
+                                    selectedProvider: selectedProvider,
+                                    isProveedorAgregado:
+                                        (isAgregado) =>
+                                            _isProveedorAgregadoNotifier.value =
+                                                isAgregado,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
               ),

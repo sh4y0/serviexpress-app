@@ -179,6 +179,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
         context,
         AppRoutes.locationPermissions,
         (route) => false,
+        arguments: role
       );
     }
   }
