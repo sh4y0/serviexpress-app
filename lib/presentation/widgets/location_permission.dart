@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class LocationPermission extends StatefulWidget {
-  const LocationPermission({super.key});
+  final String role;
+  const LocationPermission({super.key, required this.role});
 
   @override
   State<LocationPermission> createState() => _LocationPermissionState();
@@ -14,6 +16,7 @@ class LocationPermission extends StatefulWidget {
 
 class _LocationPermissionState extends State<LocationPermission> {
   late EnhancedLocationService _locationService;
+  AuthResult? authResult;
 
   @override
   void initState() {
@@ -46,7 +49,7 @@ class _LocationPermissionState extends State<LocationPermission> {
 
               const SizedBox(height: 20),
               const Text(
-                "Activa tu ubicación",
+                "Autoriza el uso de tu ubicación",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -75,9 +78,14 @@ class _LocationPermissionState extends State<LocationPermission> {
                     bool permissionSuccesfull =
                         await _locationService.requestLocationPermission();
                     if (permissionSuccesfull) {
+                      final String targetRoute =
+                          (widget.role == "Trabajador")
+                              ? AppRoutes.homeProvider
+                              : AppRoutes.home;
+
                       Navigator.pushNamedAndRemoveUntil(
                         context,
-                        AppRoutes.home,
+                        targetRoute,
                         (route) => false,
                         arguments: MapStyleLoader.cachedStyle,
                       );
