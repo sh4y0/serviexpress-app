@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/config/navigation_config.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
@@ -69,10 +70,14 @@ class Serviexpress extends StatelessWidget {
                 final args = settings.arguments as Map<String, dynamic>;
                 final mapStyle = args['mapStyle'] as String;
                 final service = args['service'] as ServiceComplete;
+                final position = args['position'] as LatLng?;
                 return MaterialPageRoute(
                   builder:
-                      (context) =>
-                          ProviderDetails(service: service, mapStyle: mapStyle),
+                      (context) => ProviderDetails(
+                        service: service,
+                        mapStyle: mapStyle,
+                        position: position,
+                      ),
                 );
               default:
                 return MaterialPageRoute(

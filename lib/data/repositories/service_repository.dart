@@ -66,7 +66,7 @@ class ServiceRepository {
           audioUrls.add(url);
         }
       }
-      
+
       final updatedService = ServiceModel(
         id: serviceId,
         categoria: service.categoria,
@@ -98,7 +98,7 @@ class ServiceRepository {
           idServicio: serviceId,
           senderId: updatedService.clientId,
           title: 'Tienes un nuevo servicio',
-          body: 'Limpieza solicitada por $username',
+          body: 'Servicio solicitado por $username',
           receiverId: workerId,
           screen: 'provider_details',
         );
