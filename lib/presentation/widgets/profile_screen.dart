@@ -13,15 +13,13 @@ import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/desactive_account_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/skeleton_profile.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  final bool isProvider;
-  const ProfileScreen({super.key, required this.isProvider});
+  const ProfileScreen({super.key});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -31,43 +29,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   UserModel? user;
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
-
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColor.bgMsgClient,
-            title: const Text("Cerrar Sesion"),
-            content: const Text("¿Estás seguro de que deseas cerrar sesión?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  AuthRepository.instance.logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil("/login", (route) => false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Sesión cerrada")),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                child: const Text(
-                  "Cerrar Sesion",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
 
   void _getUserById() async {
     final uid = await UserPreferences.getUserId();
@@ -321,17 +282,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         "title": "Historial de actividad",
         //"route": AppRoutes.cambioRol,
       },
-      widget.isProvider
-          ? {
-            "icon": Icons.published_with_changes,
-            "title": "Cambiar a Cliente",
-            "route": AppRoutes.home,
-          }
-          : {
-            "icon": Icons.published_with_changes,
-            "title": "Cambiar a Trabajador",
-            "route": AppRoutes.homeProvider,
-          },
     ];
     return Scaffold(
       backgroundColor: AppColor.bgVerification,
@@ -669,9 +619,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               child: ListTile(
                                 leading: SvgPicture.asset(
                                   "assets/icons/ic_delete_account.svg",
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.red,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                                 title: const Text(
-                                  "Inhabilitar cuenta",
+                                  "Desactivar cuenta",
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -686,14 +640,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               highlightColor: Colors.grey.withAlpha(
                                 (0.18 * 255).toInt(),
                               ),
-                              onTap: () => _logout(context),
+                              onTap:
+                                  () =>
+                                      Alerts.instance.showLogoutAlert(context),
                               child: ListTile(
                                 leading: SvgPicture.asset(
                                   "assets/icons/ic_exit.svg",
+                                  colorFilter: const ColorFilter.mode(
+                                    Colors.red,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                                 title: const Text(
                                   "Cerrar sesión",
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(color: Colors.red),
                                 ),
                               ),
                             ),
