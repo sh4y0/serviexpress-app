@@ -62,14 +62,12 @@ class CategoryButton extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SvgPicture.asset(
+                      Image.asset(
                         category.iconPath,
-                        width: 15,
-                        height: 15,
-                        colorFilter: ColorFilter.mode(
+                        width: 17,
+                        height: 17,
+                        color: 
                           isSelected ? Colors.white : AppColor.textInput,
-                          BlendMode.srcIn,
-                        ),
                       ),
                       const SizedBox(width: 3),
                       Text(

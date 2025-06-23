@@ -408,7 +408,6 @@ class DraggableSheetSolicitarServicioState
                                       widget.onCategoriaError!();
                                       return;
                                     }
-
                                     if (!widget.isSolicitudGuardada) {
                                       _descripcionError.value = true;
                                       return;
