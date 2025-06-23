@@ -12,7 +12,7 @@ class RemoteConfigService {
     await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
-        minimumFetchInterval: const Duration(hours: 1),
+        minimumFetchInterval: const Duration(seconds: 0),
       ),
     );
 
