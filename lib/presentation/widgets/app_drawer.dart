@@ -110,9 +110,7 @@ class AppDrawer extends StatelessWidget {
                                 .push(
                                   MaterialPageRoute(
                                     builder:
-                                        (context) => const ProfileScreen(
-                                          isProvider: false,
-                                        ),
+                                        (context) => const ProfileScreen(),
                                   ),
                                 )
                                 .then((_) => onUserRefresh());
