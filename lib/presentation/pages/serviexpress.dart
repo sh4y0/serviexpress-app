@@ -12,6 +12,7 @@ import 'package:serviexpress_app/presentation/pages/home_page.dart';
 import 'package:serviexpress_app/presentation/pages/home_provider.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
+import 'package:serviexpress_app/presentation/widgets/cambio_rol.dart';
 import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/location_permission.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
@@ -79,6 +80,10 @@ class Serviexpress extends StatelessWidget {
                         mapStyle: mapStyle,
                         position: position,
                       ),
+                );
+              case AppRoutes.cambioRol:
+                return MaterialPageRoute(
+                  builder: (context) => const CambioRol(),
                 );
               default:
                 return MaterialPageRoute(
