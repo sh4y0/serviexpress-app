@@ -6,14 +6,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/data/repositories/auth_repository.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
+import 'package:serviexpress_app/presentation/messaging/service/location_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/app_drawer.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
@@ -51,72 +52,18 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   final ValueNotifier<UserModel?> user = ValueNotifier<UserModel?>(null);
   final Set<String> _processedServiceIds = {};
-  late EnhancedLocationService _locationService;
-  final ValueNotifier<LocationBannerState> _locationBannerStateNotifier =
-      ValueNotifier(LocationBannerState.hidden);
-  final ValueNotifier<LatLng?> _currentPositionNotifier = ValueNotifier(null);
-
-  void _logout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: AppColor.bgMsgClient,
-            title: const Text("Cerrar Sesion"),
-            content: const Text("¿Estás seguro de que deseas cerrar sesión?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  AuthRepository.instance.logout();
-                  Navigator.of(context).pop();
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil("/login", (route) => false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Sesión cerrada",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: AppColor.bgMsgClient,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                ),
-                child: const Text(
-                  "Cerrar Sesion",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-    );
-  }
 
   @override
   void initState() {
     super.initState();
     _getUserById();
-    _locationService = EnhancedLocationService();
-    _setupLocationListener();
-    _initializeLocationService();
     _setStateSwitch();
     _screens = [
       () => _buildHomeProvider(),
       () => const Center(
         child: Text("Conversar", style: TextStyle(fontSize: 25)),
       ),
-      () => const ProfileScreen(isProvider: true),
+      () => const ProfileScreen(),
     ];
     _setupToken();
     _notificationSubscription = NotificationManager().notificationStream.listen(
@@ -131,6 +78,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           fcmMessage.idServicio,
         );
 
+        print("ServiExpress - service: $service");
         if (service != null) {
           if (!notifications.value.any(
             (n) => n.idServicio == fcmMessage.idServicio,
@@ -160,48 +108,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     await NotificationManager().initialize();
   }
 
-  void _setupLocationListener() {
-    _locationService.addListener(_onLocationStateChanged);
-  }
-
-  void _onLocationStateChanged() {
-    if (!mounted) return;
-    final state = _locationService.currentState;
-
-    LocationBannerState newBannerState;
-
-    if (_locationService.shouldShowNotFoundBanner) {
-      newBannerState = LocationBannerState.notFound;
-    } else if (_locationService.shouldShowSearchingBanner) {
-      newBannerState = LocationBannerState.searching;
-    } else {
-      newBannerState = LocationBannerState.hidden;
-    }
-
-    if (_locationBannerStateNotifier.value != newBannerState) {
-      _locationBannerStateNotifier.value = newBannerState;
-    }
-
-    if (state == LocationState.found &&
-        _locationService.currentPosition != null) {
-      final pos = _locationService.currentPosition!;
-
-      _currentPositionNotifier.value = LatLng(pos.latitude, pos.longitude);
-    }
-  }
-
-  void _setupLocation() async {
-    final state = _locationService.currentState;
-    if (state == LocationState.serviceDisabled) {
-      _locationBannerStateNotifier.value = LocationBannerState.notFound;
-    }
-  }
-
-  Future<void> _initializeLocationService() async {
-    await _locationService.initialize();
-    _setupLocation();
-  }
-
   Future<String> _getUserId(String senderId) async {
     final username = await UserRepository.instance.getUserName(senderId);
     return username;
@@ -216,6 +122,12 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
   }
 
   Widget _buildHomeProvider() {
+    final locationService = ref.watch(locationNotifierProvider);
+
+    final currentPosition = locationService.currentPosition != null
+        ? LatLng(locationService.currentPosition!.latitude, locationService.currentPosition!.longitude)
+        : null;
+        
     return Stack(
       children: [
         ValueListenableBuilder<bool>(
@@ -295,8 +207,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                           secondaryAnimation,
                                         ) => ProviderDetails(
                                           service: serviceForCliente,
-                                          position:
-                                              _currentPositionNotifier.value,
+                                          position: currentPosition,
                                           mapStyle: MapStyleLoader.cachedStyle,
                                         ),
                                     transitionsBuilder: _transition,
@@ -443,7 +354,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           return AppDrawer(
             user: userValue,
             isProvider: true,
-            onLogout: () => _logout(context),
+            onLogout: () => Alerts.instance.showLogoutAlert(context),
             onUserRefresh: _getUserById,
             isProviderDrawer: true,
           );

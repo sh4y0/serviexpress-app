@@ -89,6 +89,8 @@ class _ProviderDetailsState extends State<ProviderDetails> {
   }
 
   Future<void> _loadAndAnimateRoute() async {
+    print("ServiExpress - widget.position: ${widget.position}");
+    print("ServiExpress - widget.service.cliente: ${widget.service.cliente.latitud}");
     final providerPosition = widget.position;
     final clientData = widget.service.cliente;
     final clientPosition =
