@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _setupToken();
     _getUserById();
+    UserPreferences.activeServiceId.value = null;
   }
 
   void _setupToken() async {
