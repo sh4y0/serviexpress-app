@@ -4,6 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
@@ -188,8 +189,18 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       Alerts.instance.showSuccessAlert(
         context,
         "¡Registro completado exitosamente!",
-        onOk: () {
-          Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
+        onOk: () async {
+          final permission = await Geolocator.checkPermission();
+          final hasPermission =
+              permission == LocationPermission.always ||
+              permission == LocationPermission.whileInUse;
+          if (!hasPermission) {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.locationPermissions,
+              arguments: widget.data.rol,
+            );
+          }
         },
       );
       return;
