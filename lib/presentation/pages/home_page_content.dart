@@ -19,7 +19,6 @@ import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_
 import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
-import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class MapMovementController {
   bool _isProgrammaticMove = false;
@@ -363,6 +362,18 @@ class _HomePageContentState extends State<HomePageContent>
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         widget.onMapLoaded(true);
+
+        if (_locationService.currentState == LocationState.found &&
+            _locationService.currentPosition != null) {
+          if (mapController != null && !_isTutorialShown) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                _checkAndShowTutorial();
+                _isTutorialShown = true;
+              }
+            });
+          }
+        }
       }
     });
   }

@@ -47,6 +47,11 @@ class EnhancedLocationService extends ChangeNotifier {
   bool get shouldShowSearchingBanner =>
       _currentState == LocationState.searching;
 
+   bool get isPermissionGranted =>
+      _currentState != LocationState.permissionDenied;
+  bool get isServiceEnabled =>
+      _currentState != LocationState.serviceDisabled;
+
   LocationSettings _getLocationSettings() {
     if (Platform.isAndroid) {
       return AndroidSettings(
