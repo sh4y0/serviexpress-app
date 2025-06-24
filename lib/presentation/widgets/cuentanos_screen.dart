@@ -1,9 +1,10 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/exceptions/error_mapper.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
@@ -48,9 +49,15 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
   final ValueNotifier<bool> _firmado = ValueNotifier(false);
 
   final ValueNotifier<bool> _imagenesDniValidas = ValueNotifier(false);
-  final ValueNotifier<File?> _dniFrontImage = ValueNotifier<File?>(null);
-  final ValueNotifier<File?> _dniBackImage = ValueNotifier<File?>(null);
-  final ValueNotifier<File?> _profileImage = ValueNotifier<File?>(null);
+  final ValueNotifier<Uint8List?> _dniFrontImage = ValueNotifier<Uint8List?>(
+    null,
+  );
+  final ValueNotifier<Uint8List?> _dniBackImage = ValueNotifier<Uint8List?>(
+    null,
+  );
+  final ValueNotifier<Uint8List?> _profileImage = ValueNotifier<Uint8List?>(
+    null,
+  );
 
   final ValueNotifier<String?> antecedentesFileNameNotifier = ValueNotifier(
     null,
@@ -58,28 +65,6 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
 
   final TextEditingController _dniController = TextEditingController();
   final TextEditingController _experienciaController = TextEditingController();
-  // late Future<void> _preloadFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    // _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
-  }
-
-  // Future<void> _precacheSvgs() async {
-  //   final svgPaths = [
-  //     "assets/icons/ic_person.svg",
-  //     "assets/icons/ic_pass.svg",
-  //     "assets/icons/ic_email.svg",
-  //     "assets/icons/ic_facebook.svg",
-  //     "assets/icons/ic_google.svg",
-  //     "assets/icons/ic_apple.svg",
-  //   ];
-
-  //   for (final path in svgPaths) {
-  //     SvgCache.getIconSvg(path);
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -204,8 +189,18 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       Alerts.instance.showSuccessAlert(
         context,
         "¡Registro completado exitosamente!",
-        onOk: () {
-          Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
+        onOk: () async {
+          final permission = await Geolocator.checkPermission();
+          final hasPermission =
+              permission == LocationPermission.always ||
+              permission == LocationPermission.whileInUse;
+          if (!hasPermission) {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.locationPermissions,
+              arguments: widget.data.rol,
+            );
+          }
         },
       );
       return;
