@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/data/models/propuesta_model.dart';
 import 'package:serviexpress_app/data/models/service.dart';
+import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/service/google_maps_service.dart';
 import 'package:serviexpress_app/data/service/location_service.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
@@ -726,7 +729,9 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                   const SizedBox(height: 20),
                   SizedBox(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.bgMsgUser,
                       ),
@@ -739,7 +744,36 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                   const SizedBox(height: 10),
                   SizedBox(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final precio = presupuestoPersonalizado ?? '';
+                        final description = propuestaTexto ?? '';
+                        if (precio.isEmpty || description.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Completa todos los campos antes de enviar',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+                        final workerId = await UserPreferences.getUserId();
+                        if (workerId == null) return;
+                        final propuesta = PropuestaModel(
+                          id:
+                              PropuestaRepository.instance
+                                  .generatePropuestaId(),
+                          serviceId: widget.service.service.id,
+                          workerId: workerId,
+                          clientId: widget.service.cliente.uid,
+                          precio: double.tryParse(precio) ?? 0.0,
+                          descripcion: description,
+                        );
+
+                        await PropuestaRepository.instance.createPropuesta(
+                          propuesta,
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.btnColor,
                       ),
