@@ -109,8 +109,7 @@ class AppDrawer extends StatelessWidget {
                             Navigator.of(context)
                                 .push(
                                   MaterialPageRoute(
-                                    builder:
-                                        (context) => const ProfileScreen(),
+                                    builder: (context) => const ProfileScreen(),
                                   ),
                                 )
                                 .then((_) => onUserRefresh());
@@ -171,12 +170,12 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: SvgPicture.asset(
               "assets/icons/ic_exit.svg",
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
+              colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
             ),
-            title: const Text("Cerrar Sesión"),
+            title: const Text(
+              "Cerrar Sesión",
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: onLogout,
           ),
           const SizedBox(height: 16),
