@@ -601,7 +601,6 @@ class _HomePageContentState extends State<HomePageContent>
 
   void _onCategorySelected(int index) async {
     //_changeOnCategorySelected(index);
-
     if (_isSolicitudGuardadaNotifier.value &&
         index != _selectedCategoryIndex.value) {
       bool? confirmarCambio = await showDialog<bool>(
@@ -624,7 +623,9 @@ class _HomePageContentState extends State<HomePageContent>
             actions: [
               TextButton(
                 style: TextButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
                 child: const Text(
                   "Cancelar",
                   style: TextStyle(color: Colors.white),
@@ -632,7 +633,9 @@ class _HomePageContentState extends State<HomePageContent>
               ),
               TextButton(
                 style: TextButton.styleFrom(backgroundColor: AppColor.btnColor),
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
                 child: const Text(
                   "Si, cambiar",
                   style: TextStyle(color: Colors.white),
@@ -644,6 +647,11 @@ class _HomePageContentState extends State<HomePageContent>
       );
 
       if (confirmarCambio != true) return;
+      UserPreferences.activeServiceId.value = null;
+      UserPreferences.activeServiceId.removeListener(_serviceIdListener);
+      _propuestaSubscription?.cancel();
+      _propuestaPorWorker.clear();
+      _updateMarkers();
 
       _datosSolicitudGuardadaNotifier.value = null;
       _isSolicitudGuardadaNotifier.value = false;
@@ -706,6 +714,8 @@ class _HomePageContentState extends State<HomePageContent>
       _currentProvidersNotifier.value = {};
       _updateMarkers();
     }
+
+    UserPreferences.activeServiceId.addListener(_serviceIdListener);
   }
 
   void _adjustCameraToShowAllMarkers() {
