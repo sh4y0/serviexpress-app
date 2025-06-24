@@ -11,9 +11,23 @@ class PropuestaRepository {
 
   Future<void> createPropuesta(PropuestaModel propuesta) async {
     try {
-      await _proposalCollection.doc(propuesta.id).set(propuesta.toJson());
+      final query =
+          await _proposalCollection
+              .where('serviceId', isEqualTo: propuesta.serviceId)
+              .where('workerId', isEqualTo: propuesta.workerId)
+              .where('clientId', isEqualTo: propuesta.clientId)
+              .limit(1)
+              .get();
+
+      if (query.docs.isNotEmpty) {
+        final existingDocId = query.docs.first.id;
+
+        await _proposalCollection.doc(existingDocId).update(propuesta.toJson());
+      } else {
+        await _proposalCollection.doc(propuesta.id).set(propuesta.toJson());
+      }
     } catch (e) {
-      throw Exception('Error creating propuesta: $e');
+      throw Exception('Error al guardar propuesta: $e');
     }
   }
 
