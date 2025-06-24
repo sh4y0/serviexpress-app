@@ -3,6 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:serviexpress_app/core/exceptions/error_state.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/fmc_message.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
@@ -29,6 +30,8 @@ class ServiceRepository {
       List<String> fotoUrls = [];
       List<String> videoUrls = [];
       List<String> audioUrls = [];
+
+      UserPreferences.activeServiceId.value = serviceId;
 
       if (service.fotosFiles != null) {
         for (int i = 0; i < service.fotosFiles!.length; i++) {

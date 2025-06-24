@@ -6,9 +6,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
+import 'package:serviexpress_app/data/models/propuesta_model.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_home.dart';
@@ -130,6 +133,11 @@ class _HomePageContentState extends State<HomePageContent>
 
   final ValueNotifier<bool> _shouldShowContentTop = ValueNotifier(true);
 
+  StreamSubscription<Set<PropuestaModel>>? _propuestaSubscription;
+  final Map<String, PropuestaModel> _propuestaPorWorker = {};
+
+  late final VoidCallback _serviceIdListener;
+
   @override
   void initState() {
     super.initState();
@@ -143,6 +151,26 @@ class _HomePageContentState extends State<HomePageContent>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupKeyboardListener();
     });
+
+    _serviceIdListener = () {
+      final serviceId = UserPreferences.activeServiceId.value;
+      if (serviceId != null && serviceId.isNotEmpty) {
+        _suscribirseAPropuestas(serviceId);
+      }
+    };
+
+    UserPreferences.activeServiceId.addListener(_serviceIdListener);
+  }
+
+  void _suscribirseAPropuestas(String serviceId) {
+    _propuestaSubscription = PropuestaRepository.instance
+        .getAllPropuestasForService(serviceId)
+        .listen((propuestas) {
+          for (final p in propuestas) {
+            _propuestaPorWorker[p.workerId] = p;
+          }
+          _updateMarkers();
+        });
   }
 
   Future<void> _initializeLocationService() async {
@@ -521,6 +549,8 @@ class _HomePageContentState extends State<HomePageContent>
       //var category = CategoryMock.getCategories()[indice];
       final markerId = MarkerId('provider_${provider.uid}');
       //final icon = await getProviderIconXCategory(category.iconPath);
+      final propuesta = _propuestaPorWorker[provider.uid];
+      final hasPropuesta = propuesta != null;
 
       newMarkers.add(
         Marker(
@@ -531,6 +561,13 @@ class _HomePageContentState extends State<HomePageContent>
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           anchor: const Offset(0.5, 1.0),
           zIndexInt: 1,
+          infoWindow: InfoWindow(
+            title:
+                hasPropuesta
+                    ? "Propuesta: S/ ${propuesta.precio.toStringAsFixed(2)}"
+                    : provider.nombres,
+            snippet: provider.calificacion.toString(),
+          ),
           onTap: () {
             _selectedProviderNotifier.value = provider;
             _currentlyOpenInfoWindowMarkerId = markerId;
@@ -1745,6 +1782,8 @@ class _HomePageContentState extends State<HomePageContent>
     _isSearchingAnimationActive.dispose();
     _animationPositionNotifier.dispose();
     _zoomAnimationController?.dispose();
+    _propuestaSubscription?.cancel();
+    UserPreferences.activeServiceId.removeListener(_serviceIdListener);
     super.dispose();
   }
 }
