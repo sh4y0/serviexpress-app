@@ -13,6 +13,7 @@ import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
+import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/show_super.dart';
 import 'package:serviexpress_app/presentation/widgets/terminos_condiciones.dart';
 import 'package:serviexpress_app/presentation/widgets/verifiquemos.dart';
@@ -190,6 +191,10 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         context,
         "¡Registro completado exitosamente!",
         onOk: () async {
+          await UserRepository.instance.updateUserCuentanosById({
+            "isCompleteProfile": true,
+          });
+
           final permission = await Geolocator.checkPermission();
           final hasPermission =
               permission == LocationPermission.always ||
@@ -199,6 +204,12 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
               context,
               AppRoutes.locationPermissions,
               arguments: widget.data.rol,
+            );
+          } else {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.homeProvider,
+              arguments: MapStyleLoader.cachedStyle,
             );
           }
         },

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
@@ -121,26 +120,26 @@ class _DraggableSheetDetalleProveedorState
     }
   }
 
-  void _agregarProveedor() {
-    final proveedor = UserModel(
-      uid: widget.selectedProvider!.uid,
-      nombres: widget.selectedProvider!.nombres,
-      calificacion: widget.selectedProvider?.calificacion,
-      especialidad: widget.selectedProvider!.especialidad,
-      descripcion: widget.selectedProvider?.descripcion,
-      imagenUrl: widget.selectedProvider?.imagenUrl,
-      username: widget.selectedProvider!.username,
-      email: widget.selectedProvider!.email,
-      dni: widget.selectedProvider!.dni,
-      telefono: widget.selectedProvider!.telefono,
-      apellidoPaterno: widget.selectedProvider!.apellidoPaterno,
-      apellidoMaterno: widget.selectedProvider!.apellidoMaterno,
-      nombreCompleto: widget.selectedProvider!.nombreCompleto,
-    );
-    widget.isProveedorAgregado(true);
-    widget.onProveedorAgregado?.call(proveedor);
-    hide();
-  }
+  // void _agregarProveedor() {
+  //   final proveedor = UserModel(
+  //     uid: widget.selectedProvider!.uid,
+  //     nombres: widget.selectedProvider!.nombres,
+  //     calificacion: widget.selectedProvider?.calificacion,
+  //     especialidad: widget.selectedProvider!.especialidad,
+  //     descripcion: widget.selectedProvider?.descripcion,
+  //     imagenUrl: widget.selectedProvider?.imagenUrl,
+  //     username: widget.selectedProvider!.username,
+  //     email: widget.selectedProvider!.email,
+  //     dni: widget.selectedProvider!.dni,
+  //     telefono: widget.selectedProvider!.telefono,
+  //     apellidoPaterno: widget.selectedProvider!.apellidoPaterno,
+  //     apellidoMaterno: widget.selectedProvider!.apellidoMaterno,
+  //     nombreCompleto: widget.selectedProvider!.nombreCompleto,
+  //   );
+  //   widget.isProveedorAgregado(true);
+  //   widget.onProveedorAgregado?.call(proveedor);
+  //   hide();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -418,64 +417,64 @@ class _DraggableSheetDetalleProveedorState
 
                           const SizedBox(height: 24),
 
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FilledButton.icon(
-                                  onPressed: _agregarProveedor,
-                                  icon: const Icon(
-                                    Icons.add_box_rounded,
-                                    color: Colors.white,
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3645f5),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  label: const Text(
-                                    'Agregar',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: FilledButton.icon(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.chat,
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  label: const Text(
-                                    'No me interesa',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          // Row(
+                          //   children: [
+                          //     Expanded(
+                          //       child: FilledButton.icon(
+                          //         onPressed: _agregarProveedor,
+                          //         icon: const Icon(
+                          //           Icons.add_box_rounded,
+                          //           color: Colors.white,
+                          //         ),
+                          //         style: ElevatedButton.styleFrom(
+                          //           backgroundColor: const Color(0xFF3645f5),
+                          //           padding: const EdgeInsets.symmetric(
+                          //             vertical: 16,
+                          //           ),
+                          //           shape: RoundedRectangleBorder(
+                          //             borderRadius: BorderRadius.circular(12),
+                          //           ),
+                          //         ),
+                          //         label: const Text(
+                          //           'Agregar',
+                          //           style: TextStyle(
+                          //             color: Colors.white,
+                          //             fontSize: 16,
+                          //             fontWeight: FontWeight.bold,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     const SizedBox(width: 10),
+                          //     Expanded(
+                          //       child: FilledButton.icon(
+                          //         onPressed: () {
+                          //           Navigator.pushNamed(
+                          //             context,
+                          //             AppRoutes.chat,
+                          //           );
+                          //         },
+                          //         style: ElevatedButton.styleFrom(
+                          //           backgroundColor: Colors.transparent,
+                          //           padding: const EdgeInsets.symmetric(
+                          //             vertical: 16,
+                          //           ),
+                          //           shape: RoundedRectangleBorder(
+                          //             borderRadius: BorderRadius.circular(12),
+                          //           ),
+                          //         ),
+                          //         label: const Text(
+                          //           'No me interesa',
+                          //           style: TextStyle(
+                          //             color: Colors.white,
+                          //             fontSize: 16,
+                          //             fontWeight: FontWeight.bold,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                         ],
                       ),
                     ),

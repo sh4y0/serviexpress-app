@@ -482,10 +482,12 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                       height: 23,
                                     ),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      distancia,
-                                      style: const TextStyle(
-                                        color: AppColor.bgDistance,
+                                    Expanded(
+                                      child: Text(
+                                        distancia,
+                                        style: const TextStyle(
+                                          color: AppColor.bgDistance,
+                                        ),
                                       ),
                                     ),
                                   ],

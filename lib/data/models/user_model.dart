@@ -26,6 +26,7 @@ class UserModel {
   final String? signatureUrl;
   final bool isActive;
   final bool isAvailable;
+  bool isCompleteProfile;
 
   UserModel({
     required this.uid,
@@ -53,6 +54,7 @@ class UserModel {
     this.signatureUrl,
     this.isActive = true,
     this.isAvailable = true,
+    this.isCompleteProfile = false
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -88,6 +90,7 @@ class UserModel {
       signatureUrl: json['signatureUrl'] ?? '',
       isActive: json['isActive'] ?? true,
       isAvailable: json['isAvailable'] ?? true,
+      isCompleteProfile: json['isCompleteProfile'] ?? true
     );
   }
 
@@ -118,6 +121,7 @@ class UserModel {
       'signatureUrl': signatureUrl,
       'isActive': isActive,
       'isAvailable': isAvailable,
+      'isCompleteProfile': isCompleteProfile
     };
   }
 }

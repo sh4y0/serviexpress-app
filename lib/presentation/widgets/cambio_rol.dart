@@ -52,61 +52,65 @@ class _CambioRolState extends State<CambioRol> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: SvgPicture.asset(
-                "assets/icons/work.svg",
-                width: 300,
-                height: 450,
+            Expanded(
+              child: Center(
+                child: SvgPicture.asset(
+                  "assets/icons/work.svg",
+                  width: 300,
+                  height: 450,
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: currentRole != null ? _cambiarRol : null,
-                    child: Text(
-                      esTrabajador
-                          ? "Registrarme como Cliente"
-                          : "Registrarme como Trabajador",
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: currentRole != null ? _cambiarRol : null,
+                      child: Text(
+                        esTrabajador
+                            ? "Registrarme como Cliente"
+                            : "Registrarme como Trabajador",
+                        style: const TextStyle(
+                          color: AppColor.btnOpen,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.bgBack,
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.login);
+                      },
+                      child: const Text(
+                        "Tengo una cuenta",
+                        style: TextStyle(
+                          color: AppColor.btnOpen,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Divider(),
+                    Text(
+                      currentRole != null
+                          ? "Modo $currentRole"
+                          : "Cargando Rol...",
                       style: const TextStyle(
-                        color: AppColor.btnOpen,
-                        fontSize: 20,
+                        color: Colors.white,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColor.bgBack,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.login);
-                    },
-                    child: const Text(
-                      "Tengo una cuenta",
-                      style: TextStyle(
-                        color: AppColor.btnOpen,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  Divider(),
-                  Text(
-                    currentRole != null
-                        ? "Modo $currentRole"
-                        : "Cargando Rol...",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 23,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
