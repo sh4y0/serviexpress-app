@@ -70,7 +70,7 @@ class AppSessionConfig {
         }
       }
 
-      if (role == "Trabajador") {
+      if (role == "Trabajador" && data['isCompleteProfile']) {
         if (context.mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.homeProvider);
         }

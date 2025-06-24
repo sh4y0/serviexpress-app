@@ -65,8 +65,7 @@ class Serviexpress extends StatelessWidget {
                 );
               case AppRoutes.completeProfile:
                 final userData = settings.arguments as UserModel;
-                return MaterialPageRoute(
-                  builder: (context) => CuentanosScreen(data: userData),
+                return MaterialPageRoute(builder: (context) => CuentanosScreen(data: userData),
                 );
               case AppRoutes.providerDetails:
                 final args = settings.arguments as Map<String, dynamic>;

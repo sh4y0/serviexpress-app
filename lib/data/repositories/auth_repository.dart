@@ -207,7 +207,7 @@ class AuthRepository {
 
   Future<bool> _checkProfileCompletion(UserModel user) async {
     if (user.rol == "Trabajador") {
-      return user.dni.trim().isEmpty;
+      return !user.isCompleteProfile;
     }
     return false;
   }
