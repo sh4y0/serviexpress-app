@@ -4,8 +4,13 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class AnimationProvider extends StatefulWidget {
   final bool showAnimation;
+  final bool hasLocation;
 
-  const AnimationProvider({super.key, required this.showAnimation});
+  const AnimationProvider({
+    super.key, 
+    required this.showAnimation,
+    required this.hasLocation,
+  });
 
   @override
   State<AnimationProvider> createState() => _AnimationProviderState();
@@ -23,7 +28,7 @@ class _AnimationProviderState extends State<AnimationProvider>
       vsync: this,
     );
 
-    if (widget.showAnimation) {
+    if (widget.showAnimation && widget.hasLocation) {
       _controller.repeat();
     }
   }
@@ -31,8 +36,9 @@ class _AnimationProviderState extends State<AnimationProvider>
   @override
   void didUpdateWidget(AnimationProvider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.showAnimation != oldWidget.showAnimation) {
-      if (widget.showAnimation) {
+    if (widget.showAnimation != oldWidget.showAnimation ||
+        widget.hasLocation != oldWidget.hasLocation) {
+      if (widget.showAnimation && widget.hasLocation) {
         _controller.repeat();
       } else {
         _controller.stop();
@@ -142,6 +148,38 @@ class _AnimationProviderState extends State<AnimationProvider>
     );
   }
 
+  Widget buildNotActiveLocation() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.location_disabled_rounded,
+          size: 150,
+          color: Colors.grey[700],
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          "Tu ubicación esta desactivada",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "actívala para recibir solicitudes",
+          style: TextStyle(
+            color: Colors.white70,
+            fontSize: 18,
+            fontWeight: FontWeight.w400,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,18 +195,28 @@ class _AnimationProviderState extends State<AnimationProvider>
               child: ScaleTransition(scale: animation, child: child),
             );
           },
-          child:
-              widget.showAnimation
-                  ? KeyedSubtree(
-                    key: const ValueKey('searching'),
-                    child: buildSearchingContent(),
-                  )
-                  : KeyedSubtree(
-                    key: const ValueKey('notActive'),
-                    child: buildNotActiveContent(),
-                  ),
+          child: _buildCurrentContent(),
         ),
       ),
     );
+  }
+
+  Widget _buildCurrentContent() {
+    if (!widget.hasLocation) {
+      return KeyedSubtree(
+        key: const ValueKey('noLocation'),
+        child: buildNotActiveLocation(),
+      );
+    } else if (widget.showAnimation) {
+      return KeyedSubtree(
+        key: const ValueKey('searching'),
+        child: buildSearchingContent(),
+      );
+    } else {
+      return KeyedSubtree(
+        key: const ValueKey('notActive'),
+        child: buildNotActiveContent(),
+      );
+    }
   }
 }

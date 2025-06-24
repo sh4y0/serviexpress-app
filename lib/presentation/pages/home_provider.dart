@@ -78,7 +78,6 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           fcmMessage.idServicio,
         );
 
-        print("ServiExpress - service: $service");
         if (service != null) {
           if (!notifications.value.any(
             (n) => n.idServicio == fcmMessage.idServicio,
@@ -121,19 +120,45 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     user.value = userFetch;
   }
 
+  LocationBannerState _determineBannerState(
+    EnhancedLocationService locationState,
+  ) {
+    if (locationState.shouldShowNotFoundBanner) {
+      return LocationBannerState.notFound;
+    }
+    if (locationState.shouldShowSearchingBanner) {
+      return LocationBannerState.searching;
+    }
+    return LocationBannerState.hidden;
+  }
+
+  bool _isLocationAvailable(EnhancedLocationService locationService) {
+    return locationService.isPermissionGranted &&
+        locationService.isServiceEnabled &&
+        locationService.hasLocation;
+  }
+
   Widget _buildHomeProvider() {
     final locationService = ref.watch(locationNotifierProvider);
+    final isLocationAvailable = _isLocationAvailable(locationService);
 
-    final currentPosition = locationService.currentPosition != null
-        ? LatLng(locationService.currentPosition!.latitude, locationService.currentPosition!.longitude)
-        : null;
-        
+    final currentPosition =
+        locationService.currentPosition != null
+            ? LatLng(
+              locationService.currentPosition!.latitude,
+              locationService.currentPosition!.longitude,
+            )
+            : null;
+
     return Stack(
       children: [
         ValueListenableBuilder<bool>(
           valueListenable: _state,
           builder: (context, stateValue, _) {
-            return AnimationProvider(showAnimation: stateValue);
+            return AnimationProvider(
+              showAnimation: stateValue && isLocationAvailable,
+              hasLocation: isLocationAvailable,
+            );
           },
         ),
         ValueListenableBuilder<List<FCMMessage>>(
@@ -234,6 +259,14 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
 
   @override
   Widget build(BuildContext context) {
+    final locationState = ref.watch(locationNotifierProvider);
+    final locationNotifier = ref.read(locationNotifierProvider.notifier);
+    final bannerState = _determineBannerState(locationState);
+    final isLocationAvailable = _isLocationAvailable(locationState);
+
+    UserRepository.instance.toggleUserAvailability(isLocationAvailable);
+    _state.value = isLocationAvailable;
+
     return Scaffold(
       appBar: AppBar(
         leading: AnimatedOpacity(
@@ -283,7 +316,10 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   return Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: stateValue ? AppColor.bgSwitch : Colors.grey[300],
+                      color:
+                          (stateValue && isLocationAvailable)
+                              ? AppColor.bgSwitch
+                              : Colors.grey[300],
                       shape: BoxShape.circle,
                     ),
                   );
@@ -293,12 +329,26 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
               ValueListenableBuilder<bool>(
                 valueListenable: _state,
                 builder: (context, stateValue, _) {
+                  String statusText;
+                  Color statusColor;
+
+                  if (!isLocationAvailable) {
+                    statusText = "Sin Ubicación";
+                    statusColor = Colors.grey[400]!;
+                  } else if (stateValue) {
+                    statusText = "Disponible";
+                    statusColor = Colors.white;
+                  } else {
+                    statusText = "No Disponible";
+                    statusColor = Colors.grey[300]!;
+                  }
+
                   return Text(
-                    stateValue ? "Disponible" : "No Disponible",
+                    statusText,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: stateValue ? Colors.white : Colors.grey[300],
+                      color: statusColor,
                     ),
                   );
                 },
@@ -312,13 +362,15 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                     activeTrackColor: AppColor.bgSwitch,
                     inactiveThumbColor: Colors.white,
                     inactiveTrackColor: Colors.grey[300],
-                    value: stateValue,
-                    onChanged: (value) async {
-                      await UserRepository.instance.toggleUserAvailability(
-                        value,
-                      );
-                      _state.value = value;
-                    },
+                    value: stateValue && isLocationAvailable,
+                    onChanged:
+                        isLocationAvailable
+                            ? (value) async {
+                              await UserRepository.instance
+                                  .toggleUserAvailability(value);
+                              _state.value = value;
+                            }
+                            : null,
                   );
                 },
               ),
@@ -554,9 +606,23 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
           },
         ),
       ),
-      body: ValueListenableBuilder<int>(
-        valueListenable: _selectedIndex,
-        builder: (context, idx, _) => _screens[idx](),
+      body: LocationBannerController(
+        bannerState: bannerState,
+
+        onLocationPermissionTap: () {
+          if (locationState.currentState == LocationState.serviceDisabled) {
+            locationNotifier.requestLocationService();
+          } else if (locationState.currentState ==
+              LocationState.permissionDenied) {
+            locationNotifier.requestLocationPermission();
+          }
+        },
+        onBannerDismiss: () => LocationBannerState.hidden,
+        onSearchCancel: () => LocationBannerState.hidden,
+        child: ValueListenableBuilder<int>(
+          valueListenable: _selectedIndex,
+          builder: (context, idx, _) => _screens[idx](),
+        ),
       ),
     );
   }
