@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:serviexpress_app/data/models/propuesta_model.dart';
+import 'package:uuid/uuid.dart';
 
 class PropuestaRepository {
   static final instance = PropuestaRepository._();
@@ -17,6 +18,10 @@ class PropuestaRepository {
   }
 
   Stream<Set<PropuestaModel>> getAllPropuestasForService(String? serviceId) {
+    if (serviceId == null || serviceId.isEmpty) {
+      return const Stream.empty();
+    }
+
     try {
       return _proposalCollection
           .where('serviceId', isEqualTo: serviceId)
@@ -39,5 +44,9 @@ class PropuestaRepository {
     } catch (e) {
       return const Stream.empty();
     }
+  }
+
+  String generatePropuestaId() {
+    return const Uuid().v4();
   }
 }
