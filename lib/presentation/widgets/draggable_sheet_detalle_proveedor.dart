@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/core/utils/alerts.dart';
+import 'package:serviexpress_app/data/models/propuesta_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
 class DraggableSheetDetalleProveedor extends StatefulWidget {
@@ -13,6 +15,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final Function(UserModel)? onProveedorAgregado;
   final UserModel? selectedProvider;
   final Function(bool) isProveedorAgregado;
+  final PropuestaModel? propuestaModel;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -26,6 +29,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.onProveedorAgregado,
     this.selectedProvider,
     required this.isProveedorAgregado,
+    required this.propuestaModel,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -149,14 +153,16 @@ class _DraggableSheetDetalleProveedorState
         "name": "Allan Sagastegui",
         "subtitle": "Usuario Nuevo",
         "rating": 5.0,
-        "comment": "Se solicitó un servicio acelerado y la entrega fue muy rápida.",
+        "comment":
+            "Se solicitó un servicio acelerado y la entrega fue muy rápida.",
       },
       {
         "avatar": "assets/images/new_user.png",
         "name": "María López",
         "subtitle": "Cliente frecuente",
         "rating": 4.5,
-        "comment": "Muy buen trabajo, atención cordial y resultados excelentes.",
+        "comment":
+            "Muy buen trabajo, atención cordial y resultados excelentes.",
       },
       {
         "avatar": "assets/images/new_user.png",
@@ -170,14 +176,16 @@ class _DraggableSheetDetalleProveedorState
         "name": "Fernanda Ruiz",
         "subtitle": "Cliente frecuente",
         "rating": 5.0,
-        "comment": "Excelente atención y profesionalismo. Lo recomiendo totalmente.",
+        "comment":
+            "Excelente atención y profesionalismo. Lo recomiendo totalmente.",
       },
       {
         "avatar": "assets/images/new_user.png",
         "name": "Javier Torres",
         "subtitle": "Usuario Nuevo",
         "rating": 4.8,
-        "comment": "Muy satisfecho con el servicio recibido, volveré a contratar.",
+        "comment":
+            "Muy satisfecho con el servicio recibido, volveré a contratar.",
       },
     ];
 
@@ -252,28 +260,46 @@ class _DraggableSheetDetalleProveedorState
                               const SizedBox(width: 12),
 
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      widget.selectedProvider!.nombreCompleto,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
                                         Text(
-                                          '${widget.selectedProvider!.calificacion}',
+                                          widget.selectedProvider!.nombres,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              '${widget.selectedProvider!.calificacion}',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          widget
+                                                  .selectedProvider
+                                                  ?.descripcion ??
+                                              '',
                                           style: const TextStyle(
                                             color: Colors.white70,
                                             fontSize: 12,
@@ -281,13 +307,32 @@ class _DraggableSheetDetalleProveedorState
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      widget.selectedProvider?.descripcion ??
-                                          '',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12,
+                                    Container(
+                                      width: 60,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(
+                                          236,
+                                          244,
+                                          255,
+                                          1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          'S/.${widget.propuestaModel!.precio.toString()}',
+                                          style: const TextStyle(
+                                            color: Color.fromRGBO(
+                                              42,
+                                              52,
+                                              216,
+                                              1,
+                                            ),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -310,14 +355,14 @@ class _DraggableSheetDetalleProveedorState
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              // SizedBox(width: 3),
-                              // Text(
-                              //   '(120+ review)',
-                              //   style: TextStyle(
-                              //     color: Color(0xff3d4d8a),
-                              //     fontSize: 12,
-                              //   ),
-                              // ),
+                              SizedBox(width: 3),
+                              Text(
+                                '(120+ review)',
+                                style: TextStyle(
+                                  color: Color(0xff3d4d8a),
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           ),
 
@@ -328,153 +373,170 @@ class _DraggableSheetDetalleProveedorState
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: reviews.length,
-                              separatorBuilder: (context, index) => const SizedBox(width: 12),
-                              itemBuilder: (context, index){
+                              separatorBuilder:
+                                  (context, index) => const SizedBox(width: 8),
+                              itemBuilder: (context, index) {
                                 final review = reviews[index];
                                 return Container(
-                                width: 320,
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0c0d23),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          width: 40,
-                                          height: 40,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.grey,
-                                          ),
-                                          child: ClipOval(
-                                            child: Image.asset(review["avatar"],
-                                              fit: BoxFit.cover,
+                                  width: 280,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0c0d23),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.grey,
+                                            ),
+                                            child: ClipOval(
+                                              child: Image.asset(
+                                                review["avatar"],
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 12),
-                              
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                          const SizedBox(width: 12),
+
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  review["name"],
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  review["subtitle"],
+                                                  style: const TextStyle(
+                                                    color: AppColor.textInput,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          Row(
                                             children: [
-                                              Text(review["name"],
+                                              const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                review["rating"].toString(),
                                                 style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              Text(review["subtitle"],
-                                                style: const TextStyle(
-                                                  color: AppColor.textInput,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
                                             ],
                                           ),
-                                        ),
-                              
-                                         Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                              size: 16,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(review["rating"].toString(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                              
-                                     Text(review["comment"],
-                                      style: const TextStyle(
-                                        color: AppColor.textInput,
-                                        fontSize: 14,
-                                        fontStyle: FontStyle.italic,
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              },                              
+                                      const SizedBox(height: 12),
+
+                                      Text(
+                                        review["comment"],
+                                        style: const TextStyle(
+                                          color: AppColor.textInput,
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 30),
 
-                          // Row(
-                          //   children: [
-                          //     Expanded(
-                          //       child: FilledButton.icon(
-                          //         onPressed: _agregarProveedor,
-                          //         icon: const Icon(
-                          //           Icons.add_box_rounded,
-                          //           color: Colors.white,
-                          //         ),
-                          //         style: ElevatedButton.styleFrom(
-                          //           backgroundColor: const Color(0xFF3645f5),
-                          //           padding: const EdgeInsets.symmetric(
-                          //             vertical: 16,
-                          //           ),
-                          //           shape: RoundedRectangleBorder(
-                          //             borderRadius: BorderRadius.circular(12),
-                          //           ),
-                          //         ),
-                          //         label: const Text(
-                          //           'Agregar',
-                          //           style: TextStyle(
-                          //             color: Colors.white,
-                          //             fontSize: 16,
-                          //             fontWeight: FontWeight.bold,
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //     const SizedBox(width: 10),
-                          //     Expanded(
-                          //       child: FilledButton.icon(
-                          //         onPressed: () {
-                          //           Navigator.pushNamed(
-                          //             context,
-                          //             AppRoutes.chat,
-                          //           );
-                          //         },
-                          //         style: ElevatedButton.styleFrom(
-                          //           backgroundColor: Colors.transparent,
-                          //           padding: const EdgeInsets.symmetric(
-                          //             vertical: 16,
-                          //           ),
-                          //           shape: RoundedRectangleBorder(
-                          //             borderRadius: BorderRadius.circular(12),
-                          //           ),
-                          //         ),
-                          //         label: const Text(
-                          //           'No me interesa',
-                          //           style: TextStyle(
-                          //             color: Colors.white,
-                          //             fontSize: 16,
-                          //             fontWeight: FontWeight.bold,
-                          //           ),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () {
+                                    //_agregarProveedor
+                                    Alerts.instance.showInfoAlert(
+                                      context,
+                                      "Aún no implementado",
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.add_box_rounded,
+                                    color: Colors.white,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3645f5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  label: const Text(
+                                    'Aceptar',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: () {
+                                    // Navigator.pushNamed(
+                                    //   context,
+                                    //   AppRoutes.chat,
+                                    // );
+                                    Alerts.instance.showInfoAlert(
+                                      context,
+                                      "Aún no implementado xd",
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  label: const Text(
+                                    'No me interesa',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),

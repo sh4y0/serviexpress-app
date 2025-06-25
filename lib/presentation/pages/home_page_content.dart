@@ -15,11 +15,13 @@ import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_home.dart';
+import 'package:serviexpress_app/presentation/widgets/ballon_tail_painter.dart';
 import 'package:serviexpress_app/presentation/widgets/category_button.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio.dart';
 import 'package:serviexpress_app/presentation/widgets/draggable_sheet_solicitar_servicio_detallado.dart';
 import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
+import 'package:serviexpress_app/presentation/widgets/proposal_marker_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -137,6 +139,12 @@ class _HomePageContentState extends State<HomePageContent>
   final Map<String, PropuestaModel> _propuestaPorWorker = {};
 
   late final VoidCallback _serviceIdListener;
+
+  final ValueNotifier<List<MarkerWithProposal>> _markersWithProposalsNotifier =
+      ValueNotifier([]);
+  Timer? _screenPositionUpdateTimer;
+
+  final ValueNotifier<PropuestaModel?> _propuestaProvider = ValueNotifier(null);
 
   @override
   void initState() {
@@ -530,6 +538,7 @@ class _HomePageContentState extends State<HomePageContent>
   void _updateMarkers() async {
     final currentPosition = _currentPositionNotifier.value;
     Set<Marker> newMarkers = {};
+    List<MarkerWithProposal> markersWithProposals = [];
 
     if (currentPosition != null) {
       newMarkers.add(
@@ -544,12 +553,9 @@ class _HomePageContentState extends State<HomePageContent>
       );
     }
 
-    //var indice = 0;
     for (var provider in _currentProvidersNotifier.value) {
-      //var category = CategoryMock.getCategories()[indice];
       final markerId = MarkerId('provider_${provider.uid}');
-      //final icon = await getProviderIconXCategory(category.iconPath);
-      final propuesta = _propuestaPorWorker[provider.uid];
+      final propuesta = _propuestaPorWorker[provider.uid];   
       final hasPropuesta = propuesta != null;
 
       newMarkers.add(
@@ -561,22 +567,78 @@ class _HomePageContentState extends State<HomePageContent>
               BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
           anchor: const Offset(0.5, 1.0),
           zIndexInt: 1,
-          infoWindow: InfoWindow(
-            title:
-                hasPropuesta
-                    ? "Propuesta: S/ ${propuesta.precio.toStringAsFixed(2)}"
-                    : provider.nombres,
-            snippet: provider.calificacion.toString(),
-          ),
           onTap: () {
-            _selectedProviderNotifier.value = provider;
+            //_selectedProviderNotifier.value = provider;
+            if (hasPropuesta) {
+              _selectedProviderNotifier.value = provider;
+              _isSheetVisibleDetalleProveedorNotifier.value = true;
+            }
             _currentlyOpenInfoWindowMarkerId = markerId;
-            //_isSheetVisibleDetalleProveedorNotifier.value = true;
           },
         ),
       );
+
+      if (hasPropuesta) {
+        _propuestaProvider.value = propuesta;
+        markersWithProposals.add(
+          MarkerWithProposal(
+            markerId: 'provider_${provider.uid}',
+            position: LatLng(provider.latitud!, provider.longitud!),
+            price: propuesta.precio.toStringAsFixed(2),
+            rating: provider.calificacion.toString(),
+          ),
+        );
+      }
     }
+
     _markersNotifier.value = newMarkers;
+    _markersWithProposalsNotifier.value = markersWithProposals;
+    _updateScreenPositions();
+  }
+
+  void _updateScreenPositions() async {
+    if (mapController == null || _markersWithProposalsNotifier.value.isEmpty) {
+      return;
+    }
+
+    List<MarkerWithProposal> updatedMarkers = [];
+
+    for (var markerWithProposal in _markersWithProposalsNotifier.value) {
+      try {
+        final screenCoordinate = await mapController!.getScreenCoordinate(
+          markerWithProposal.position,
+        );
+
+        final devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+        final screenPosition = Offset(
+          screenCoordinate.x / devicePixelRatio,
+          screenCoordinate.y / devicePixelRatio - 60,
+        );
+
+        updatedMarkers.add(
+          markerWithProposal.copyWith(screenPosition: screenPosition),
+        );
+      } catch (e) {
+        debugPrint('Error calculando posición de pantalla: $e');
+        updatedMarkers.add(markerWithProposal);
+      }
+    }
+
+    if (mounted) {
+      _markersWithProposalsNotifier.value = updatedMarkers;
+    }
+  }
+
+  void _startScreenPositionUpdates() {
+    _screenPositionUpdateTimer?.cancel();
+    _screenPositionUpdateTimer = Timer.periodic(
+      const Duration(milliseconds: 300),
+      (_) => _updateScreenPositions(),
+    );
+  }
+
+  void _stopScreenPositionUpdates() {
+    _screenPositionUpdateTimer?.cancel();
   }
 
   // Future<BitmapDescriptor> getProviderIconXCategory(String iconPath) async {
@@ -647,6 +709,7 @@ class _HomePageContentState extends State<HomePageContent>
       );
 
       if (confirmarCambio != true) return;
+      _propuestaProvider.value = null;
       UserPreferences.activeServiceId.value = null;
       UserPreferences.activeServiceId.removeListener(_serviceIdListener);
       _propuestaSubscription?.cancel();
@@ -782,6 +845,7 @@ class _HomePageContentState extends State<HomePageContent>
     if (!_isMapBeingMoved) {
       _isMapBeingMoved = true;
       _shouldShowSheet.value = false;
+      _startScreenPositionUpdates();
     }
     _mapInteractionTimer?.cancel();
     _mapInteractionTimer = Timer(const Duration(milliseconds: 200), () {
@@ -792,6 +856,8 @@ class _HomePageContentState extends State<HomePageContent>
   }
 
   void _onCameraIdle() {
+    _stopScreenPositionUpdates();
+    _updateScreenPositions();
     if (_activeProgrammaticOperationId != null) {
       _movementController.endProgrammaticMove(_activeProgrammaticOperationId!);
       _activeProgrammaticOperationId = null;
@@ -1345,6 +1411,39 @@ class _HomePageContentState extends State<HomePageContent>
                 },
               ),
 
+              ValueListenableBuilder<List<MarkerWithProposal>>(
+                valueListenable: _markersWithProposalsNotifier,
+                builder: (context, markersWithProposals, _) {
+                  return Stack(
+                    children:
+                        markersWithProposals
+                            .where((marker) => marker.screenPosition != null)
+                            .map(
+                              (marker) => Positioned(
+                                left: marker.screenPosition!.dx - 30,
+                                top: marker.screenPosition!.dy - 12,
+                                child: IgnorePointer(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ProposalMarkerWidget(
+                                        price: marker.price,
+                                        rating: marker.rating,
+                                      ),
+                                      CustomPaint(
+                                        size: const Size(20, 15),
+                                        painter: BalloonTailPainter(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                  );
+                },
+              ),
+
               ValueListenableBuilder<bool>(
                 valueListenable: _isSearchingAnimationActive,
                 builder: (context, isActive, child) {
@@ -1737,19 +1836,25 @@ class _HomePageContentState extends State<HomePageContent>
                               child: ValueListenableBuilder<UserModel?>(
                                 valueListenable: _selectedProviderNotifier,
                                 builder: (context, selectedProvider, _) {
-                                  return DraggableSheetDetalleProveedor(
-                                    targetInitialSize: 0.57,
-                                    minSheetSize: 0.0,
-                                    maxSheetSize: 0.95,
-                                    snapPoints: const [0.0, 0.57, 0.95],
-                                    onDismiss:
-                                        _handleSheetDismissedDetalleProveedor,
-                                    //onProveedorAgregado: _agregarProveedor,
-                                    selectedProvider: selectedProvider,
-                                    isProveedorAgregado:
-                                        (isAgregado) =>
-                                            _isProveedorAgregadoNotifier.value =
-                                                isAgregado,
+                                  return ValueListenableBuilder(
+                                    valueListenable: _propuestaProvider,
+                                    builder: (context, propuesta, _) {
+                                      return DraggableSheetDetalleProveedor(
+                                        targetInitialSize: 0.55,
+                                        minSheetSize: 0.0,
+                                        maxSheetSize: 0.95,
+                                        snapPoints: const [0.0, 0.55, 0.95],
+                                        onDismiss:
+                                            _handleSheetDismissedDetalleProveedor,
+                                        //onProveedorAgregado: _agregarProveedor,
+                                        selectedProvider: selectedProvider,
+                                        isProveedorAgregado:
+                                            (isAgregado) =>
+                                                _isProveedorAgregadoNotifier
+                                                    .value = isAgregado,
+                                        propuestaModel: propuesta,
+                                      );
+                                    },
                                   );
                                 },
                               ),
@@ -1792,6 +1897,8 @@ class _HomePageContentState extends State<HomePageContent>
     _isSearchingAnimationActive.dispose();
     _animationPositionNotifier.dispose();
     _zoomAnimationController?.dispose();
+    _screenPositionUpdateTimer?.cancel();
+    _markersWithProposalsNotifier.dispose();
     _propuestaSubscription?.cancel();
     UserPreferences.activeServiceId.removeListener(_serviceIdListener);
     super.dispose();
