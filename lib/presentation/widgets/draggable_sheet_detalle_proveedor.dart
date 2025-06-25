@@ -251,10 +251,37 @@ class _DraggableSheetDetalleProveedorState
                                   shape: BoxShape.circle,
                                   color: Color(0xFF1B1B2E),
                                 ),
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.grey,
-                                  size: 40,
+                                child: ClipOval(
+                                  child: SizedBox(
+                                    width: 60,
+                                    height: 60,
+                                    child:
+                                        widget.selectedProvider!.imagenUrl !=
+                                                null
+                                            ? FadeInImage.assetNetwork(
+                                              placeholder:
+                                                  "assets/images/avatar.png",
+                                              image:
+                                                  widget
+                                                      .selectedProvider!
+                                                      .imagenUrl!,
+                                              fit: BoxFit.cover,
+                                              imageErrorBuilder: (
+                                                context,
+                                                error,
+                                                stackTrace,
+                                              ) {
+                                                return Image.asset(
+                                                  "assets/images/avatar.png",
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
+                                            )
+                                            : Image.asset(
+                                              "assets/images/avatar.png",
+                                              fit: BoxFit.cover,
+                                            ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
