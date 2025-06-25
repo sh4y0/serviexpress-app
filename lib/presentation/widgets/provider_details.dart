@@ -775,6 +775,17 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         await PropuestaRepository.instance.createPropuesta(
                           propuesta,
                         );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              "Propuesta enviada exitosamente",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Color(0xFF101328),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.btnColor,
