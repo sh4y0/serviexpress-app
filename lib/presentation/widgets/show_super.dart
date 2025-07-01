@@ -36,12 +36,12 @@ class ShowSuper extends StatelessWidget {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Fedor podrá empezar con el servicio después de que realices el pago. Recuerda el pago no se le dará a Fedor hasta que haya terminado la tarea con éxito.",
-                        style: TextStyle(color: AppColor.txtPropuesta),
-                        textAlign: TextAlign.center,
-                      ),
+                      // const SizedBox(height: 10),
+                      // const Text(
+                      //   "Fedor podrá empezar con el servicio después de que realices el pago. Recuerda el pago no se le dará a Fedor hasta que haya terminado la tarea con éxito.",
+                      //   style: TextStyle(color: AppColor.txtPropuesta),
+                      //   textAlign: TextAlign.center,
+                      // ),
                       const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
