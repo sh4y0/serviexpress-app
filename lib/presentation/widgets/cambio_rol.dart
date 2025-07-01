@@ -13,11 +13,20 @@ class CambioRol extends StatefulWidget {
 
 class _CambioRolState extends State<CambioRol> {
   String? currentRole;
+  bool _isFirstLoad = true;
 
   @override
   void initState() {
     super.initState();
-    _loadRole();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isFirstLoad) {
+      _isFirstLoad = false;
+      _loadRole();
+    }
   }
 
   Future<void> _loadRole() async {
@@ -31,7 +40,7 @@ class _CambioRolState extends State<CambioRol> {
     final nuevoRol = currentRole == "Trabajador" ? "Cliente" : "Trabajador";
     await UserPreferences.saveRoleName(nuevoRol);
     if (!mounted) return;
-    Navigator.pushNamed(context, AppRoutes.login);
+    Navigator.pushNamed(context, AppRoutes.login, arguments: {"login": false});
   }
 
   @override
@@ -45,7 +54,19 @@ class _CambioRolState extends State<CambioRol> {
     final esTrabajador = currentRole == "Trabajador";
     return Scaffold(
       backgroundColor: AppColor.bgVerification,
-      appBar: AppBar(backgroundColor: AppColor.bgVerification),
+      appBar: AppBar(
+        backgroundColor: AppColor.bgVerification,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Transform.translate(
+            offset: const Offset(4, 0),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          ),
+          style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -101,7 +122,11 @@ class _CambioRolState extends State<CambioRol> {
                           backgroundColor: AppColor.bgBack,
                         ),
                         onPressed: () {
-                          Navigator.pushNamed(context, AppRoutes.login);
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.login,
+                            arguments: {"login": true},
+                          );
                         },
                         child: const Text(
                           "Tengo una cuenta",
