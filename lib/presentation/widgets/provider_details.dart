@@ -856,147 +856,174 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Precio",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 25,
-                vertical: 17.5,
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 45,
+            child: Stack(
               alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: AppColor.colorInput,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
+              children: [
+                const Text(
+                  "Crear propuesta",
+                  style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
-              ),
-              child: const Text(
-                "S/",
-                style: TextStyle(color: AppColor.txtBooking, fontSize: 17),
-              ),
-            ),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                    borderSide: BorderSide(
-                      color: AppColor.colorInput,
-                      width: 1.5,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12),
-                      bottomRight: Radius.circular(12),
-                    ),
-                    borderSide: BorderSide(
-                      color: AppColor.bgMsgUser,
-                      width: 1.5,
-                    ),
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          "Propuesta",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          "Describe detalladamente el servicio que ofrecerás",
-          style: TextStyle(color: AppColor.txtBooking),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _descripcionController,
-          maxLines: 6,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColor.colorInput,
-                width: 1.5,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColor.bgMsgUser,
-                width: 1.5,
-              ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 15),
-        ElevatedButton(
-          onPressed: () {
-            if (_controller.text.trim().isEmpty) {
-              showDialog(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      backgroundColor: AppColor.bgMsgClient,
-                      icon: const Icon(
-                        Icons.error_outline_outlined,
-                        color: Colors.red,
-                        size: 50,
+          const SizedBox(height: 20),
+          const Text(
+            "Precio",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 25,
+                  vertical: 17.5,
+                ),
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: AppColor.colorInput,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "S/",
+                  style: TextStyle(color: AppColor.txtBooking, fontSize: 17),
+                ),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  style: const TextStyle(color: Colors.white, fontSize: 18),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
                       ),
-                      title: const Text("Campo Obligatorio"),
-                      content: const Text(
-                        "Por favor ingresa un valor para el presupuesto.",
+                      borderSide: BorderSide(
+                        color: AppColor.colorInput,
+                        width: 1.5,
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: const Text("OK"),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                      borderSide: BorderSide(
+                        color: AppColor.bgMsgUser,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            "Propuesta",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Describe detalladamente el servicio que ofrecerás",
+            style: TextStyle(color: AppColor.txtBooking),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _descripcionController,
+            maxLines: 6,
+            style: const TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColor.colorInput,
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColor.bgMsgUser,
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          ElevatedButton(
+            onPressed: () {
+              if (_controller.text.trim().isEmpty) {
+                showDialog(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        backgroundColor: AppColor.bgMsgClient,
+                        icon: const Icon(
+                          Icons.error_outline_outlined,
+                          color: Colors.red,
+                          size: 50,
                         ),
-                      ],
-                    ),
-              );
-              return;
-            }
-            Navigator.of(context).pop({
-              "presupuesto": _controller.text,
-              "propuesta": _descripcionController.text,
-            });
-          },
-          child: const Text(
-            "Crear Propuesta",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+                        title: const Text("Campo Obligatorio"),
+                        content: const Text(
+                          "Por favor ingresa un valor para el presupuesto.",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                );
+                return;
+              }
+              Navigator.of(context).pop({
+                "presupuesto": _controller.text,
+                "propuesta": _descripcionController.text,
+              });
+            },
+            child: const Text(
+              "Crear Propuesta",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1088,17 +1115,18 @@ Future<Map<String, String>?> mostrarPropuesta(
 }) {
   return showDialog<Map<String, String>>(
     context: context,
-    barrierDismissible: true,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return Center(
         child: SingleChildScrollView(
-          child: AlertDialog(
-            backgroundColor: AppColor.bgContendeor,
+          child: Dialog(
+            backgroundColor: AppColor.bgCreate,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
             ),
-            content: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+            insetPadding: EdgeInsets.zero,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.95,
               child: InputPresupuesto(
                 initialValue: initialValue,
                 initialpropuesta: initialpropuesta,
