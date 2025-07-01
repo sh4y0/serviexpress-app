@@ -239,7 +239,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
         (serviceData.audios?.isNotEmpty ?? false);
 
     final double minSheetSize = hayMultimedia ? 0.30 : 0.3;
-    final double maxSheetSize = hayMultimedia ? 0.8 : 0.68;
+    final double maxSheetSize = hayMultimedia ? 0.8 : 0.63;
 
     final mediaQuery = MediaQuery.of(context);
     final double topPaddingHeight = 60.0 + 25.0 + mediaQuery.padding.top;
@@ -247,20 +247,6 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Transform.translate(
-            offset: const Offset(4, 0),
-            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          ),
-          style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
-        ),
-      ),
       body: Stack(
         children: [
           ValueListenableBuilder<Set<Polyline>>(
@@ -290,10 +276,43 @@ class _ProviderDetailsState extends State<ProviderDetails> {
             },
           ),
 
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 10,
+            child: InkWell(
+              onTap: () => Navigator.pop(context),
+              customBorder: const CircleBorder(),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: AppColor.bgBack,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 5,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Transform.translate(
+                  offset: const Offset(2, 0),
+                  child: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           DraggableScrollableSheet(
             initialChildSize: 0.30,
             minChildSize: minSheetSize,
-            maxChildSize: maxSheetSize, //mod 8
+            maxChildSize: maxSheetSize,
             builder: (context, scrollController) {
               return SafeArea(
                 top: true,
