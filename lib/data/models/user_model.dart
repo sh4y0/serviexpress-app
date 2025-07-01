@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:serviexpress_app/data/models/propuesta_model.dart';
 
 class UserModel {
   final String uid;
@@ -27,6 +28,7 @@ class UserModel {
   final bool isActive;
   final bool isAvailable;
   bool isCompleteProfile;
+  PropuestaModel? propuesta;
 
   UserModel({
     required this.uid,
@@ -54,7 +56,8 @@ class UserModel {
     this.signatureUrl,
     this.isActive = true,
     this.isAvailable = true,
-    this.isCompleteProfile = false
+    this.isCompleteProfile = false,
+    this.propuesta
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -90,7 +93,8 @@ class UserModel {
       signatureUrl: json['signatureUrl'] ?? '',
       isActive: json['isActive'] ?? true,
       isAvailable: json['isAvailable'] ?? true,
-      isCompleteProfile: json['isCompleteProfile'] ?? true
+      isCompleteProfile: json['isCompleteProfile'] ?? true,
+      propuesta: json['propuesta']
     );
   }
 
@@ -121,7 +125,68 @@ class UserModel {
       'signatureUrl': signatureUrl,
       'isActive': isActive,
       'isAvailable': isAvailable,
-      'isCompleteProfile': isCompleteProfile
+      'isCompleteProfile': isCompleteProfile,
+      'propuesta': propuesta
     };
   }
+
+  UserModel copyWith({
+  String? uid,
+  String? username,
+  String? email,
+  String? dni,
+  String? telefono,
+  String? nombres,
+  String? apellidoPaterno,
+  String? apellidoMaterno,
+  String? nombreCompleto,
+  DateTime? createdAt,
+  String? rol,
+  String? especialidad,
+  String? descripcion,
+  String? token,
+  double? latitud,
+  double? longitud,
+  String? imagenUrl,
+  double? calificacion,
+  List<dynamic>? resenias,
+  String? dniFrontImageUrl,
+  String? dniBackImageUrl,
+  String? criminalRecordUrl,
+  String? signatureUrl,
+  bool? isActive,
+  bool? isAvailable,
+  bool? isCompleteProfile,
+  PropuestaModel? propuesta,
+}) {
+  return UserModel(
+    uid: uid ?? this.uid,
+    username: username ?? this.username,
+    email: email ?? this.email,
+    dni: dni ?? this.dni,
+    telefono: telefono ?? this.telefono,
+    nombres: nombres ?? this.nombres,
+    apellidoPaterno: apellidoPaterno ?? this.apellidoPaterno,
+    apellidoMaterno: apellidoMaterno ?? this.apellidoMaterno,
+    nombreCompleto: nombreCompleto ?? this.nombreCompleto,
+    createdAt: createdAt ?? this.createdAt,
+    rol: rol ?? this.rol,
+    especialidad: especialidad ?? this.especialidad,
+    descripcion: descripcion ?? this.descripcion,
+    token: token ?? this.token,
+    latitud: latitud ?? this.latitud,
+    longitud: longitud ?? this.longitud,
+    imagenUrl: imagenUrl ?? this.imagenUrl,
+    calificacion: calificacion ?? this.calificacion,
+    resenias: resenias ?? this.resenias,
+    dniFrontImageUrl: dniFrontImageUrl ?? this.dniFrontImageUrl,
+    dniBackImageUrl: dniBackImageUrl ?? this.dniBackImageUrl,
+    criminalRecordUrl: criminalRecordUrl ?? this.criminalRecordUrl,
+    signatureUrl: signatureUrl ?? this.signatureUrl,
+    isActive: isActive ?? this.isActive,
+    isAvailable: isAvailable ?? this.isAvailable,
+    isCompleteProfile: isCompleteProfile ?? this.isCompleteProfile,
+    propuesta: propuesta ?? this.propuesta,
+  );
+}
 }

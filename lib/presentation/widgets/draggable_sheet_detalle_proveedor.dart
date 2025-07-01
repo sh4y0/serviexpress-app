@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
-import 'package:serviexpress_app/data/models/propuesta_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 
 class DraggableSheetDetalleProveedor extends StatefulWidget {
@@ -15,7 +15,6 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final Function(UserModel)? onProveedorAgregado;
   final UserModel? selectedProvider;
   final Function(bool) isProveedorAgregado;
-  final PropuestaModel? propuestaModel;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -29,7 +28,6 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.onProveedorAgregado,
     this.selectedProvider,
     required this.isProveedorAgregado,
-    required this.propuestaModel,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -291,48 +289,50 @@ class _DraggableSheetDetalleProveedorState
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          widget.selectedProvider!.nombres,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                              size: 16,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            widget.selectedProvider!.nombres,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${widget.selectedProvider!.calificacion}',
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 12,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 16,
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          widget
-                                                  .selectedProvider
-                                                  ?.descripcion ??
-                                              '',
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12,
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${widget.selectedProvider!.calificacion}',
+                                                style: const TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            widget
+                                                    .selectedProvider
+                                                    ?.descripcion ??
+                                                '',
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                     Container(
                                       width: 60,
@@ -348,7 +348,7 @@ class _DraggableSheetDetalleProveedorState
                                       ),
                                       child: Center(
                                         child: Text(
-                                          'S/.${widget.propuestaModel!.precio.toString()}',
+                                          'S/.${widget.selectedProvider?.propuesta?.precio.toString()}',
                                           style: const TextStyle(
                                             color: Color.fromRGBO(
                                               42,
@@ -502,10 +502,11 @@ class _DraggableSheetDetalleProveedorState
                                 child: FilledButton.icon(
                                   onPressed: () {
                                     //_agregarProveedor
-                                    Alerts.instance.showInfoAlert(
-                                      context,
-                                      "Aún no implementado",
-                                    );
+                                    // Alerts.instance.showInfoAlert(
+                                    //   context,
+                                    //   "Aún no implementado",
+                                    // );
+                                    Navigator.pushNamed(context, AppRoutes.showSuper);
                                   },
                                   icon: const Icon(
                                     Icons.add_box_rounded,

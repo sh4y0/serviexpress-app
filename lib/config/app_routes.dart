@@ -10,4 +10,5 @@ class AppRoutes {
   static const String providerDetails = '/provider_details';
   static const String locationPermissions = '/location_permissions';
   static const String cambioRol = '/cambio_rol';
+  static const String showSuper = '/show_super';
 }

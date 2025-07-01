@@ -16,6 +16,7 @@ import 'package:serviexpress_app/presentation/widgets/cambio_rol.dart';
 import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/location_permission.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
+import 'package:serviexpress_app/presentation/widgets/show_super.dart';
 import 'package:sizer/sizer.dart';
 
 class Serviexpress extends StatelessWidget {
@@ -59,13 +60,18 @@ class Serviexpress extends StatelessWidget {
                 return MaterialPageRoute(
                   builder: (context) => const Verification(),
                 );
+              case AppRoutes.showSuper:
+                return MaterialPageRoute(
+                  builder: (context) => const ShowSuper(),
+                );
               case AppRoutes.chat:
                 return MaterialPageRoute(
                   builder: (context) => const ChatScreen(),
                 );
               case AppRoutes.completeProfile:
                 final userData = settings.arguments as UserModel;
-                return MaterialPageRoute(builder: (context) => CuentanosScreen(data: userData),
+                return MaterialPageRoute(
+                  builder: (context) => CuentanosScreen(data: userData),
                 );
               case AppRoutes.providerDetails:
                 final args = settings.arguments as Map<String, dynamic>;

@@ -144,8 +144,6 @@ class _HomePageContentState extends State<HomePageContent>
       ValueNotifier([]);
   Timer? _screenPositionUpdateTimer;
 
-  final ValueNotifier<PropuestaModel?> _propuestaProvider = ValueNotifier(null);
-
   @override
   void initState() {
     super.initState();
@@ -570,7 +568,9 @@ class _HomePageContentState extends State<HomePageContent>
           onTap: () {
             //_selectedProviderNotifier.value = provider;
             if (hasPropuesta) {
-              _selectedProviderNotifier.value = provider;
+              final updatedProvider = provider.copyWith(propuesta: propuesta);
+              _selectedProviderNotifier.value = updatedProvider;
+              _selectedProviderNotifier.value?.propuesta = propuesta;
               _isSheetVisibleDetalleProveedorNotifier.value = true;
             }
             _currentlyOpenInfoWindowMarkerId = markerId;
@@ -579,7 +579,6 @@ class _HomePageContentState extends State<HomePageContent>
       );
 
       if (hasPropuesta) {
-        _propuestaProvider.value = propuesta;
         markersWithProposals.add(
           MarkerWithProposal(
             markerId: 'provider_${provider.uid}',
@@ -709,7 +708,6 @@ class _HomePageContentState extends State<HomePageContent>
       );
 
       if (confirmarCambio != true) return;
-      _propuestaProvider.value = null;
       UserPreferences.activeServiceId.value = null;
       UserPreferences.activeServiceId.removeListener(_serviceIdListener);
       _propuestaSubscription?.cancel();
@@ -1836,25 +1834,19 @@ class _HomePageContentState extends State<HomePageContent>
                               child: ValueListenableBuilder<UserModel?>(
                                 valueListenable: _selectedProviderNotifier,
                                 builder: (context, selectedProvider, _) {
-                                  return ValueListenableBuilder(
-                                    valueListenable: _propuestaProvider,
-                                    builder: (context, propuesta, _) {
-                                      return DraggableSheetDetalleProveedor(
-                                        targetInitialSize: 0.55,
-                                        minSheetSize: 0.0,
-                                        maxSheetSize: 0.95,
-                                        snapPoints: const [0.0, 0.55, 0.95],
-                                        onDismiss:
-                                            _handleSheetDismissedDetalleProveedor,
-                                        //onProveedorAgregado: _agregarProveedor,
-                                        selectedProvider: selectedProvider,
-                                        isProveedorAgregado:
-                                            (isAgregado) =>
-                                                _isProveedorAgregadoNotifier
-                                                    .value = isAgregado,
-                                        propuestaModel: propuesta,
-                                      );
-                                    },
+                                  return DraggableSheetDetalleProveedor(
+                                    targetInitialSize: 0.55,
+                                    minSheetSize: 0.0,
+                                    maxSheetSize: 0.95,
+                                    snapPoints: const [0.0, 0.55, 0.95],
+                                    onDismiss:
+                                        _handleSheetDismissedDetalleProveedor,
+                                    //onProveedorAgregado: _agregarProveedor,
+                                    selectedProvider: selectedProvider,
+                                    isProveedorAgregado:
+                                        (isAgregado) =>
+                                            _isProveedorAgregadoNotifier
+                                                .value = isAgregado,
                                   );
                                 },
                               ),
