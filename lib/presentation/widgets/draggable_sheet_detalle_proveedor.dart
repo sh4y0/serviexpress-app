@@ -17,6 +17,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final UserModel? selectedProvider;
   final Function(bool)? isProveedorAgregado;
   final LatLng? clientPosition;
+  final bool showPropuesta;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -31,6 +32,7 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.selectedProvider,
     this.isProveedorAgregado,
     this.clientPosition,
+    this.showPropuesta = true,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -218,357 +220,431 @@ class _DraggableSheetDetalleProveedorState
                   topRight: Radius.circular(24),
                 ),
               ),
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 13,
-                        horizontal: 26.5,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 29.5),
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                              color: Color.fromRGBO(117, 148, 255, 1),
-                              shape: BoxShape.rectangle,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 13,
+                              horizontal: 26.5,
                             ),
-                            width: 154,
-                            height: 4,
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Color(0xFF1B1B2E),
-                                ),
-                                child: ClipOval(
-                                  child: SizedBox(
-                                    width: 60,
-                                    height: 60,
-                                    child:
-                                        widget.selectedProvider!.imagenUrl !=
-                                                null
-                                            ? FadeInImage.assetNetwork(
-                                              placeholder:
-                                                  "assets/images/avatar.png",
-                                              image:
-                                                  widget
-                                                      .selectedProvider!
-                                                      .imagenUrl!,
-                                              fit: BoxFit.cover,
-                                              imageErrorBuilder: (
-                                                context,
-                                                error,
-                                                stackTrace,
-                                              ) {
-                                                return Image.asset(
-                                                  "assets/images/avatar.png",
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            )
-                                            : Image.asset(
-                                              "assets/images/avatar.png",
-                                              fit: BoxFit.cover,
-                                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(bottom: 29.5),
+                                    decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      color: Color.fromRGBO(117, 148, 255, 1),
+                                      shape: BoxShape.rectangle,
+                                    ),
+                                    width: 154,
+                                    height: 4,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            widget.selectedProvider!.nombres,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
-                                                size: 16,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                '${widget.selectedProvider!.calificacion}',
-                                                style: const TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            widget
-                                                    .selectedProvider
-                                                    ?.descripcion ??
-                                                '',
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                     Container(
                                       width: 60,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                        color: const Color.fromRGBO(
-                                          236,
-                                          244,
-                                          255,
-                                          1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
+                                      height: 60,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF1B1B2E),
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          'S/.${widget.selectedProvider?.propuesta?.precio.toString()}',
-                                          style: const TextStyle(
-                                            color: Color.fromRGBO(
-                                              42,
-                                              52,
-                                              216,
-                                              1,
-                                            ),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                      child: ClipOval(
+                                        child: SizedBox(
+                                          width: 60,
+                                          height: 60,
+                                          child:
+                                              widget
+                                                          .selectedProvider!
+                                                          .imagenUrl !=
+                                                      null
+                                                  ? FadeInImage.assetNetwork(
+                                                    placeholder:
+                                                        "assets/images/avatar.png",
+                                                    image:
+                                                        widget
+                                                            .selectedProvider!
+                                                            .imagenUrl!,
+                                                    fit: BoxFit.cover,
+                                                    imageErrorBuilder: (
+                                                      context,
+                                                      error,
+                                                      stackTrace,
+                                                    ) {
+                                                      return Image.asset(
+                                                        "assets/images/avatar.png",
+                                                        fit: BoxFit.cover,
+                                                      );
+                                                    },
+                                                  )
+                                                  : Image.asset(
+                                                    "assets/images/avatar.png",
+                                                    fit: BoxFit.cover,
+                                                  ),
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                                    const SizedBox(width: 12),
 
-                          const SizedBox(height: 16),
-
-                          //const SizedBox(height: 24),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Reseñas',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 3),
-                              Text(
-                                '(120+ review)',
-                                style: TextStyle(
-                                  color: Color(0xff3d4d8a),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          SizedBox(
-                            height: 140,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: reviews.length,
-                              separatorBuilder:
-                                  (context, index) => const SizedBox(width: 8),
-                              itemBuilder: (context, index) {
-                                final review = reviews[index];
-                                return Container(
-                                  width: 280,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0c0d23),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
+                                    Expanded(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.grey,
-                                            ),
-                                            child: ClipOval(
-                                              child: Image.asset(
-                                                review["avatar"],
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  review["name"],
+                                                  widget
+                                                      .selectedProvider!
+                                                      .nombres,
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14,
+                                                    fontSize: 18,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
+                                                const SizedBox(height: 4),
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.star,
+                                                      color: Colors.amber,
+                                                      size: 16,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      '${widget.selectedProvider!.calificacion}',
+                                                      style: const TextStyle(
+                                                        color: Colors.white70,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
                                                 Text(
-                                                  review["subtitle"],
+                                                  widget
+                                                          .selectedProvider
+                                                          ?.descripcion ??
+                                                      '',
                                                   style: const TextStyle(
-                                                    color: AppColor.textInput,
+                                                    color: Colors.white70,
                                                     fontSize: 12,
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
-
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
-                                                size: 16,
+                                          Container(
+                                            width: 60,
+                                            height: 30,
+                                            decoration: BoxDecoration(
+                                              color: const Color.fromRGBO(
+                                                236,
+                                                244,
+                                                255,
+                                                1,
                                               ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                review["rating"].toString(),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                'S/.${widget.selectedProvider?.propuesta?.precio.toString()}',
                                                 style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: Color.fromRGBO(
+                                                    42,
+                                                    52,
+                                                    216,
+                                                    1,
+                                                  ),
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 12),
-
+                                    ),
+                                  ],
+                                ),
+                                if (widget.showPropuesta) ...[
+                                  const SizedBox(height: 16),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Propuesta",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                       Text(
-                                        review["comment"],
+                                        widget
+                                            .selectedProvider!
+                                            .propuesta!
+                                            .descripcion,
                                         style: const TextStyle(
-                                          color: AppColor.textInput,
+                                          color: AppColor.txtDetalle,
                                           fontSize: 14,
-                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        maxLines: 6,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                const SizedBox(height: 16),
+
+                                //const SizedBox(height: 24),
+                                const Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Reseñas',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 3),
+                                    Text(
+                                      '(120+ review)',
+                                      style: TextStyle(
+                                        color: Color(0xff3d4d8a),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.65,
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(height: 10),
+                                      Expanded(
+                                        child: ListView.separated(
+                                          scrollDirection: Axis.vertical,
+                                          itemCount: reviews.length,
+                                          separatorBuilder:
+                                              (context, index) =>
+                                                  const SizedBox(height: 8),
+                                          itemBuilder: (context, index) {
+                                            final review = reviews[index];
+                                            return Container(
+                                              padding: const EdgeInsets.all(12),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF0c0d23),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 40,
+                                                        height: 40,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                              shape:
+                                                                  BoxShape
+                                                                      .circle,
+                                                              color:
+                                                                  Colors.grey,
+                                                            ),
+                                                        child: ClipOval(
+                                                          child: Image.asset(
+                                                            review["avatar"],
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 12),
+
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              review["name"],
+                                                              style: const TextStyle(
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                            Text(
+                                                              review["subtitle"],
+                                                              style: const TextStyle(
+                                                                color:
+                                                                    AppColor
+                                                                        .textInput,
+                                                                fontSize: 12,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+
+                                                      Row(
+                                                        children: [
+                                                          const Icon(
+                                                            Icons.star,
+                                                            color: Colors.amber,
+                                                            size: 16,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          Text(
+                                                            review["rating"]
+                                                                .toString(),
+                                                            style:
+                                                                const TextStyle(
+                                                                  color:
+                                                                      Colors
+                                                                          .white,
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 12),
+
+                                                  Text(
+                                                    review["comment"],
+                                                    style: const TextStyle(
+                                                      color: AppColor.textInput,
+                                                      fontSize: 14,
+                                                      fontStyle:
+                                                          FontStyle.italic,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              },
+                                ),
+                                const SizedBox(height: 30),
+                              ],
                             ),
                           ),
-
-                          const SizedBox(height: 30),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: FilledButton.icon(
-                                  onPressed: () {
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      AppRoutes.showSuper,
-                                      arguments: {
-                                        'selectedProvider' : widget.selectedProvider,
-                                        'clientPosition': widget.clientPosition
-                                        },
-                                        
-                                    );
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26.5,
+                      vertical: 18,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {
+                              if (widget.showPropuesta) {
+                                Navigator.pushNamed(context, AppRoutes.chat);
+                              } else {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.showSuper,
+                                  arguments: {
+                                    'selectedProvider': widget.selectedProvider,
+                                    'clientPosition': widget.clientPosition,
                                   },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3645f5),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  label: const Text(
-                                    'Aceptar',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3645f5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: FilledButton.icon(
-                                  onPressed: () {
-                                    // Navigator.pushNamed(
-                                    //   context,
-                                    //   AppRoutes.chat,
-                                    // );
-                                    Alerts.instance.showInfoAlert(
-                                      context,
-                                      "Aún no implementado xd",
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  label: const Text(
-                                    'No me interesa',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
+                            ),
+                            label: Text(
+                              widget.showPropuesta ? "Ir al chat" : "Aceptar",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
-                            ],
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () {                              
+                              Alerts.instance.showInfoAlert(
+                                context,
+                                "Aún no implementado xd",
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                141,
+                                93,
+                                93,
+                                93,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            label: Text(
+                              widget.showPropuesta
+                                  ? "Cancelar"
+                                  : "No me interesa",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
