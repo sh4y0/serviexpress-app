@@ -11,6 +11,7 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
+import 'package:serviexpress_app/presentation/widgets/keyboard_dismisser.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class _AppIcons {
@@ -191,113 +192,120 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   @override
   Widget build(BuildContext context) {
     _listenToAuthViewModel();
+    return KeyboardDismisser(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
+          child: FutureBuilder<void>(
+            future: _preloadFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                );
+              }
+              if (snapshot.hasError) {
+                return const Center(
+                  child: Text(
+                    "Error al cargar recursos",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                );
+              }
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColor.backgroudGradient),
-        child: FutureBuilder<void>(
-          future: _preloadFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              );
-            }
-            if (snapshot.hasError) {
-              return const Center(
-                child: Text(
-                  "Error al cargar recursos",
-                  style: TextStyle(color: Colors.white),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 65,
+                  horizontal: 24,
+                ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _isLogin,
+                  builder: (context, isLogin, _) {
+                    return Column(
+                      children: [
+                        _AuthHeader(
+                          isLogin: isLogin,
+                          onToggle: _toggleAuthMode,
+                        ),
+                        const SizedBox(height: 35),
+                        AnimatedCrossFade(
+                          crossFadeState:
+                              isLogin
+                                  ? CrossFadeState.showFirst
+                                  : CrossFadeState.showSecond,
+                          firstChild: ValueListenableBuilder<bool>(
+                            valueListenable: _obscurePasswordLogin,
+                            builder: (context, obscurePasswordLogin, _) {
+                              return _LoginFormWidget(
+                                formKey: _formLoginKey,
+                                emailController: _emailLoginController,
+                                passwordController: _passwordLoginController,
+                                obscurePassword: obscurePasswordLogin,
+                                onTogglePasswordVisibility:
+                                    () =>
+                                        _obscurePasswordLogin.value =
+                                            !_obscurePasswordLogin.value,
+                                onLogin: _performLogin,
+                                onForgotPassword: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.recoveryPassword,
+                                  );
+                                },
+                                onSwitchToSignup: _toggleAuthMode,
+                                ref: ref,
+                              );
+                            },
+                          ),
+                          secondChild: ValueListenableBuilder<bool>(
+                            valueListenable: _obscurePasswordSignup,
+                            builder: (context, obscurePasswordSignup, _) {
+                              return _SignupFormWidget(
+                                formKey: _formSignupKey,
+                                usuarioController: _usuarioSignupController,
+                                dniController: _dniSignupController,
+                                emailController: _emailSignupController,
+                                passwordController: _passwordSignupController,
+                                obscurePassword: obscurePasswordSignup,
+                                onTogglePasswordVisibility:
+                                    () =>
+                                        _obscurePasswordSignup.value =
+                                            !_obscurePasswordSignup.value,
+                                onSignup: _performSignup,
+                                onSwitchToLogin: _toggleAuthMode,
+                                ref: ref,
+                              );
+                            },
+                          ),
+                          duration: const Duration(milliseconds: 500),
+                          firstCurve: Curves.easeOutQuart,
+                          secondCurve: Curves.easeInQuart,
+                          sizeCurve: Curves.easeInOutCubic,
+                          layoutBuilder: (
+                            topChild,
+                            topKey,
+                            bottomChild,
+                            bottomKey,
+                          ) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Positioned(key: bottomKey, child: bottomChild),
+                                Positioned(key: topKey, child: topChild),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               );
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 65, horizontal: 24),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: _isLogin,
-                builder: (context, isLogin, _) {
-                  return Column(
-                    children: [
-                      _AuthHeader(isLogin: isLogin, onToggle: _toggleAuthMode),
-                      const SizedBox(height: 35),
-                      AnimatedCrossFade(
-                        crossFadeState:
-                            isLogin
-                                ? CrossFadeState.showFirst
-                                : CrossFadeState.showSecond,
-                        firstChild: ValueListenableBuilder<bool>(
-                          valueListenable: _obscurePasswordLogin,
-                          builder: (context, obscurePasswordLogin, _) {
-                            return _LoginFormWidget(
-                              formKey: _formLoginKey,
-                              emailController: _emailLoginController,
-                              passwordController: _passwordLoginController,
-                              obscurePassword: obscurePasswordLogin,
-                              onTogglePasswordVisibility:
-                                  () =>
-                                      _obscurePasswordLogin.value =
-                                          !_obscurePasswordLogin.value,
-                              onLogin: _performLogin,
-                              onForgotPassword: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.recoveryPassword,
-                                );
-                              },
-                              onSwitchToSignup: _toggleAuthMode,
-                              ref: ref,
-                            );
-                          },
-                        ),
-                        secondChild: ValueListenableBuilder<bool>(
-                          valueListenable: _obscurePasswordSignup,
-                          builder: (context, obscurePasswordSignup, _) {
-                            return _SignupFormWidget(
-                              formKey: _formSignupKey,
-                              usuarioController: _usuarioSignupController,
-                              dniController: _dniSignupController,
-                              emailController: _emailSignupController,
-                              passwordController: _passwordSignupController,
-                              obscurePassword: obscurePasswordSignup,
-                              onTogglePasswordVisibility:
-                                  () =>
-                                      _obscurePasswordSignup.value =
-                                          !_obscurePasswordSignup.value,
-                              onSignup: _performSignup,
-                              onSwitchToLogin: _toggleAuthMode,
-                              ref: ref,
-                            );
-                          },
-                        ),
-                        duration: const Duration(milliseconds: 500),
-                        firstCurve: Curves.easeOutQuart,
-                        secondCurve: Curves.easeInQuart,
-                        sizeCurve: Curves.easeInOutCubic,
-                        layoutBuilder: (
-                          topChild,
-                          topKey,
-                          bottomChild,
-                          bottomKey,
-                        ) {
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Positioned(key: bottomKey, child: bottomChild),
-                              Positioned(key: topKey, child: topChild),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
     );
