@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
@@ -14,7 +15,8 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
   final Curve entryAnimationCurve;
   final Function(UserModel)? onProveedorAgregado;
   final UserModel? selectedProvider;
-  final Function(bool) isProveedorAgregado;
+  final Function(bool)? isProveedorAgregado;
+  final LatLng? clientPosition;
 
   const DraggableSheetDetalleProveedor({
     super.key,
@@ -27,7 +29,8 @@ class DraggableSheetDetalleProveedor extends StatefulWidget {
     this.entryAnimationCurve = Curves.easeOutCubic,
     this.onProveedorAgregado,
     this.selectedProvider,
-    required this.isProveedorAgregado,
+    this.isProveedorAgregado,
+    this.clientPosition,
   });
   @override
   State<DraggableSheetDetalleProveedor> createState() =>
@@ -501,17 +504,16 @@ class _DraggableSheetDetalleProveedorState
                               Expanded(
                                 child: FilledButton.icon(
                                   onPressed: () {
-                                    //_agregarProveedor
-                                    // Alerts.instance.showInfoAlert(
-                                    //   context,
-                                    //   "Aún no implementado",
-                                    // );
-                                    Navigator.pushNamed(context, AppRoutes.showSuper);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      AppRoutes.showSuper,
+                                      arguments: {
+                                        'selectedProvider' : widget.selectedProvider,
+                                        'clientPosition': widget.clientPosition
+                                        },
+                                        
+                                    );
                                   },
-                                  icon: const Icon(
-                                    Icons.add_box_rounded,
-                                    color: Colors.white,
-                                  ),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3645f5),
                                     padding: const EdgeInsets.symmetric(

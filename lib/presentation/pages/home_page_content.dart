@@ -553,7 +553,7 @@ class _HomePageContentState extends State<HomePageContent>
 
     for (var provider in _currentProvidersNotifier.value) {
       final markerId = MarkerId('provider_${provider.uid}');
-      final propuesta = _propuestaPorWorker[provider.uid];   
+      final propuesta = _propuestaPorWorker[provider.uid];
       final hasPropuesta = propuesta != null;
 
       newMarkers.add(
@@ -1834,19 +1834,25 @@ class _HomePageContentState extends State<HomePageContent>
                               child: ValueListenableBuilder<UserModel?>(
                                 valueListenable: _selectedProviderNotifier,
                                 builder: (context, selectedProvider, _) {
-                                  return DraggableSheetDetalleProveedor(
-                                    targetInitialSize: 0.55,
-                                    minSheetSize: 0.0,
-                                    maxSheetSize: 0.95,
-                                    snapPoints: const [0.0, 0.55, 0.95],
-                                    onDismiss:
-                                        _handleSheetDismissedDetalleProveedor,
-                                    //onProveedorAgregado: _agregarProveedor,
-                                    selectedProvider: selectedProvider,
-                                    isProveedorAgregado:
-                                        (isAgregado) =>
-                                            _isProveedorAgregadoNotifier
-                                                .value = isAgregado,
+                                  return ValueListenableBuilder(
+                                    valueListenable: _currentPositionNotifier,
+                                    builder: (context, positionClient, _) {
+                                      return DraggableSheetDetalleProveedor(
+                                        targetInitialSize: 0.55,
+                                        minSheetSize: 0.0,
+                                        maxSheetSize: 0.95,
+                                        snapPoints: const [0.0, 0.55, 0.95],
+                                        onDismiss:
+                                            _handleSheetDismissedDetalleProveedor,
+                                        //onProveedorAgregado: _agregarProveedor,
+                                        selectedProvider: selectedProvider,
+                                        clientPosition: positionClient,
+                                        isProveedorAgregado:
+                                            (isAgregado) =>
+                                                _isProveedorAgregadoNotifier
+                                                    .value = isAgregado,
+                                      );
+                                    },
                                   );
                                 },
                               ),
