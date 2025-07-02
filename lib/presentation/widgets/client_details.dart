@@ -268,6 +268,7 @@ class _ClientDetailsState extends State<ClientDetails> {
             snapPoints: const [0.52, 0.95],
             selectedProvider: widget.provider,
             clientPosition: widget.clientPosition,
+            showPropuesta: true,
           ),
         ],
       ),
