@@ -144,6 +144,8 @@ class _HomePageContentState extends State<HomePageContent>
       ValueNotifier([]);
   Timer? _screenPositionUpdateTimer;
 
+  final ValueNotifier<bool> _shouldShowProposalMarker = ValueNotifier(true);
+
   @override
   void initState() {
     super.initState();
@@ -843,6 +845,7 @@ class _HomePageContentState extends State<HomePageContent>
     if (!_isMapBeingMoved) {
       _isMapBeingMoved = true;
       _shouldShowSheet.value = false;
+      _shouldShowProposalMarker.value = false;
       _startScreenPositionUpdates();
     }
     _mapInteractionTimer?.cancel();
@@ -875,6 +878,7 @@ class _HomePageContentState extends State<HomePageContent>
       if (mounted) {
         _isMapBeingMoved = false;
         _shouldShowSheet.value = true;
+        _shouldShowProposalMarker.value = true;
       }
     });
   }
@@ -1409,35 +1413,43 @@ class _HomePageContentState extends State<HomePageContent>
                 },
               ),
 
-              ValueListenableBuilder<List<MarkerWithProposal>>(
-                valueListenable: _markersWithProposalsNotifier,
-                builder: (context, markersWithProposals, _) {
-                  return Stack(
-                    children:
-                        markersWithProposals
-                            .where((marker) => marker.screenPosition != null)
-                            .map(
-                              (marker) => Positioned(
-                                left: marker.screenPosition!.dx - 30,
-                                top: marker.screenPosition!.dy - 12,
-                                child: IgnorePointer(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      ProposalMarkerWidget(
-                                        price: marker.price,
-                                        rating: marker.rating,
+              ValueListenableBuilder<bool>(
+                valueListenable: _shouldShowProposalMarker,
+                builder: (context, showProposalMarker, child) {
+                  if (!showProposalMarker) return const SizedBox.shrink();
+                  return ValueListenableBuilder<List<MarkerWithProposal>>(
+                    valueListenable: _markersWithProposalsNotifier,
+                    builder: (context, markersWithProposals, _) {
+                      return Stack(
+                        children:
+                            markersWithProposals
+                                .where(
+                                  (marker) => marker.screenPosition != null,
+                                )
+                                .map(
+                                  (marker) => Positioned(
+                                    left: marker.screenPosition!.dx - 30,
+                                    top: marker.screenPosition!.dy - 12,
+                                    child: IgnorePointer(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ProposalMarkerWidget(
+                                            price: marker.price,
+                                            rating: marker.rating,
+                                          ),
+                                          CustomPaint(
+                                            size: const Size(20, 15),
+                                            painter: BalloonTailPainter(),
+                                          ),
+                                        ],
                                       ),
-                                      CustomPaint(
-                                        size: const Size(20, 15),
-                                        painter: BalloonTailPainter(),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            )
-                            .toList(),
+                                )
+                                .toList(),
+                      );
+                    },
                   );
                 },
               ),
