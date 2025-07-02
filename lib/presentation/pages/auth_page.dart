@@ -44,7 +44,8 @@ class SvgCache {
 }
 
 class AuthPage extends ConsumerStatefulWidget {
-  const AuthPage({super.key});
+  final bool startWithLogin;
+  const AuthPage({super.key, this.startWithLogin = true});
 
   @override
   ConsumerState<AuthPage> createState() => _AuthPageState();
@@ -65,11 +66,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
   late Future<void> _preloadFuture;
 
-  final ValueNotifier<bool> _isLogin = ValueNotifier<bool>(true);
+  late final ValueNotifier<bool> _isLogin;
 
   @override
   void initState() {
     super.initState();
+    _isLogin = ValueNotifier<bool>(widget.startWithLogin);
     _preloadFuture = Future.wait([MapStyleLoader.loadStyle(), _precacheSvgs()]);
   }
 
