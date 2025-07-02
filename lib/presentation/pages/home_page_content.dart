@@ -1850,6 +1850,7 @@ class _HomePageContentState extends State<HomePageContent>
                                     valueListenable: _currentPositionNotifier,
                                     builder: (context, positionClient, _) {
                                       return DraggableSheetDetalleProveedor(
+                                        showPropuesta: false,
                                         targetInitialSize: 0.55,
                                         minSheetSize: 0.0,
                                         maxSheetSize: 0.95,
