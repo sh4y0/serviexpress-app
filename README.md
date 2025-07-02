@@ -161,10 +161,13 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
 
 ## Estado del Proyecto
 
-En desarrollo activo
+> En desarrollo activo
+
 Próximas funcionalidades:
 
-* Mejora de la verificación del Trabajador
+* Mejora del diseño y experiencia visual de la aplicación.
+* Implementación del flujo de aceptación de servicios por parte del cliente.
+* Incorporación de un sistema de reseñas y calificaciones al finalizar un servicio.
 
 ---
 
@@ -176,6 +179,6 @@ Queda estrictamente prohibido el uso, copia, modificación, redistribución o ex
 
 Para obtener permisos especiales o licencias de uso, por favor contacta directamente con los autores.
 
-Para más información, contáctanos a: serviexpressdev@gmail.com
+Para más información, contáctanos a: **[serviexpressdev@gmail.com](mailto:serviexpressdev@gmail.com)**
 
 ---

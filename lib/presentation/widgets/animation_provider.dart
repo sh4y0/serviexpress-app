@@ -7,7 +7,7 @@ class AnimationProvider extends StatefulWidget {
   final bool hasLocation;
 
   const AnimationProvider({
-    super.key, 
+    super.key,
     required this.showAnimation,
     required this.hasLocation,
   });
@@ -124,7 +124,7 @@ class _AnimationProviderState extends State<AnimationProvider>
     return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.access_time_filled, size: 150, color: Colors.orangeAccent),
+        Icon(Icons.visibility_off_rounded, size: 200, color: Color(0xFF454A70)),
         SizedBox(height: 20),
         Text(
           "Activa tu disponibilidad",
@@ -149,16 +149,12 @@ class _AnimationProviderState extends State<AnimationProvider>
   }
 
   Widget buildNotActiveLocation() {
-    return Column(
+    return const Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.location_disabled_rounded,
-          size: 150,
-          color: Colors.grey[700],
-        ),
-        const SizedBox(height: 20),
-        const Text(
+        Icon(Icons.location_off_rounded, size: 200, color: Color(0xFF454A70)),
+        SizedBox(height: 20),
+        Text(
           "Tu ubicación esta desactivada",
           style: TextStyle(
             color: Colors.white,
@@ -166,8 +162,8 @@ class _AnimationProviderState extends State<AnimationProvider>
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 10),
-        const Text(
+        SizedBox(height: 10),
+        Text(
           "actívala para recibir solicitudes",
           style: TextStyle(
             color: Colors.white70,
