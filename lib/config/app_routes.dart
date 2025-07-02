@@ -11,4 +11,6 @@ class AppRoutes {
   static const String locationPermissions = '/location_permissions';
   static const String cambioRol = '/cambio_rol';
   static const String showSuper = '/show_super';
+  static const String clientDetails = '/client_details';
+
 }

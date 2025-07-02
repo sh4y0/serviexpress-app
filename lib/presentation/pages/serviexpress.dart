@@ -13,6 +13,7 @@ import 'package:serviexpress_app/presentation/pages/home_provider.dart';
 import 'package:serviexpress_app/presentation/pages/start_page.dart';
 import 'package:serviexpress_app/presentation/pages/verification.dart';
 import 'package:serviexpress_app/presentation/widgets/cambio_rol.dart';
+import 'package:serviexpress_app/presentation/widgets/client_details.dart';
 import 'package:serviexpress_app/presentation/widgets/cuentanos_screen.dart';
 import 'package:serviexpress_app/presentation/widgets/location_permission.dart';
 import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
@@ -61,8 +62,15 @@ class Serviexpress extends StatelessWidget {
                   builder: (context) => const Verification(),
                 );
               case AppRoutes.showSuper:
+                final args = settings.arguments as Map<String, dynamic>;
+                final provider = args['selectedProvider'] as UserModel;
+                final clientPosition = args['clientPosition'] as LatLng?;
                 return MaterialPageRoute(
-                  builder: (context) => const ShowSuper(),
+                  builder:
+                      (context) => ShowSuper(
+                        provider: provider,
+                        clientPosition: clientPosition,
+                      ),
                 );
               case AppRoutes.chat:
                 return MaterialPageRoute(
@@ -84,6 +92,19 @@ class Serviexpress extends StatelessWidget {
                         service: service,
                         mapStyle: mapStyle,
                         position: position,
+                      ),
+                );
+              case AppRoutes.clientDetails:
+                final args = settings.arguments as Map<String, dynamic>;
+                final mapStyle = args['mapStyle'] as String;
+                final provider = args['selectedProvider'] as UserModel;
+                final clientPosition = args['clientPosition'] as LatLng?;
+                return MaterialPageRoute(
+                  builder:
+                      (context) => ClientDetails(
+                        clientPosition: clientPosition,
+                        mapStyle: mapStyle,
+                        provider: provider,
                       ),
                 );
               case AppRoutes.cambioRol:
