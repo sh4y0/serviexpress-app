@@ -41,7 +41,7 @@ class ProposalMarkerWidget extends StatelessWidget {
                 rating,
                 style: const TextStyle(
                   color: Colors.black,
-                  fontSize: 8,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                 ),
               ),
