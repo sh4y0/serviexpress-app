@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "970897771269-02i3b8n4mkhj7i2qdamdh9pf2p546ri1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "212dd7269108034c3fb2aacfabab810e315fd963"
+          }
+        },
+        {
           "client_id": "970897771269-1jlmgkl2s8p2hfhv7ambj642j35o0lu0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -30,11 +38,43 @@
           }
         },
         {
+          "client_id": "970897771269-a7pku3gv6i02ha4lfbgjl7m0b5irsncc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "a19c736c56b7bfb46f041ac223d89dddd374d801"
+          }
+        },
+        {
+          "client_id": "970897771269-g75dfph6q6ng7g7oft4djsmml1dj82hg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "ce3fd762b7331c065a3edd5085c51f1251585206"
+          }
+        },
+        {
+          "client_id": "970897771269-jognf02j2jlhrcmu6aupo73tk6ushu4l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "2c60e003a4c9908eed8bceb12f028ea74ab7fb43"
+          }
+        },
+        {
           "client_id": "970897771269-qpn0g0rtmcubd40a5s6aphjvg97h9g6j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.serviexpress_app",
             "certificate_hash": "038e7d611b4fd21bb19e7c891b38fa3f48e474d4"
+          }
+        },
+        {
+          "client_id": "970897771269-rvva5d3cnkkn5m2kolsodlcf31mfgo7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "990c6a72c34041d20d38ca9e5baa34566356d644"
           }
         },
         {
