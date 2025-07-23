@@ -133,10 +133,10 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
         <a href="https://github.com/sh4y0" target="_blank">
           <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
         </a>
-        <a href="#" target="_blank">
+        <a href="https://www.linkedin.com/in/jahir-gutierrez/" target="_blank">
           <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
         </a>
-        <a href="#" target="_blank">
+        <a href="https://www.instagram.com/rodri.9726" target="_blank">
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>
@@ -146,6 +146,57 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
           <sub><b>Jefferson Gonzales</b></sub><br>
         </a><br />
         <a href="https://github.com/Jefferson-Gonzales" target="_blank">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
+        </a>
+        <a href="https://www.linkedin.com/in/jefferson-gonzales-polo-621716310/" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
+        </a>
+        <a href="#" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <br/>
+  <table cellspacing="50">
+    <tr>
+      <td align="center">
+        <a href="https://github.com/JairGZZ" target="_blank">
+          <img src="https://github.com/JairGZZ.png" width="100px;" alt="Jair Gonzalez"/><br />
+          <sub><b>Jair Gonzalez</b></sub><br>
+        </a><br />
+        <a href="https://github.com/JairGZZ" target="_blank">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
+        </a>
+        <a href="#" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
+        </a>
+        <a href="https://www.instagram.com/jairgz_/" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/https-michi" target="_blank">
+          <img src="https://github.com/https-michi.png" width="100px;" alt="Miguel Sullcapuma"/><br />
+          <sub><b>José Sullcapuma</b></sub><br>
+        </a><br />
+        <a href="https://github.com/https-michi" target="_blank">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
+        </a>
+        <a href="https://www.linkedin.com/in/jose-sullca-b253b3318/" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
+        </a>
+        <a href="https://www.instagram.com/miichi_u" target="_blank">
+          <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="https://github.com/DavidGrados21" target="_blank">
+          <img src="https://github.com/DavidGrados21.png" width="100px;" alt="David Grados"/><br />
+          <sub><b>David Grados</b></sub><br>
+        </a><br />
+        <a href="https://github.com/DavidGrados21" target="_blank">
           <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
         </a>
         <a href="#" target="_blank">
@@ -161,13 +212,7 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
 
 ## Estado del Proyecto
 
-> En desarrollo activo
-
-Próximas funcionalidades:
-
-* Mejora del diseño y experiencia visual de la aplicación.
-* Implementación del flujo de aceptación de servicios por parte del cliente.
-* Incorporación de un sistema de reseñas y calificaciones al finalizar un servicio.
+> En proceso de refactorización.
 
 ---
 
