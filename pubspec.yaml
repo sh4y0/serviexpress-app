@@ -62,7 +62,7 @@ dependencies:
   firebase_remote_config: ^5.4.3
   shared_preferences: ^2.5.3
   path: ^1.9.1
-  google_sign_in: ^7.1.1
+  google_sign_in: ^6.3.0
   flutter_facebook_auth: ^7.1.2
   firebase_messaging: ^15.2.6
   flutter_local_notifications: ^19.2.1
