@@ -21,8 +21,7 @@ class GoogleMapsService {
           final String encodedPolyline =
               jsonResponse['routes'][0]['overview_polyline']['points'];
 
-          final polylinePoints = PolylinePoints();
-          final List<PointLatLng> decodedPoints = polylinePoints.decodePolyline(
+          final List<PointLatLng> decodedPoints = PolylinePoints.decodePolyline(
             encodedPolyline,
           );
           return decodedPoints
