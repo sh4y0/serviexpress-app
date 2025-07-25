@@ -191,21 +191,6 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>
-      <td align="center">
-        <a href="https://github.com/DavidGrados21" target="_blank">
-          <img src="https://github.com/DavidGrados21.png" width="100px;" alt="David Grados"/><br />
-          <sub><b>David Grados</b></sub><br>
-        </a><br />
-        <a href="https://github.com/DavidGrados21" target="_blank">
-          <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
-        </a>
-        <a href="#" target="_blank">
-          <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
-        </a>
-        <a href="#" target="_blank">
-          <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
-        </a>
-      </td>
     </tr>
   </table>
 </div>
