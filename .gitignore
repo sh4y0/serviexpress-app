@@ -53,7 +53,7 @@ macos/Flutter/*
 windows/flutter/*
 
 # Firebase config (sensitive)
-android/app/google-services.json
+android/app/src/google-services.json
 android/google-services.json
 ios/Runner/GoogleService-Info.plist
 
