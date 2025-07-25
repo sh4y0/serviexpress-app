@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "970897771269-02i3b8n4mkhj7i2qdamdh9pf2p546ri1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "212dd7269108034c3fb2aacfabab810e315fd963"
+          }
+        },
+        {
           "client_id": "970897771269-1jlmgkl2s8p2hfhv7ambj642j35o0lu0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -51,6 +59,14 @@
           "android_info": {
             "package_name": "com.example.serviexpress_app",
             "certificate_hash": "038e7d611b4fd21bb19e7c891b38fa3f48e474d4"
+          }
+        },
+        {
+          "client_id": "970897771269-rvva5d3cnkkn5m2kolsodlcf31mfgo7d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.serviexpress_app",
+            "certificate_hash": "990c6a72c34041d20d38ca9e5baa34566356d644"
           }
         },
         {
