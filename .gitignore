@@ -51,3 +51,16 @@ assets/serviexpressapp.json
 linux/flutter/*
 macos/Flutter/*
 windows/flutter/*
+
+# Firebase config (sensitive)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Flutter local metadata
+.metadata
+
+# Firebase CLI config (optional)
+firebase.json
+
+# Custom secrets/configs
+assets/serviexpressapp.json
