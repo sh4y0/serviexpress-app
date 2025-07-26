@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
 
 class Verification extends StatelessWidget {
   const Verification({super.key});
@@ -39,7 +40,7 @@ class Verification extends StatelessWidget {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        "Has sido verificado exitosamente.\n Ahora puedes usar",
+                        "¡Genial! Has sido verificado exitosamente",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 17, color: Colors.white),
                       ),
@@ -78,8 +79,8 @@ class Verification extends StatelessWidget {
                 onPressed: () {
                   Navigator.pushReplacementNamed(
                     context,
-                    AppRoutes.login,
-                    //arguments: MapStyleLoader.cachedStyle,
+                    AppRoutes.homeProvider,
+                    arguments: MapStyleLoader.cachedStyle,
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -89,7 +90,7 @@ class Verification extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Iniciar Sesión",
+                  "Comenzar",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 17,

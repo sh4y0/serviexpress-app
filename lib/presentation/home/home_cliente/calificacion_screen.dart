@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
-import 'package:serviexpress_app/presentation/widgets/show_calificar.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/show_calificar.dart';
 
 class CalificacionScreen extends StatefulWidget {
   const CalificacionScreen({super.key});

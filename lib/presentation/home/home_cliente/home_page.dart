@@ -4,9 +4,9 @@ import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
-import 'package:serviexpress_app/presentation/pages/home_page_content.dart';
-import 'package:serviexpress_app/presentation/widgets/app_drawer.dart';
-import 'package:serviexpress_app/presentation/widgets/skeleton_home.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/home_page_content.dart';
+import 'package:serviexpress_app/presentation/widgets/common/app_drawer.dart';
+import 'package:serviexpress_app/presentation/widgets/common/skeleton_home.dart';
 
 class HomePage extends StatefulWidget {
   final String mapStyle;

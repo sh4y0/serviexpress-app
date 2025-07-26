@@ -10,9 +10,9 @@ import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/service/google_maps_service.dart';
 import 'package:serviexpress_app/data/service/location_service.dart';
-import 'package:serviexpress_app/presentation/pages/home_page.dart';
-import 'package:serviexpress_app/presentation/widgets/audio_item.dart';
-import 'package:serviexpress_app/presentation/widgets/video_item.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/home_page.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/audio_item.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/video_item.dart';
 
 class ProviderDetails extends StatefulWidget {
   final ServiceComplete service;

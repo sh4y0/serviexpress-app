@@ -4,7 +4,7 @@ import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
 
 class LocationPermission extends StatefulWidget {
   final String role;

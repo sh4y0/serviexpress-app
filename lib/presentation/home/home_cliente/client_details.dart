@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/service/google_maps_service.dart';
-import 'package:serviexpress_app/presentation/pages/home_page.dart';
-import 'package:serviexpress_app/presentation/widgets/draggable_sheet_detalle_proveedor.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/home_page.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/draggable_sheet_detalle_proveedor.dart';
 
 class ClientDetails extends StatefulWidget {
   final LatLng? clientPosition;
