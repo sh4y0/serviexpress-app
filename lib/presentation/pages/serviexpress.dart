@@ -10,7 +10,7 @@ import 'package:serviexpress_app/presentation/login/auth_page_recovery_password.
 import 'package:serviexpress_app/presentation/widgets/common/chat_page.dart';
 import 'package:serviexpress_app/presentation/home/home_cliente/home_page.dart';
 import 'package:serviexpress_app/presentation/home/home_proveedor/home_provider.dart';
-import 'package:serviexpress_app/onboarding/start_page.dart';
+import 'package:serviexpress_app/presentation/onboarding/start_page.dart';
 import 'package:serviexpress_app/presentation/home/home_proveedor/verification.dart';
 import 'package:serviexpress_app/presentation/widgets/common/cambio_rol.dart';
 import 'package:serviexpress_app/presentation/home/home_cliente/client_details.dart';
