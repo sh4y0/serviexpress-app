@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
 
 class ShowSuper extends StatelessWidget {
   final VoidCallback? onClose;

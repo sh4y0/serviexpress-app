@@ -11,8 +11,8 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
-import 'package:serviexpress_app/presentation/widgets/keyboard_dismisser.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/common/keyboard_dismisser.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
 
 class _AppIcons {
   static const String person = "assets/icons/ic_person.svg";

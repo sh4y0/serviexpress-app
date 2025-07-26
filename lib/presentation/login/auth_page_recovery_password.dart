@@ -7,7 +7,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
-import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/login/auth_page.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 
 class AuthPageRecoveryPassword extends ConsumerStatefulWidget {

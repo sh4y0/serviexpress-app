@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
-import 'package:serviexpress_app/presentation/widgets/form_multimedia.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/form_multimedia.dart';
 
 class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
   final GlobalKey globalKeyServicioDetalladoPhotos;

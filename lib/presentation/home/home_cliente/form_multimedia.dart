@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
-import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/login/auth_page.dart';
 
 class FormMultimedia extends StatefulWidget {
   final GlobalKey keyServicioDetalladoPhotos;

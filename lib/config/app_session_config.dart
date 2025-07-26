@@ -6,8 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
-import 'package:serviexpress_app/presentation/pages/onboarnding_screen.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/onboarding/onboarnding_screen.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 
 class AppSessionConfig {

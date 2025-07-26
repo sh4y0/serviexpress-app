@@ -15,8 +15,8 @@ import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/presentation/viewmodels/desactive_account_view_model.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
-import 'package:serviexpress_app/presentation/widgets/skeleton_profile.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/common/skeleton_profile.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});

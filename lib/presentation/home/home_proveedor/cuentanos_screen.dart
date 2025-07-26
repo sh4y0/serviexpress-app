@@ -12,11 +12,11 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
-import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
-import 'package:serviexpress_app/presentation/widgets/show_super.dart';
-import 'package:serviexpress_app/presentation/widgets/terminos_condiciones.dart';
-import 'package:serviexpress_app/presentation/widgets/verifiquemos.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/antecedentes.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/home/home_cliente/show_super.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/terminos_condiciones.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/verifiquemos.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class CuentanosScreen extends ConsumerStatefulWidget {

@@ -15,13 +15,13 @@ import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/messaging/service/location_provider.dart';
-import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
-import 'package:serviexpress_app/presentation/widgets/app_drawer.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/animation_provider.dart';
+import 'package:serviexpress_app/presentation/widgets/common/app_drawer.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
-import 'package:serviexpress_app/presentation/widgets/location_not_found_banner.dart';
-import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
-import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
-import 'package:serviexpress_app/presentation/widgets/provider_details.dart';
+import 'package:serviexpress_app/presentation/widgets/common/location_not_found_banner.dart';
+import 'package:serviexpress_app/presentation/widgets/common/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/widgets/common/profile_screen.dart';
+import 'package:serviexpress_app/presentation/home/home_proveedor/provider_details.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 
 class HomeProvider extends ConsumerStatefulWidget {
