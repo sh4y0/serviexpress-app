@@ -878,7 +878,9 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.close, color: Colors.white),
-                    style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColor.bgBack,
+                    ),
                   ),
                 ),
               ],

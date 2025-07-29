@@ -10,19 +10,17 @@ class LocationService {
   static Future<String> getAddressFromLatLng(double lat, double lng) async {
     try {
       final placeMarks = await geo.placemarkFromCoordinates(lat, lng);
-      if (placeMarks.isNotEmpty){
+      if (placeMarks.isNotEmpty) {
         final place = placeMarks.first;
         final street = place.street ?? '';
         final locality = place.locality ?? '';
         final address = '$street, $locality';
-        
+
         return address.isNotEmpty ? address : 'Dirección no disponible';
-      }
-      else{
+      } else {
         return 'Dirección no disponible';
       }
-    }
-    catch(e){
+    } catch (e) {
       return 'Error obteniendo dirección';
     }
   }
@@ -34,16 +32,17 @@ class LocationService {
     try {
       final currentUserId = await UserPreferences.getUserId();
 
-      if (currentUserId == null){
+      if (currentUserId == null) {
         return 'Usuario no encontrado';
       }
 
-      final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUserId)
-        .get();
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(currentUserId)
+              .get();
 
-      if (!userDoc.exists || userDoc.data() == null){
+      if (!userDoc.exists || userDoc.data() == null) {
         return 'Usuario no encontrado (documento no existe)';
       }
 
@@ -90,8 +89,7 @@ class LocationService {
       } else {
         return "Error en status general: ${data['status']}";
       }
-    }
-    catch(e) {
+    } catch (e) {
       return '';
     }
   }
