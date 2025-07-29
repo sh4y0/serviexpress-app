@@ -37,5 +37,8 @@ jobs:
 
       - run: flutter pub get
 
+      - name: Remove asset serviexpress.json from pubspec.yaml
+        run: sed -i '/assets\/serviexpressapp.json/d' pubspec.yaml
+
       - name: Run flutter analyze
         run: flutter analyze --fatal-warnings
