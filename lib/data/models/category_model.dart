@@ -3,10 +3,5 @@ class CategoryModel {
   final String name;
   final String iconPath;
 
-  CategoryModel({
-    required this.id,
-    required this.name,
-    required this.iconPath,
-  });
-
+  CategoryModel({required this.id, required this.name, required this.iconPath});
 }

@@ -9,14 +9,15 @@ class AnimationHome extends StatefulWidget {
   const AnimationHome({
     super.key,
     required this.onAnimationComplete,
-    this.animationDuration = const Duration(seconds: 20)
+    this.animationDuration = const Duration(seconds: 20),
   });
 
   @override
   State<AnimationHome> createState() => _AnimationHomeState();
 }
 
-class _AnimationHomeState extends State<AnimationHome> with TickerProviderStateMixin {
+class _AnimationHomeState extends State<AnimationHome>
+    with TickerProviderStateMixin {
   late AnimationController _rippleController;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -36,9 +37,10 @@ class _AnimationHomeState extends State<AnimationHome> with TickerProviderStateM
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     _startAnimation();
   }
@@ -123,7 +125,6 @@ class _AnimationHomeState extends State<AnimationHome> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Stack(

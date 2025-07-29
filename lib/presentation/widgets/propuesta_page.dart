@@ -161,7 +161,10 @@ Widget buildInfoRow(String label, String value) {
           Text(label, style: const TextStyle(color: AppColor.txtBooking)),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

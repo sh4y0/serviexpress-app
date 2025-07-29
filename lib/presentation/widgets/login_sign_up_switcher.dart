@@ -52,7 +52,9 @@ class LoginSignUpSwitcher extends StatelessWidget {
                         ? AppColor.loginSelect
                         : AppColor.loginDeselect,
                   ),
-                  minimumSize: WidgetStateProperty.all(const Size(double.infinity, 60))
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(double.infinity, 60),
+                  ),
                 ),
                 child: const Text(
                   "Sign Up",

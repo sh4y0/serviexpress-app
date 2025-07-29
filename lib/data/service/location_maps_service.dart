@@ -47,10 +47,9 @@ class EnhancedLocationService extends ChangeNotifier {
   bool get shouldShowSearchingBanner =>
       _currentState == LocationState.searching;
 
-   bool get isPermissionGranted =>
+  bool get isPermissionGranted =>
       _currentState != LocationState.permissionDenied;
-  bool get isServiceEnabled =>
-      _currentState != LocationState.serviceDisabled;
+  bool get isServiceEnabled => _currentState != LocationState.serviceDisabled;
 
   LocationSettings _getLocationSettings() {
     if (Platform.isAndroid) {
@@ -132,6 +131,7 @@ class EnhancedLocationService extends ChangeNotifier {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: _getLocationSettings(),
+        // ignore: deprecated_member_use
         timeLimit: const Duration(seconds: 15),
       );
       _handleNewPosition(position);
@@ -219,6 +219,7 @@ class EnhancedLocationService extends ChangeNotifier {
     try {
       await Geolocator.getCurrentPosition(
         locationSettings: _getLocationSettings(),
+        // ignore: deprecated_member_use
         timeLimit: const Duration(seconds: 1),
       );
       _updateState(LocationState.searching);
