@@ -614,7 +614,7 @@ class _DraggableSheetDetalleProveedorState
                         const SizedBox(width: 10),
                         Expanded(
                           child: FilledButton.icon(
-                            onPressed: () {                              
+                            onPressed: () {
                               Alerts.instance.showInfoAlert(
                                 context,
                                 "Aún no implementado xd",
