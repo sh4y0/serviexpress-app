@@ -39,12 +39,8 @@ class Serviexpress extends StatelessWidget {
             switch (settings.name) {
               case AppRoutes.login:
                 final args = settings.arguments as Map<String, dynamic>?;
-<<<<<<< HEAD
                 final startWithLogin =
                     args?[ShowSuperNavigationKeys.login] ?? true;
-=======
-                final startWithLogin = args?['login'] ?? true;
->>>>>>> origin/main
                 return MaterialPageRoute(
                   builder:
                       (context) => AuthPage(startWithLogin: startWithLogin),
