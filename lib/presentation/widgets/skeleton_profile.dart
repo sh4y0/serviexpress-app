@@ -68,7 +68,10 @@ class SkeletonProfile extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   height: 165,
                   decoration: BoxDecoration(
                     color: Colors.blue,
@@ -77,7 +80,10 @@ class SkeletonProfile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   height: 165,
                   decoration: BoxDecoration(
                     color: Colors.blue,
@@ -86,7 +92,10 @@ class SkeletonProfile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   height: 105,
                   decoration: BoxDecoration(
                     color: Colors.blue,

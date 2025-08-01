@@ -1,14 +1,11 @@
 import 'package:serviexpress_app/data/models/category_model.dart';
 
-class CategoryMock{
+class CategoryMock {
   final String name;
   final String iconPath;
 
-  CategoryMock({
-    required this.name,
-    required this.iconPath,
-  });
-  
+  CategoryMock({required this.name, required this.iconPath});
+
   static List<CategoryModel> getCategories() {
     return [
       CategoryModel(
