@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/animation_provider_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/animation_provider_keys.dart';
 
 class AnimationProvider extends StatefulWidget {
   final bool showAnimation;
@@ -99,7 +101,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         ),
         const SizedBox(height: 80),
         const Text(
-          "Empezando a buscar solicitudes",
+          AnimationProviderString.startingToSearchRequests,
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -108,7 +110,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         ),
         const SizedBox(height: 10),
         const Text(
-          "cercanas a ti",
+          AnimationProviderString.nearbyToYou,
           style: TextStyle(
             color: Colors.white70,
             fontSize: 18,
@@ -127,7 +129,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         Icon(Icons.visibility_off_rounded, size: 200, color: Color(0xFF454A70)),
         SizedBox(height: 20),
         Text(
-          "Activa tu disponibilidad",
+          AnimationProviderString.activateYourAvailability,
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -136,7 +138,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         ),
         SizedBox(height: 10),
         Text(
-          "para empezar a buscar solicitudes",
+          AnimationProviderString.toStartSearchingRequests,
           style: TextStyle(
             color: Colors.white70,
             fontSize: 18,
@@ -155,7 +157,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         Icon(Icons.location_off_rounded, size: 200, color: Color(0xFF454A70)),
         SizedBox(height: 20),
         Text(
-          "Tu ubicación esta desactivada",
+          AnimationProviderString.notActiveLocation,
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -164,7 +166,7 @@ class _AnimationProviderState extends State<AnimationProvider>
         ),
         SizedBox(height: 10),
         Text(
-          "actívala para recibir solicitudes",
+          AnimationProviderString.toActivateLocation,
           style: TextStyle(
             color: Colors.white70,
             fontSize: 18,
@@ -200,17 +202,17 @@ class _AnimationProviderState extends State<AnimationProvider>
   Widget _buildCurrentContent() {
     if (!widget.hasLocation) {
       return KeyedSubtree(
-        key: const ValueKey('noLocation'),
+        key: const ValueKey(AnimationProviderKeys.noLocation),
         child: buildNotActiveLocation(),
       );
     } else if (widget.showAnimation) {
       return KeyedSubtree(
-        key: const ValueKey('searching'),
+        key: const ValueKey(AnimationProviderKeys.searching),
         child: buildSearchingContent(),
       );
     } else {
       return KeyedSubtree(
-        key: const ValueKey('notActive'),
+        key: const ValueKey(AnimationProviderKeys.notActive),
         child: buildNotActiveContent(),
       );
     }

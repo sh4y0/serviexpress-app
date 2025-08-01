@@ -11,6 +11,9 @@ import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/service/google_maps_service.dart';
 import 'package:serviexpress_app/data/service/location_service.dart';
 import 'package:serviexpress_app/presentation/pages/home_page.dart';
+import 'package:serviexpress_app/presentation/resources/constants/polyline_constants.dart';
+import 'package:serviexpress_app/presentation/resources/constants/profile/profile_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/provider_details_string.dart';
 import 'package:serviexpress_app/presentation/widgets/audio_item.dart';
 import 'package:serviexpress_app/presentation/widgets/video_item.dart';
 
@@ -124,7 +127,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
     Set<Marker> newMarkers = {};
     newMarkers.add(
       Marker(
-        markerId: const MarkerId('providerLocation'),
+        markerId: const MarkerId(ProviderDetailsString.providerLocation),
         position: providerPosition,
         icon: _locationMarkerIcon ?? BitmapDescriptor.defaultMarker,
       ),
@@ -159,7 +162,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
         final newPolylines = <Polyline>{};
         newPolylines.add(
           Polyline(
-            polylineId: const PolylineId('animated_route'),
+            polylineId: const PolylineId(PolylineConstants.animatedRoute),
             color: const Color.fromRGBO(74, 102, 255, 1),
             width: 3,
             points: _animatedRoutePoints,
@@ -176,7 +179,7 @@ class _ProviderDetailsState extends State<ProviderDetails> {
 
   void _drawFallbackLine(LatLng p1, LatLng p2) {
     final fallbackPolyline = Polyline(
-      polylineId: const PolylineId('fallback_route'),
+      polylineId: const PolylineId(PolylineConstants.fallbackRoute),
       color: Colors.red.withAlpha((0.8 * 255).toInt()),
       width: 4,
       patterns: [PatternItem.dot, PatternItem.gap(10)],
@@ -455,11 +458,11 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                             final direccion =
                                 snapshot.hasData
                                     ? snapshot.data![0]
-                                    : "Obteniendo dirección...";
+                                    : ProviderDetailsString.fetchingAddress;
                             final distancia =
                                 snapshot.hasData
                                     ? snapshot.data![1]
-                                    : "Calculando distancia...";
+                                    : ProviderDetailsString.calculatingDistance;
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -546,7 +549,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Detalles de servicios",
+                          ProviderDetailsString.serviceDetails,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -710,7 +713,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                                 width: 200,
                                 child: Center(
                                   child: Text(
-                                    "Audio Vacío",
+                                    ProviderDetailsString.emptyAudio,
                                     style: TextStyle(color: Colors.white),
                                   ),
                                 ),
@@ -722,7 +725,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                   ],
                   const SizedBox(height: 10),
                   const Text(
-                    "Ingresa el precio:",
+                    ProviderDetailsString.enterPrice,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
@@ -741,8 +744,10 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                       );
                       if (result != null) {
                         setState(() {
-                          presupuestoPersonalizado = result["presupuesto"];
-                          propuestaTexto = result["propuesta"];
+                          presupuestoPersonalizado =
+                              result[ProviderDetailsString.budget];
+                          propuestaTexto =
+                              result[ProviderDetailsString.proposal];
                         });
                       }
                     },
@@ -757,7 +762,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         backgroundColor: AppColor.bgMsgUser,
                       ),
                       child: const Text(
-                        "No me interesa",
+                        ProviderDetailsString.notInterested,
                         style: TextStyle(color: Colors.white70, fontSize: 16),
                       ),
                     ),
@@ -772,7 +777,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text(
-                                'Completa todos los campos antes de enviar',
+                                ProviderDetailsString.completeAllFields,
                               ),
                             ),
                           );
@@ -798,7 +803,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                              "Propuesta enviada exitosamente",
+                              ProviderDetailsString.proposalSent,
                               style: TextStyle(color: Colors.white),
                             ),
                             backgroundColor: Color(0xFF101328),
@@ -810,7 +815,7 @@ class _ScreenClientDataState extends State<ScreenClientData> {
                         backgroundColor: AppColor.btnColor,
                       ),
                       child: const Text(
-                        "Enviar",
+                        ProviderDetailsString.send,
                         style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
@@ -868,7 +873,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
               alignment: Alignment.center,
               children: [
                 const Text(
-                  "Crear propuesta",
+                  ProviderDetailsString.createProposal,
                   style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
                 Positioned(
@@ -878,7 +883,9 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                       Navigator.pop(context);
                     },
                     icon: const Icon(Icons.close, color: Colors.white),
-                    style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColor.bgBack,
+                    ),
                   ),
                 ),
               ],
@@ -886,7 +893,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
           ),
           const SizedBox(height: 20),
           const Text(
-            "Precio",
+            ProviderDetailsString.price,
             style: TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -910,7 +917,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                   ),
                 ),
                 child: const Text(
-                  "S/",
+                  ProviderDetailsString.serviceFee,
                   style: TextStyle(color: AppColor.txtBooking, fontSize: 17),
                 ),
               ),
@@ -950,7 +957,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
           ),
           const SizedBox(height: 15),
           const Text(
-            "Propuesta",
+            ProviderDetailsString.proposal,
             style: TextStyle(
               color: Colors.white,
               fontSize: 17,
@@ -959,7 +966,7 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
           ),
           const SizedBox(height: 10),
           const Text(
-            "Describe detalladamente el servicio que ofrecerás",
+            ProviderDetailsString.serviceDescription,
             style: TextStyle(color: AppColor.txtBooking),
           ),
           const SizedBox(height: 10),
@@ -998,14 +1005,14 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                           color: Colors.red,
                           size: 50,
                         ),
-                        title: const Text("Campo Obligatorio"),
+                        title: const Text(ProviderDetailsString.requiredField),
                         content: const Text(
-                          "Por favor ingresa un valor para el presupuesto.",
+                          ProviderDetailsString.enterBudgetValue,
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("OK"),
+                            child: const Text(ProfileScreenStrings.ok),
                           ),
                         ],
                       ),
@@ -1013,12 +1020,13 @@ class _InputPresupuestoState extends State<InputPresupuesto> {
                 return;
               }
               Navigator.of(context).pop({
-                "presupuesto": _controller.text,
-                "propuesta": _descripcionController.text,
+                ProviderDetailsString.resultFieldBudget: _controller.text,
+                ProviderDetailsString.resultFieldProposal:
+                    _descripcionController.text,
               });
             },
             child: const Text(
-              "Crear Propuesta",
+              ProviderDetailsString.createProposal,
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
@@ -1061,7 +1069,7 @@ class InputPresupuestoLauncher extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "S/",
+                  ProviderDetailsString.serviceFee,
                   style: TextStyle(color: AppColor.txtBooking, fontSize: 17),
                 ),
               ),

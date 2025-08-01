@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/drawer_string.dart';
 import 'package:serviexpress_app/presentation/widgets/profile_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -134,7 +135,9 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                   title: Text(
-                    isProvider ? "Ver Solicitudes" : "Solicitar Servicio",
+                    isProvider
+                        ? DrawerString.viewRequests
+                        : DrawerString.requestService,
                   ),
                   onTap: () => Navigator.pop(context),
                 ),
@@ -146,7 +149,7 @@ class AppDrawer extends StatelessWidget {
                       BlendMode.srcIn,
                     ),
                   ),
-                  title: const Text("Historial de actividad"),
+                  title: const Text(DrawerString.activityHistory),
                   onTap: () => Navigator.pop(context),
                 ),
                 ListTile(
@@ -157,7 +160,9 @@ class AppDrawer extends StatelessWidget {
                     height: 25,
                   ),
                   title: Text(
-                    isProvider ? "Cambiar a Cliente" : "Cambiar a Trabajador",
+                    isProvider
+                        ? DrawerString.switchToClient
+                        : DrawerString.switchToWorker,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -173,7 +178,7 @@ class AppDrawer extends StatelessWidget {
               colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
             ),
             title: const Text(
-              "Cerrar Sesión",
+              DrawerString.logout,
               style: TextStyle(color: Colors.red),
             ),
             onTap: onLogout,

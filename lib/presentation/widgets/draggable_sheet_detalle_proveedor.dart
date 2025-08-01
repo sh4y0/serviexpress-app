@@ -4,6 +4,10 @@ import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/mock_reviews.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/review_keys.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/draggable_sheet_detail_provider_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/route_argument_key.dart';
 
 class DraggableSheetDetalleProveedor extends StatefulWidget {
   final VoidCallback? onDismiss;
@@ -150,47 +154,7 @@ class _DraggableSheetDetalleProveedorState
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> reviews = [
-      {
-        "avatar": "assets/images/new_user.png",
-        "name": "Allan Sagastegui",
-        "subtitle": "Usuario Nuevo",
-        "rating": 5.0,
-        "comment":
-            "Se solicitó un servicio acelerado y la entrega fue muy rápida.",
-      },
-      {
-        "avatar": "assets/images/new_user.png",
-        "name": "María López",
-        "subtitle": "Cliente frecuente",
-        "rating": 4.5,
-        "comment":
-            "Muy buen trabajo, atención cordial y resultados excelentes.",
-      },
-      {
-        "avatar": "assets/images/new_user.png",
-        "name": "Carlos Pérez",
-        "subtitle": "Usuario Nuevo",
-        "rating": 4.0,
-        "comment": "El servicio fue bueno, aunque hubo un pequeño retraso.",
-      },
-      {
-        "avatar": "assets/images/new_user.png",
-        "name": "Fernanda Ruiz",
-        "subtitle": "Cliente frecuente",
-        "rating": 5.0,
-        "comment":
-            "Excelente atención y profesionalismo. Lo recomiendo totalmente.",
-      },
-      {
-        "avatar": "assets/images/new_user.png",
-        "name": "Javier Torres",
-        "subtitle": "Usuario Nuevo",
-        "rating": 4.8,
-        "comment":
-            "Muy satisfecho con el servicio recibido, volveré a contratar.",
-      },
-    ];
+    final reviews = MockReviews.all;
 
     return LayoutBuilder(
       builder: (builder, constraints) {
@@ -389,7 +353,7 @@ class _DraggableSheetDetalleProveedorState
                                         CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        "Propuesta",
+                                        DetailProviderString.proposal,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,
@@ -418,7 +382,7 @@ class _DraggableSheetDetalleProveedorState
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Reseñas',
+                                      DetailProviderString.reviews,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,
@@ -427,7 +391,7 @@ class _DraggableSheetDetalleProveedorState
                                     ),
                                     SizedBox(width: 3),
                                     Text(
-                                      '(120+ review)',
+                                      DetailProviderString.reviewsCount,
                                       style: TextStyle(
                                         color: Color(0xff3d4d8a),
                                         fontSize: 12,
@@ -477,7 +441,8 @@ class _DraggableSheetDetalleProveedorState
                                                             ),
                                                         child: ClipOval(
                                                           child: Image.asset(
-                                                            review["avatar"],
+                                                            review[ReviewKeys
+                                                                .avatar],
                                                             fit: BoxFit.cover,
                                                           ),
                                                         ),
@@ -491,7 +456,8 @@ class _DraggableSheetDetalleProveedorState
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              review["name"],
+                                                              review[ReviewKeys
+                                                                  .name],
                                                               style: const TextStyle(
                                                                 color:
                                                                     Colors
@@ -503,7 +469,8 @@ class _DraggableSheetDetalleProveedorState
                                                               ),
                                                             ),
                                                             Text(
-                                                              review["subtitle"],
+                                                              review[ReviewKeys
+                                                                  .subtitle],
                                                               style: const TextStyle(
                                                                 color:
                                                                     AppColor
@@ -526,7 +493,8 @@ class _DraggableSheetDetalleProveedorState
                                                             width: 4,
                                                           ),
                                                           Text(
-                                                            review["rating"]
+                                                            review[ReviewKeys
+                                                                    .rating]
                                                                 .toString(),
                                                             style:
                                                                 const TextStyle(
@@ -546,7 +514,7 @@ class _DraggableSheetDetalleProveedorState
                                                   const SizedBox(height: 12),
 
                                                   Text(
-                                                    review["comment"],
+                                                    review[ReviewKeys.comment],
                                                     style: const TextStyle(
                                                       color: AppColor.textInput,
                                                       fontSize: 14,
@@ -588,8 +556,10 @@ class _DraggableSheetDetalleProveedorState
                                   context,
                                   AppRoutes.showSuper,
                                   arguments: {
-                                    'selectedProvider': widget.selectedProvider,
-                                    'clientPosition': widget.clientPosition,
+                                    RouteArgumentKeys.selectedProvider:
+                                        widget.selectedProvider,
+                                    RouteArgumentKeys.clientPosition:
+                                        widget.clientPosition,
                                   },
                                 );
                               }
@@ -602,7 +572,9 @@ class _DraggableSheetDetalleProveedorState
                               ),
                             ),
                             label: Text(
-                              widget.showPropuesta ? "Ir al chat" : "Aceptar",
+                              widget.showPropuesta
+                                  ? DetailProviderString.goToChat
+                                  : DetailProviderString.accept,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -614,10 +586,10 @@ class _DraggableSheetDetalleProveedorState
                         const SizedBox(width: 10),
                         Expanded(
                           child: FilledButton.icon(
-                            onPressed: () {                              
+                            onPressed: () {
                               Alerts.instance.showInfoAlert(
                                 context,
-                                "Aún no implementado xd",
+                                DetailProviderString.notImplemented,
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -634,8 +606,8 @@ class _DraggableSheetDetalleProveedorState
                             ),
                             label: Text(
                               widget.showPropuesta
-                                  ? "Cancelar"
-                                  : "No me interesa",
+                                  ? DetailProviderString.cancel
+                                  : DetailProviderString.notInterested,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

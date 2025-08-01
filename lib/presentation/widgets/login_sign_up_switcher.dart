@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_login_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_register_string.dart';
 
 class LoginSignUpSwitcher extends StatelessWidget {
   final bool isLoginSelected;
@@ -37,7 +39,7 @@ class LoginSignUpSwitcher extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Login",
+                  AuthLoginString.btnLoginGen,
                   style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
               ),
@@ -52,10 +54,12 @@ class LoginSignUpSwitcher extends StatelessWidget {
                         ? AppColor.loginSelect
                         : AppColor.loginDeselect,
                   ),
-                  minimumSize: WidgetStateProperty.all(const Size(double.infinity, 60))
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(double.infinity, 60),
+                  ),
                 ),
                 child: const Text(
-                  "Sign Up",
+                  AuthRegisterString.btnSignUp,
                   style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
               ),

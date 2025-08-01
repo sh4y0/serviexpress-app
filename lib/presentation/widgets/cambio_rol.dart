@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/role_change_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/show_super_navigation_keys.dart';
 
 class CambioRol extends StatefulWidget {
   const CambioRol({super.key});
@@ -37,7 +39,10 @@ class _CambioRolState extends State<CambioRol> {
   }
 
   Future<void> _cambiarRol() async {
-    final nuevoRol = currentRole == "Trabajador" ? "Cliente" : "Trabajador";
+    final nuevoRol =
+        currentRole == RoleChangeString.roleTrabajador
+            ? RoleChangeString.roleCliente
+            : RoleChangeString.roleTrabajador;
     await UserPreferences.saveRoleName(nuevoRol);
     if (!mounted) return;
     Navigator.pushNamed(context, AppRoutes.login, arguments: {"login": false});
@@ -51,7 +56,7 @@ class _CambioRolState extends State<CambioRol> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    final esTrabajador = currentRole == "Trabajador";
+    final esTrabajador = currentRole == RoleChangeString.roleTrabajador;
     return Scaffold(
       backgroundColor: AppColor.bgVerification,
       appBar: AppBar(
@@ -80,7 +85,7 @@ class _CambioRolState extends State<CambioRol> {
                 ),
                 const SizedBox(height: 30),
                 const Text(
-                  "¿Deseas generar ingresos realizando servicios?",
+                  RoleChangeString.titleText,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 25,
@@ -90,7 +95,7 @@ class _CambioRolState extends State<CambioRol> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "En ServiExpress podrás ofrecer tus servicios a nuestros clientes y ofrecer tarifas por ello.",
+                  RoleChangeString.descriptionText,
                   style: TextStyle(color: AppColor.txtPropuesta, fontSize: 15),
                   textAlign: TextAlign.center,
                 ),
@@ -107,8 +112,8 @@ class _CambioRolState extends State<CambioRol> {
                         onPressed: currentRole != null ? _cambiarRol : null,
                         child: Text(
                           esTrabajador
-                              ? "Registrarme como Cliente"
-                              : "Registrarme como Trabajador",
+                              ? RoleChangeString.registerWithClient
+                              : RoleChangeString.registerWithWorker,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -125,11 +130,11 @@ class _CambioRolState extends State<CambioRol> {
                           Navigator.pushNamed(
                             context,
                             AppRoutes.login,
-                            arguments: {"login": true},
+                            arguments: {ShowSuperNavigationKeys.login: true},
                           );
                         },
                         child: const Text(
-                          "Tengo una cuenta",
+                          RoleChangeString.iHaveAnAccount,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,

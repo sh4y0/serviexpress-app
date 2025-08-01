@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/calification_strings.dart';
 import 'package:serviexpress_app/presentation/widgets/show_calificar.dart';
 
 class CalificacionScreen extends StatefulWidget {
@@ -40,7 +41,7 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
           style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
         ),
         title: const Text(
-          "Calificar",
+          CalificationStrings.title,
           style: TextStyle(color: Colors.white, fontSize: 17),
         ),
         centerTitle: true,
@@ -59,7 +60,7 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                   ),
                   const SizedBox(height: 15),
                   const Text(
-                    "Fedor Kiryakov",
+                    CalificationStrings.fullName,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 21,
@@ -68,7 +69,7 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "Limpiador",
+                    CalificationStrings.roleCleaner,
                     style: TextStyle(color: AppColor.textInput, fontSize: 17),
                   ),
                   const SizedBox(height: 10),
@@ -98,7 +99,10 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(Icons.star_half, color: AppColor.bgStar),
+                        child: const Icon(
+                          Icons.star_half,
+                          color: AppColor.bgStar,
+                        ),
                       ),
                       empty: Container(
                         decoration: BoxDecoration(
@@ -106,7 +110,10 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(Icons.star, color: AppColor.loginSelect),
+                        child: const Icon(
+                          Icons.star,
+                          color: AppColor.loginSelect,
+                        ),
                       ),
                     ),
                     onRatingUpdate: (rating) {},
@@ -126,7 +133,7 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                       ),
                       onPressed: mostrarAlert,
                       child: const Text(
-                        "Enviar",
+                        CalificationStrings.send,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -152,7 +159,7 @@ Widget _buildTextFieldComent() {
     cursorColor: AppColor.colorInput,
     style: const TextStyle(color: AppColor.txtMsg),
     decoration: InputDecoration(
-      hintText: "Déjale un comentario..",
+      hintText: CalificationStrings.commentHint,
       hintStyle: const TextStyle(color: AppColor.txtMsg),
       filled: true,
       fillColor: AppColor.bgLabel,
