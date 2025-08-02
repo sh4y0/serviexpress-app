@@ -37,7 +37,7 @@ class UserPreferences {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyRoleName);
   }
-
+  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   static Future<void> saveTutorial(bool isMostrado) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyTutorial, isMostrado);
