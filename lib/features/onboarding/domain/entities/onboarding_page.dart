@@ -8,5 +8,4 @@ class OnboardingPage {
     required this.title,
     required this.description,
   });
-
 }

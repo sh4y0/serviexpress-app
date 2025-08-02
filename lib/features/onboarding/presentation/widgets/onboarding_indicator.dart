@@ -6,10 +6,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 class OnboardingIndicator extends StatelessWidget {
   final OnboardingViewModel viewModel;
 
-  const OnboardingIndicator({
-    super.key,
-    required this.viewModel,
-  });
+  const OnboardingIndicator({super.key, required this.viewModel});
 
   @override
   Widget build(BuildContext context) {

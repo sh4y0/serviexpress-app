@@ -27,7 +27,7 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-  
+
   await setupDI();
   runApp(const ProviderScope(child: Serviexpress()));
 }

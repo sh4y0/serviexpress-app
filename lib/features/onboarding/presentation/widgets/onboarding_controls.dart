@@ -12,9 +12,13 @@ class OnboardingControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: viewModel.isLastPage 
+      child:
+          viewModel.isLastPage
               ? RoleSelectionButtons(onRoleSelected: viewModel.selectRole)
-              : NavigationButtons(onSkip: viewModel.skip, onNext: viewModel.nextPage)
+              : NavigationButtons(
+                onSkip: viewModel.skip,
+                onNext: viewModel.nextPage,
+              ),
     );
   }
 }

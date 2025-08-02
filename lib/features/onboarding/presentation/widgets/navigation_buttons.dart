@@ -6,7 +6,9 @@ class NavigationButtons extends StatelessWidget {
   final VoidCallback onNext;
 
   const NavigationButtons({
-    super.key, required this.onSkip, required this.onNext,
+    super.key,
+    required this.onSkip,
+    required this.onNext,
   });
 
   @override
@@ -18,9 +20,7 @@ class NavigationButtons extends StatelessWidget {
           onPressed: onSkip,
           padding: const EdgeInsets.symmetric(horizontal: 15),
           height: 45,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: const Text(
             "Saltar",
             style: TextStyle(color: AppColor.bgAll, fontSize: 16),

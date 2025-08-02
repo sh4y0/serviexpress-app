@@ -28,5 +28,4 @@ class SessionRepositoryImpl implements SessionRepository {
   Future<void> saveUserId(String userId) async {
     _localStorage.setString(_keyUserId, userId);
   }
-
 }

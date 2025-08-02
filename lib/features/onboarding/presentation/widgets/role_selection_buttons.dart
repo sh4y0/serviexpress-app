@@ -4,9 +4,7 @@ import 'package:serviexpress_app/core/theme/app_color.dart';
 class RoleSelectionButtons extends StatelessWidget {
   final Function(String role) onRoleSelected;
 
-  const RoleSelectionButtons({
-    super.key, required this.onRoleSelected,
-  });
+  const RoleSelectionButtons({super.key, required this.onRoleSelected});
 
   @override
   Widget build(BuildContext context) {

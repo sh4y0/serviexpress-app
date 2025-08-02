@@ -1,4 +1,3 @@
-
 import 'package:serviexpress_app/features/onboarding/domain/entities/onboarding_page.dart';
 
 abstract class OnboardingLocalDatasource {
@@ -6,7 +5,6 @@ abstract class OnboardingLocalDatasource {
 }
 
 class OnboardingLocalDatasourceImpl implements OnboardingLocalDatasource {
-
   @override
   Future<List<OnboardingPage>> getOnboardingPages() async {
     return const [

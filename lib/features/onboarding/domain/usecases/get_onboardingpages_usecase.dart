@@ -4,7 +4,8 @@ import 'package:serviexpress_app/features/onboarding/domain/entities/onboarding_
 import 'package:serviexpress_app/features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'package:serviexpress_app/core/usecases/usecase.dart';
 
-class GetOnboardingPagesUseCase implements UseCaseWithoutParams<List<OnboardingPage>> {
+class GetOnboardingPagesUseCase
+    implements UseCaseWithoutParams<List<OnboardingPage>> {
   final OnboardingRepository repository;
 
   GetOnboardingPagesUseCase(this.repository);
@@ -15,7 +16,7 @@ class GetOnboardingPagesUseCase implements UseCaseWithoutParams<List<OnboardingP
       final pages = await repository.getOnboardingPages();
       return Right(pages);
     } catch (e) {
-      throw Exception('No se pudieron obtener las páginas'); 
+      throw Exception('No se pudieron obtener las páginas');
     }
   }
 }

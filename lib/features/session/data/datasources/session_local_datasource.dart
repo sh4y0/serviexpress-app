@@ -8,7 +8,7 @@ abstract class LocalStorageService {
   Future<void> setBool(String key, bool value);
 }
 
-class SessionLocalDatasource implements LocalStorageService{
+class SessionLocalDatasource implements LocalStorageService {
   final SharedPreferences sharedPreferences;
 
   SessionLocalDatasource({required this.sharedPreferences});

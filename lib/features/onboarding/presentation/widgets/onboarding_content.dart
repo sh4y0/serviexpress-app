@@ -24,9 +24,7 @@ class OnboardingContent extends StatelessWidget {
           const SizedBox(height: 20),
           Expanded(
             flex: 5,
-            child: Center(
-              child: SvgPicture.asset(image, fit: BoxFit.contain),
-            ),
+            child: Center(child: SvgPicture.asset(image, fit: BoxFit.contain)),
           ),
           const SizedBox(height: 20),
           Text(
@@ -38,10 +36,7 @@ class OnboardingContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Text(
-            description,
-            style: const TextStyle(color: AppColor.txtDesc),
-          ),
+          Text(description, style: const TextStyle(color: AppColor.txtDesc)),
           const SizedBox(height: 20),
         ],
       ),

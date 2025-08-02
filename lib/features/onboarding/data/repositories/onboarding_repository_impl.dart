@@ -8,10 +8,8 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
 
   OnboardingRepositoryImpl({required this.localDataSource});
 
-
   @override
   Future<List<OnboardingPage>> getOnboardingPages() async {
     return localDataSource.getOnboardingPages();
   }
-  
 }
