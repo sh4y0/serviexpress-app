@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
+import 'package:serviexpress_app/core/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
