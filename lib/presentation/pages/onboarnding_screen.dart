@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
+import 'package:serviexpress_app/core/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
