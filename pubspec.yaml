@@ -76,8 +76,6 @@ dependencies:
   flutter_polyline_points: ^3.0.1
   flutter_image_compress: ^2.4.0
   recase: ^4.0.0
-  get_it: ^8.1.0
-  dart_either: ^2.0.0
 
 dev_dependencies:
   flutter_test:
