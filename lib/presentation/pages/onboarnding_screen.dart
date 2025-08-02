@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
+import 'package:serviexpress_app/presentation/resources/constants/onboarding/onboarding_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/onboarding/role_constants.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboarndingScreen extends StatefulWidget {
@@ -43,21 +45,18 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
                   children: const [
                     _OnboardContent(
                       image: "assets/icons/onborning_one.svg",
-                      title: "¡Tu hogar en buenas manos!",
-                      description:
-                          "Solicita servicios de limpieza, pintura y más, desde tu celular y sin complicaciones.",
+                      title: OnboardingStrings.titleOne,
+                      description: OnboardingStrings.descriptionOne,
                     ),
                     _OnboardContent(
                       image: "assets/icons/onborning_two.svg",
-                      title: "Profesionales verificados",
-                      description:
-                          "Elige a expertos calificados, revisa opiniones y programa el servicio según tu horario.",
+                      title: OnboardingStrings.titleTwo,
+                      description: OnboardingStrings.descriptionTwo,
                     ),
                     _OnboardContent(
                       image: "assets/icons/onborning_three.svg",
-                      title: "Paga con garantía",
-                      description:
-                          "Tu dinero está protegido hasta que el servicio esté completado. Sin sorpresas, sin riesgos.",
+                      title: OnboardingStrings.titleThree,
+                      description: OnboardingStrings.descriptionThree,
                     ),
                   ],
                 ),
@@ -106,7 +105,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
         Expanded(
           child: MaterialButton(
             onPressed: () async {
-              await UserPreferences.saveRoleName("Trabajador");
+              await UserPreferences.saveRoleName(RoleConstants.worker);
               Navigator.pushNamed(context, AppRoutes.login);
             },
             shape: RoundedRectangleBorder(
@@ -115,7 +114,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
             ),
             height: 45,
             child: const Text(
-              "Trabajador",
+              OnboardingStrings.workerButton,
               style: TextStyle(
                 color: AppColor.bgAll,
                 fontSize: 16,
@@ -130,7 +129,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
         Expanded(
           child: MaterialButton(
             onPressed: () async {
-              await UserPreferences.saveRoleName("Cliente");
+              await UserPreferences.saveRoleName(RoleConstants.client);
               Navigator.pushNamed(context, AppRoutes.login);
             },
             color: AppColor.bgAll,
@@ -139,7 +138,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
             ),
             height: 45,
             child: const Text(
-              "Cliente",
+              OnboardingStrings.clientButton,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -162,7 +161,7 @@ class _OnboarndingScreenState extends State<OnboarndingScreen> {
           height: 45,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           child: const Text(
-            "Saltar",
+            OnboardingStrings.skip,
             style: TextStyle(color: AppColor.bgAll, fontSize: 16),
           ),
         ),

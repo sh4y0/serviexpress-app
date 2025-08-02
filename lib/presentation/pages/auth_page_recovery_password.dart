@@ -8,7 +8,9 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_recovery_password_string.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
+import 'package:serviexpress_app/presentation/resources/constants/ui_keys.dart';
 
 class AuthPageRecoveryPassword extends ConsumerStatefulWidget {
   const AuthPageRecoveryPassword({super.key});
@@ -45,7 +47,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
             Alerts.instance
                 .showSuccessAlert(
                   navigator.context,
-                  "Se ha enviado un correo de recuperación a tu correo electrónico.",
+                  AuthRecoveryPasswordString.successRecoveryMessage,
                 )
                 .then((_) {
                   navigator.pushReplacementNamed(AppRoutes.login);
@@ -105,7 +107,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Recuperemos tu contraseña",
+          AuthRecoveryPasswordString.title,
           style: TextStyle(
             fontSize: 30,
             color: Colors.white,
@@ -113,18 +115,18 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
           ),
         ),
         const Text(
-          "Ingresa tu correo!",
+          AuthRecoveryPasswordString.subtitle,
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
         Form(
           key: _formRecoveryKey,
           child: Column(
-            key: const ValueKey('loginForm'),
+            key: const ValueKey(UIKeys.loginFormKey),
             children: [
               _buildTextField(
                 controller: _emailController,
-                hintText: "Correo electrónico",
+                hintText: AuthRecoveryPasswordString.hintEmail,
                 svgIconPath: "assets/icons/ic_email.svg",
               ),
               const SizedBox(height: 30),
@@ -136,7 +138,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
                   if (email.isEmpty) {
                     Alerts.instance.showErrorAlert(
                       context,
-                      "Por favor ingresa el correo electrónico.",
+                      AuthRecoveryPasswordString.errorEmptyEmail,
                     );
                     return;
                   }
@@ -152,7 +154,7 @@ class _AuthScreenState extends ConsumerState<AuthPageRecoveryPassword> {
                   ),
                 ),
                 child: const Text(
-                  "Recuperar Contraseña",
+                  AuthRecoveryPasswordString.btnRecover,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 17,

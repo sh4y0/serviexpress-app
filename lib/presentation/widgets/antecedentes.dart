@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/criminal_record_string.dart';
 
 class Antecedentes extends StatefulWidget {
   final ValueNotifier<String?> fileNameNotifier;
@@ -18,7 +19,10 @@ class _AntecedentesState extends State<Antecedentes> {
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ["pdf", "docx"],
+      allowedExtensions: [
+        CriminalRecordString.pdfFormat,
+        CriminalRecordString.docxFormat,
+      ],
     );
     if (result != null) {
       widget.fileNameNotifier.value = result.files.single.name;
@@ -43,7 +47,7 @@ class _AntecedentesState extends State<Antecedentes> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Ya casi..",
+                  CriminalRecordString.almostThere,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 30,
@@ -52,7 +56,7 @@ class _AntecedentesState extends State<Antecedentes> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Necesitamos saber si cuentas con algún antecedente, esto para verificar que estas limpio.",
+                  CriminalRecordString.needToKnow,
                   style: TextStyle(color: AppColor.textWelcome, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
@@ -86,7 +90,9 @@ class _AntecedentesState extends State<Antecedentes> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              fileUploaded ? value : "Subir archivo",
+                              fileUploaded
+                                  ? value
+                                  : CriminalRecordString.uploadFile,
                               style: TextStyle(
                                 color: AppColor.btnColor.withAlpha(110),
                                 fontSize: 14,
@@ -101,7 +107,7 @@ class _AntecedentesState extends State<Antecedentes> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "*Subir formato PDF o DCX",
+                  CriminalRecordString.uploadFileFormat,
                   style: TextStyle(color: AppColor.textInput, fontSize: 14),
                 ),
               ],

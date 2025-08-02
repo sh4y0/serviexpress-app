@@ -10,9 +10,14 @@ import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_alert_messages_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_login_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/auth_register_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/onboarding/role_constants.dart';
 import 'package:serviexpress_app/presentation/viewmodels/auth_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/keyboard_dismisser.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
+import 'package:serviexpress_app/presentation/resources/constants/ui_keys.dart';
 
 class _AppIcons {
   static const String person = "assets/icons/ic_person.svg";
@@ -150,12 +155,13 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       if (mounted) {
         Alerts.instance.showSuccessAlert(
           context,
-          "¡Registro exitoso! Bienvenido a ServiExpress",
-          onOk: () => _checkPermissionsAndNavigate(role ?? "Trabajador"),
+          AuthAlertMessagesString.registrationSuccessMessage,
+          onOk:
+              () => _checkPermissionsAndNavigate(role ?? RoleConstants.worker),
         );
       }
     } else {
-      await _checkPermissionsAndNavigate(role ?? "Cliente");
+      await _checkPermissionsAndNavigate(role ?? RoleConstants.client);
     }
   }
 
@@ -169,7 +175,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
 
     if (hasPermission) {
       final String targetRoute =
-          (role == "Trabajador") ? AppRoutes.homeProvider : AppRoutes.home;
+          (role == RoleConstants.worker)
+              ? AppRoutes.homeProvider
+              : AppRoutes.home;
 
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -212,7 +220,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               if (snapshot.hasError) {
                 return const Center(
                   child: Text(
-                    "Error al cargar recursos",
+                    AuthAlertMessagesString.resourceLoadError,
                     style: TextStyle(color: Colors.white),
                   ),
                 );
@@ -322,7 +330,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     } else {
       Alerts.instance.showErrorAlert(
         context,
-        "Por favor completa todos los campos requeridos.",
+        AuthAlertMessagesString.completeAllFields,
       );
     }
   }
@@ -339,7 +347,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     } else {
       Alerts.instance.showErrorAlert(
         context,
-        "Por favor completa todos los campos requeridos.",
+        AuthAlertMessagesString.completeAllFields,
       );
     }
   }
@@ -383,7 +391,7 @@ class _AuthHeader extends StatelessWidget {
               children: [
                 Expanded(
                   child: _AuthHeaderButton(
-                    text: "Login",
+                    text: AuthLoginString.btnLoginGen,
                     isActive: isLogin,
                     onPressed: () {
                       if (!isLogin) onToggle();
@@ -392,7 +400,7 @@ class _AuthHeader extends StatelessWidget {
                 ),
                 Expanded(
                   child: _AuthHeaderButton(
-                    text: "Sign Up",
+                    text: AuthRegisterString.btnSignUp,
                     isActive: !isLogin,
                     onPressed: () {
                       if (isLogin) onToggle();
@@ -499,15 +507,15 @@ class _CommonAuthFormFields {
           validator ??
           (value) {
             if (value == null || value.isEmpty) {
-              return 'Este campo es obligatorio.';
+              return AuthLoginString.requiredField;
             }
             if (svgIconPath == _AppIcons.email &&
-                !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-              return 'Por favor ingresa un correo válido.';
+                !RegExp(AuthLoginString.emailPattern).hasMatch(value)) {
+              return AuthLoginString.invalidEmail;
             }
-            if (hintText.toLowerCase().contains("contraseña") &&
+            if (hintText.toLowerCase().contains(AuthLoginString.hintKeywords) &&
                 value.length < 6) {
-              return 'La contraseña debe tener al menos 6 caracteres.';
+              return AuthLoginString.shortPassword;
             }
             return null;
           },
@@ -551,11 +559,11 @@ class _LoginFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      key: const ValueKey('loginForm'),
+      key: const ValueKey(UIKeys.loginFormKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Bienvenido",
+          AuthLoginString.welcomeTitle,
           style: TextStyle(
             fontSize: 30,
             color: Colors.white,
@@ -563,7 +571,7 @@ class _LoginFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "¡Qué bueno tenerte de vuelta!",
+          AuthLoginString.welcomeBack,
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
@@ -573,14 +581,14 @@ class _LoginFormWidget extends StatelessWidget {
             children: [
               _CommonAuthFormFields.buildTextField(
                 controller: emailController,
-                hintText: "Usuario o correo electrónico",
+                hintText: AuthLoginString.userOrEmailHint,
                 svgIconPath: _AppIcons.person,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 30),
               _CommonAuthFormFields.buildTextField(
                 controller: passwordController,
-                hintText: "Contraseña*",
+                hintText: AuthLoginString.passwordHint,
                 svgIconPath: _AppIcons.pass,
                 obscureText: obscurePassword,
                 suffixIcon: _CommonAuthFormFields.buildPasswordToggleIcon(
@@ -595,7 +603,7 @@ class _LoginFormWidget extends StatelessWidget {
                   onPressed: onForgotPassword,
                   style: TextButton.styleFrom(foregroundColor: Colors.white),
                   child: const Text(
-                    "¿Olvidaste tu contraseña?",
+                    AuthLoginString.forgotPassword,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -613,7 +621,7 @@ class _LoginFormWidget extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "Iniciar Sesion",
+                    AuthLoginString.loginButton,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
@@ -623,15 +631,15 @@ class _LoginFormWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const _SocialLoginDivider(text: "O inicia sesión con"),
+              const _SocialLoginDivider(text: AuthLoginString.orLoginWith),
               const SizedBox(height: 20),
               _SocialLoginButtons(
                 authViewModelNotifier: ref.read(authViewModelProvider.notifier),
               ),
               const SizedBox(height: 25),
               _AlternateAuthAction(
-                promptText: "¿No tienes una cuenta? ",
-                actionText: "Registrate Ahora",
+                promptText: AuthLoginString.noAccountPrompt,
+                actionText: AuthLoginString.registerNow,
                 onActionTap: onSwitchToSignup,
               ),
             ],
@@ -670,11 +678,11 @@ class _SignupFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      key: const ValueKey('signupForm'),
+      key: const ValueKey(UIKeys.registerFormKey),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Crea una cuenta",
+          AuthRegisterString.signUpTitle,
           style: TextStyle(
             fontSize: 30,
             color: Colors.white,
@@ -682,7 +690,7 @@ class _SignupFormWidget extends StatelessWidget {
           ),
         ),
         const Text(
-          "¡Empecemos! Tu experiencia comienza aquí.",
+          AuthRegisterString.signUpSubtitle,
           style: TextStyle(fontSize: 17, color: AppColor.textWelcome),
         ),
         const SizedBox(height: 32),
@@ -692,20 +700,20 @@ class _SignupFormWidget extends StatelessWidget {
             children: [
               _CommonAuthFormFields.buildTextField(
                 controller: usuarioController,
-                hintText: "Usuario",
+                hintText: AuthRegisterString.usernameHint,
                 svgIconPath: _AppIcons.person,
               ),
               const SizedBox(height: 20),
               _CommonAuthFormFields.buildTextField(
                 controller: emailController,
-                hintText: "Correo electrónico",
+                hintText: AuthRegisterString.emailHint,
                 svgIconPath: _AppIcons.email,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
               _CommonAuthFormFields.buildTextField(
                 controller: passwordController,
-                hintText: "Contraseña*",
+                hintText: AuthRegisterString.passwordHint,
                 svgIconPath: _AppIcons.pass,
                 obscureText: obscurePassword,
                 suffixIcon: _CommonAuthFormFields.buildPasswordToggleIcon(
@@ -726,7 +734,7 @@ class _SignupFormWidget extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    "Registrate",
+                    AuthRegisterString.btnRegister,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 17,
@@ -736,15 +744,17 @@ class _SignupFormWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const _SocialLoginDivider(text: "O regístrate con"),
+              const _SocialLoginDivider(
+                text: AuthRegisterString.orRegisterWith,
+              ),
               const SizedBox(height: 20),
               _SocialLoginButtons(
                 authViewModelNotifier: ref.read(authViewModelProvider.notifier),
               ),
               const SizedBox(height: 20),
               _AlternateAuthAction(
-                promptText: "¿Ya tienes una cuenta? ",
-                actionText: "Inicia Sesion",
+                promptText: AuthRegisterString.alreadyHaveAccount,
+                actionText: AuthRegisterString.loginNow,
                 onActionTap: onSwitchToLogin,
               ),
             ],
@@ -826,7 +836,7 @@ class _SocialLoginButtons extends StatelessWidget {
         _socialButton(_AppIcons.apple, () {
           Alerts.instance.showInfoAlert(
             context,
-            "Inicio de sesión con Apple no implementado aún.",
+            AuthAlertMessagesString.appleLoginNotImplemented,
           );
         }),
       ],

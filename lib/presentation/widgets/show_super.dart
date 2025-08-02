@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/show_super_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/show_super_navigation_keys.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class ShowSuper extends StatelessWidget {
@@ -40,7 +42,7 @@ class ShowSuper extends StatelessWidget {
                       const Image(image: AssetImage("assets/gifs/acepted.gif")),
                       const SizedBox(height: 30),
                       Text(
-                        "Super! Has aceptado a ${provider?.nombres.capitalize}",
+                        "${ShowSuperString.superAccepted}${provider?.nombres.capitalize}",
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 21,
@@ -50,7 +52,7 @@ class ShowSuper extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "${provider?.nombres.capitalize} podrá empezar con el servicio después de que realices el pago. Recuerda el pago no se le dará a Fedor hasta que haya terminado la tarea con éxito.",
+                        "${provider?.nombres.capitalize} ${ShowSuperString.serviceStartInfo}",
                         style: const TextStyle(color: AppColor.txtPropuesta),
                         textAlign: TextAlign.center,
                       ),
@@ -63,9 +65,12 @@ class ShowSuper extends StatelessWidget {
                               context,
                               AppRoutes.clientDetails,
                               arguments: {
-                                'mapStyle': MapStyleLoader.cachedStyle,
-                                'selectedProvider': provider,
-                                'clientPosition': clientPosition,
+                                ShowSuperNavigationKeys.mapStyle:
+                                    MapStyleLoader.cachedStyle,
+                                ShowSuperNavigationKeys.selectedProvider:
+                                    provider,
+                                ShowSuperNavigationKeys.clientPosition:
+                                    clientPosition,
                               },
                             );
                           },
@@ -77,7 +82,7 @@ class ShowSuper extends StatelessWidget {
                             ),
                           ),
                           child: const Text(
-                            "Continuar",
+                            ShowSuperString.continueButton,
                             style: TextStyle(
                               color: AppColor.bgAll,
                               fontSize: 17,

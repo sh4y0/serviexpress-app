@@ -4,6 +4,8 @@ import 'package:serviexpress_app/config/app_routes.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/auth/auth_result.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
+import 'package:serviexpress_app/presentation/resources/constants/auth/location_permission_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/onboarding/role_constants.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 
 class LocationPermission extends StatefulWidget {
@@ -49,7 +51,7 @@ class _LocationPermissionState extends State<LocationPermission> {
 
               const SizedBox(height: 20),
               const Text(
-                "Autoriza el uso de tu ubicación",
+                LocationPermissionString.locationPermissionTitle,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -63,7 +65,7 @@ class _LocationPermissionState extends State<LocationPermission> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                  "Tu ubicación es clave para recibir un servicio preciso y sin demoras",
+                  LocationPermissionString.locationPermissionSubtitle,
                   style: TextStyle(color: AppColor.txtDesc, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
@@ -79,7 +81,7 @@ class _LocationPermissionState extends State<LocationPermission> {
                         await _locationService.requestLocationPermission();
                     if (permissionSuccesfull) {
                       final String targetRoute =
-                          (widget.role == "Trabajador")
+                          (widget.role == RoleConstants.worker)
                               ? AppRoutes.homeProvider
                               : AppRoutes.home;
 
@@ -92,7 +94,7 @@ class _LocationPermissionState extends State<LocationPermission> {
                     }
                   },
                   child: const Text(
-                    "Activar servicios de ubicación",
+                    LocationPermissionString.enableLocationButton,
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
@@ -115,7 +117,7 @@ class _LocationPermissionState extends State<LocationPermission> {
                     backgroundColor: Colors.grey[700],
                   ),
                   child: const Text(
-                    "Saltar",
+                    LocationPermissionString.skipButton,
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
