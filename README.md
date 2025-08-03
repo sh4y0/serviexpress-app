@@ -24,6 +24,8 @@ Con un enfoque en la experiencia del usuario, **ServiExpress** permite explorar,
 ## Convenciones de Commits
 
 Este proyecto sigue la convención de [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+</br>
+[Ver guía de commits aquí](.github/COMMIT_CONVENTION.md)
 
 ## 📑 Tabla de Contenidos
 
