@@ -34,6 +34,7 @@ revert: feat(onboarding): remove welcome screen
 | types    | Cambios en modelos/tipos                    |
 | wip      | Trabajo en progreso                         |
 | revert   | Reversión de un commit anterior             |
+| docs     | Cambios en archivos de documentación del proyecto |
 
 ## Reglas al escribir el commit
 

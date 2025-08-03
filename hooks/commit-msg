@@ -3,7 +3,7 @@
 commit_msg_file=$1
 commit_msg=$(cat "$commit_msg_file")
 
-regex='^(revert: )?(feat|fix|style|refactor|perf|test|workflow|ci|chore|types|wip)(\([^)]+\))?: .{1,72}$'
+regex='^(revert: )?(feat|fix|style|refactor|perf|test|workflow|ci|chore|types|wip|docs)(\([^)]+\))?: .{1,72}$'
 
 if echo "$commit_msg" | grep -Eq "$regex"; then
   exit 0
