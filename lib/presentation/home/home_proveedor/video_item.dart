@@ -229,7 +229,9 @@ class __VideoViewerDialogState extends State<_VideoViewerDialog> {
                                     }
 
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                      ),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -252,7 +254,9 @@ class __VideoViewerDialogState extends State<_VideoViewerDialog> {
                                                           .controller
                                                           .value
                                                           .position -
-                                                      const Duration(seconds: 10);
+                                                      const Duration(
+                                                        seconds: 10,
+                                                      );
                                                   widget.controller.seekTo(
                                                     newPosition > Duration.zero
                                                         ? newPosition
@@ -286,7 +290,9 @@ class __VideoViewerDialogState extends State<_VideoViewerDialog> {
                                                           .controller
                                                           .value
                                                           .position +
-                                                      const Duration(seconds: 10);
+                                                      const Duration(
+                                                        seconds: 10,
+                                                      );
                                                   widget.controller.seekTo(
                                                     newPos < max ? newPos : max,
                                                   );
@@ -335,7 +341,6 @@ class __VideoViewerDialogState extends State<_VideoViewerDialog> {
   }
 }
 
-
 // Positioned.fill(
-                    //   child: GestureDetector(onTap: _togglePlayPause),
-                    // ),
+//   child: GestureDetector(onTap: _togglePlayPause),
+// ),

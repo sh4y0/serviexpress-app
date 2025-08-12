@@ -10,5 +10,4 @@ class AuthResult {
     this.isNewUser = false,
     this.needsProfileCompletion = false,
   });
-
 }

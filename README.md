@@ -14,7 +14,6 @@
 
 </div>
 
----
 
 ## 📌 Descripción
 
@@ -22,8 +21,11 @@
 
 Con un enfoque en la experiencia del usuario, **ServiExpress** permite explorar, agendar, monitorear y calificar servicios como mantenimiento, reparaciones o instalaciones desde la comodidad del celular. Nuestra plataforma busca digitalizar el acceso a servicios técnicos, centralizando toda la gestión en una sola app y generando oportunidades para profesionales independientes.
 
+## Convenciones de Commits
 
----
+Este proyecto sigue la convención de [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+</br>
+[Ver guía de commits aquí](.github/COMMIT_CONVENTION.md)
 
 ## 📑 Tabla de Contenidos
 
@@ -61,7 +63,13 @@ cd serviexpress-app
 flutter pub get
 ````
 
-4. Prueba ServiExpress!
+4. Instalar hook de commits
+
+```bash
+dart tool/install_hooks.dart
+````
+
+5. Prueba ServiExpress!
 
 ```bash
 flutter run
@@ -188,21 +196,6 @@ Toda la experiencia está pensada para ser rápida, transparente y segura.
           <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
         </a>
         <a href="https://www.instagram.com/miichi_u" target="_blank">
-          <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
-        </a>
-      </td>
-      <td align="center">
-        <a href="https://github.com/DavidGrados21" target="_blank">
-          <img src="https://github.com/DavidGrados21.png" width="100px;" alt="David Grados"/><br />
-          <sub><b>David Grados</b></sub><br>
-        </a><br />
-        <a href="https://github.com/DavidGrados21" target="_blank">
-          <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" width="30" style="margin-right: 8px;" />
-        </a>
-        <a href="#" target="_blank">
-          <img src="https://img.icons8.com/fluency/48/linkedin.png" width="32" style="margin-right: 8px;" />
-        </a>
-        <a href="#" target="_blank">
           <img src="https://img.icons8.com/fluency/48/instagram-new.png" width="32" />
         </a>
       </td>

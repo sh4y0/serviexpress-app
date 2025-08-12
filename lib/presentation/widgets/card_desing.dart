@@ -160,7 +160,7 @@ class CardDesing extends StatelessWidget {
                                 distancia,
                                 style: const TextStyle(
                                   color: AppColor.bgDistance,
-                                  fontSize: 12
+                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -200,7 +200,10 @@ class CardDesing extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   service.service.descripcion,
-                  style: const TextStyle(color: AppColor.txtDetalle, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppColor.txtDetalle,
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -218,7 +221,7 @@ class CardDesing extends StatelessWidget {
                       //   child: const Text("Ver más"),
                       // ),
                       child: ElevatedButton(
-                        onPressed:onViewDetails,
+                        onPressed: onViewDetails,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColor.bgMsgUser,
                         ),
@@ -243,26 +246,26 @@ class CardDesing extends StatelessWidget {
                     //       ),
                     //     ),
                     //     onPressed: () {
-                          
+
                     //     },
                     //     child: const Text("Aceptar"),
                     //   ),
-                      // child: ElevatedButton(
-                      //   onPressed: () {
-                      //     // Acción para aceptar
-                      //   },
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: AppColor.bgAll,
-                      //   ),
-                      //   child: const Text(
-                      //     "Aceptar",
-                      //     style: TextStyle(
-                      //       color: Colors.white,
-                      //       fontSize: 16,
-                      //       fontWeight: FontWeight.bold,
-                      //     ),
-                      //   ),
-                      // ),
+                    // child: ElevatedButton(
+                    //   onPressed: () {
+                    //     // Acción para aceptar
+                    //   },
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: AppColor.bgAll,
+                    //   ),
+                    //   child: const Text(
+                    //     "Aceptar",
+                    //     style: TextStyle(
+                    //       color: Colors.white,
+                    //       fontSize: 16,
+                    //       fontWeight: FontWeight.bold,
+                    //     ),
+                    //   ),
+                    // ),
                     //),
                   ],
                 ),

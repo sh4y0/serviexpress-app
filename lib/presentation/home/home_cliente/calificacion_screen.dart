@@ -98,7 +98,10 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(Icons.star_half, color: AppColor.bgStar),
+                        child: const Icon(
+                          Icons.star_half,
+                          color: AppColor.bgStar,
+                        ),
                       ),
                       empty: Container(
                         decoration: BoxDecoration(
@@ -106,7 +109,10 @@ class _CalificacionScreenState extends State<CalificacionScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: const Icon(Icons.star, color: AppColor.loginSelect),
+                        child: const Icon(
+                          Icons.star,
+                          color: AppColor.loginSelect,
+                        ),
                       ),
                     ),
                     onRatingUpdate: (rating) {},

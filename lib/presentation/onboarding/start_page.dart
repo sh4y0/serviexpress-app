@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:serviexpress_app/config/app_session_config.dart';
+import 'package:serviexpress_app/core/config/app_session_config.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 
 class StartPage extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:serviexpress_app/config/app_routes.dart';
-import 'package:serviexpress_app/config/navigation_config.dart';
+import 'package:serviexpress_app/core/config/app_routes.dart';
+import 'package:serviexpress_app/core/config/navigation_config.dart';
 import 'package:serviexpress_app/core/theme/app_theme.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
@@ -36,10 +36,11 @@ class Serviexpress extends StatelessWidget {
           onGenerateRoute: (settings) {
             switch (settings.name) {
               case AppRoutes.login:
-              final args = settings.arguments as Map<String, dynamic>?;
-              final startWithLogin = args?['login'] ?? true;
+                final args = settings.arguments as Map<String, dynamic>?;
+                final startWithLogin = args?['login'] ?? true;
                 return MaterialPageRoute(
-                  builder: (context) => AuthPage(startWithLogin: startWithLogin,),
+                  builder:
+                      (context) => AuthPage(startWithLogin: startWithLogin),
                 );
               case AppRoutes.home:
                 final mapStyle = settings.arguments as String;

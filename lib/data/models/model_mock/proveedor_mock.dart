@@ -1,7 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:serviexpress_app/data/models/proveedor_model.dart';
 
-
 class ProveedorMock {
   static List<ProveedorModel> getProveedoresPorCategoria(String categoria) {
     // const double baseLat = -8.073506;
@@ -9,7 +8,7 @@ class ProveedorMock {
 
     const double baseLat = -8.095322189711315;
     const double baseLng = -79.04929526003019;
-    
+
     switch (categoria.toLowerCase()) {
       case 'limpieza':
         return [
@@ -54,7 +53,7 @@ class ProveedorMock {
             imagenUrl: 'assets/images/provider4.jpg',
           ),
         ];
-      
+
       case 'reparador':
         return [
           ProveedorModel(
@@ -88,7 +87,7 @@ class ProveedorMock {
             imagenUrl: 'assets/images/plumber3.jpg',
           ),
         ];
-      
+
       case 'pintor':
         return [
           ProveedorModel(
@@ -112,12 +111,12 @@ class ProveedorMock {
             imagenUrl: 'assets/images/electric2.jpg',
           ),
         ];
-      
+
       default:
         return [];
     }
   }
-  
+
   static List<ProveedorModel> getAllProveedores() {
     List<ProveedorModel> todos = [];
     for (var categoria in ['limpieza', 'reparador', 'pintor']) {

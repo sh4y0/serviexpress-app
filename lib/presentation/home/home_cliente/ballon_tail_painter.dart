@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class BalloonTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.fill;
 
     final path = Path();
     path.moveTo(0, 0);

@@ -173,7 +173,7 @@ class DraggableSheetState
       audioFiles: audio,
     );
 
-   //widget.isSolicitudEnviada(true);
+    //widget.isSolicitudEnviada(true);
     widget.onGuardarSolicitudCallback(service);
   }
 
@@ -254,7 +254,7 @@ class DraggableSheetState
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
-                                    fontWeight: FontWeight.bold
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
 

@@ -11,9 +11,9 @@ class LocationNotFoundBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration:  const BoxDecoration(
-        color:  Color(0xFFE6A024),
-        boxShadow:  [
+      decoration: const BoxDecoration(
+        color: Color(0xFFE6A024),
+        boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
@@ -103,7 +103,7 @@ class _SearchingLocationBannerState extends State<SearchingLocationBanner>
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        color: Color.fromRGBO(74,102,255,1),
+        color: Color.fromRGBO(74, 102, 255, 1),
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
