@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/location_not_found_string.dart';
 
 class LocationNotFoundBanner extends StatelessWidget {
   final VoidCallback? onTap;
@@ -29,7 +30,7 @@ class LocationNotFoundBanner extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
-                    "No pudimos encontrarte",
+                    LocationNotFoundString.notFound,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -40,7 +41,7 @@ class LocationNotFoundBanner extends StatelessWidget {
                   GestureDetector(
                     onTap: onTap,
                     child: const Text(
-                      "Toca para activar la ubicación",
+                      LocationNotFoundString.activateLocation,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -132,7 +133,7 @@ class _SearchingLocationBannerState extends State<SearchingLocationBanner>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Buscándote en el mapa",
+                    LocationNotFoundString.searchingLocation,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -141,7 +142,7 @@ class _SearchingLocationBannerState extends State<SearchingLocationBanner>
                   ),
                   SizedBox(height: 2),
                   Text(
-                    "Estamos ubicándote, por favor espera un momento…",
+                    LocationNotFoundString.searchingLocationDescription,
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],

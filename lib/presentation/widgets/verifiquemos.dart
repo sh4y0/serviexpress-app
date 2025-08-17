@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/dni_image_types.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/verifications_string.dart';
 
 class Verifiquemos extends StatefulWidget {
   final ValueNotifier<Uint8List?> dniFrontImage;
@@ -28,13 +30,13 @@ class _VerifiquemosState extends State<Verifiquemos> {
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
       switch (type) {
-        case "front":
+        case DniImageTypes.front:
           widget.dniFrontImage.value = bytes;
           break;
-        case "back":
+        case DniImageTypes.back:
           widget.dniBackImage.value = bytes;
           break;
-        case "profile":
+        case DniImageTypes.profile:
           widget.profileImage.value = bytes;
           break;
       }
@@ -58,7 +60,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.camera_alt),
-                  title: const Text("Tomar Foto"),
+                  title: const Text(VerificationsString.takePhoto),
                   onTap: () {
                     Navigator.of(context).pop();
                     _pickImage(ImageSource.camera, type);
@@ -66,7 +68,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.photo),
-                  title: const Text("Elegir de Galería"),
+                  title: const Text(VerificationsString.chooseFromGallery),
                   onTap: () {
                     Navigator.of(context).pop();
                     _pickImage(ImageSource.gallery, type);
@@ -92,7 +94,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Verifiquemos",
+                  VerificationsString.titleVerify,
                   style: TextStyle(
                     fontSize: 30,
                     color: Colors.white,
@@ -101,7 +103,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Te solicitaremos fotos y archivos adjuntos a continuación.",
+                  VerificationsString.subtitleVerify,
                   style: TextStyle(fontSize: 14, color: AppColor.textWelcome),
                 ),
                 const SizedBox(height: 20),
@@ -110,31 +112,31 @@ class _VerifiquemosState extends State<Verifiquemos> {
                   children: [
                     Expanded(
                       child: _buildPhotoBox(
-                        "DNI Lado Frontal",
+                        VerificationsString.dniFront,
                         widget.dniFrontImage,
-                        "front",
+                        DniImageTypes.front,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildPhotoBox(
-                        "DNI Lado Trasero",
+                        VerificationsString.dniBack,
                         widget.dniBackImage,
-                        "back",
+                        DniImageTypes.back,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
                 _buildPhotoBox(
-                  "Foto de Perfil",
+                  VerificationsString.profilePhoto,
                   widget.profileImage,
-                  "profile",
+                  DniImageTypes.profile,
                   isCircular: true,
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "*Verificaremos si tu foto de perfil coincide con la de tu DNI",
+                  VerificationsString.profilePhotoNote,
                   style: TextStyle(color: AppColor.textInput, fontSize: 14),
                 ),
               ],
@@ -193,7 +195,7 @@ class _VerifiquemosState extends State<Verifiquemos> {
                               ),
                             ),
                             Text(
-                              "Tomar Foto",
+                              VerificationsString.takePhoto,
                               style: TextStyle(
                                 color: AppColor.btnColor.withAlpha(110),
                                 fontSize: 14,

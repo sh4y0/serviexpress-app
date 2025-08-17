@@ -4,6 +4,7 @@ import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/request_service_string.dart';
 
 class DraggableSheetSolicitarServicio extends ConsumerStatefulWidget {
   final VoidCallback? onDismiss;
@@ -334,8 +335,10 @@ class DraggableSheetSolicitarServicioState
                                                       decoration: InputDecoration(
                                                         hintText:
                                                             widget.isSolicitudGuardada
-                                                                ? "Toca aqui para editar tu solicitud..."
-                                                                : "Describe el servicio que necesitas...",
+                                                                ? RequestServiceString
+                                                                    .editRequest
+                                                                : RequestServiceString
+                                                                    .describeService,
                                                         hintStyle: TextStyle(
                                                           color:
                                                               _descripcionError
@@ -444,7 +447,7 @@ class DraggableSheetSolicitarServicioState
                                     ),
                                   ),
                                   child: const Text(
-                                    'Solicitar Servicio',
+                                    RequestServiceString.requestService,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,

@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:serviexpress_app/data/models/model_mock/category_mock.dart';
 import 'package:serviexpress_app/data/models/service_model.dart';
 import 'package:serviexpress_app/data/repositories/service_repository.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/request_service_string.dart';
 import 'package:serviexpress_app/presentation/widgets/form_multimedia.dart';
 
 class DraggableSheetSolicitarServicioDetallado extends StatefulWidget {
@@ -250,7 +251,7 @@ class DraggableSheetState
                                 ),
                                 const SizedBox(height: 10),
                                 const Text(
-                                  'Cuéntanos Más',
+                                  RequestServiceString.tellUsMore,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -281,7 +282,7 @@ class DraggableSheetState
                                       ),
                                     ),
                                     child: const Text(
-                                      'Guardar Solicitud',
+                                      RequestServiceString.saveRequest,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16,

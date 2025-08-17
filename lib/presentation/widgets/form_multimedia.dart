@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:serviexpress_app/presentation/pages/auth_page.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/form_multimedia_string.dart';
 
 class FormMultimedia extends StatefulWidget {
   final GlobalKey keyServicioDetalladoPhotos;
@@ -344,7 +345,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Grabando... ${_formatRecordingTime(seconds)}',
+                  '${FormMultimediaString.recording} ${_formatRecordingTime(seconds)}',
                   style: const TextStyle(
                     color: Colors.red,
                     fontSize: 14,
@@ -388,7 +389,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.white70),
                 title: const Text(
-                  'Tomar Foto',
+                  FormMultimediaString.takePhoto,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
@@ -399,7 +400,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Colors.white70),
                 title: const Text(
-                  'Subir Fotos de la Galería',
+                  FormMultimediaString.uploadPhotos,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
@@ -410,7 +411,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
               ListTile(
                 leading: const Icon(Icons.videocam, color: Colors.white70),
                 title: const Text(
-                  'Grabar Video',
+                  FormMultimediaString.recordVideo,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
@@ -421,7 +422,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
               ListTile(
                 leading: const Icon(Icons.video_library, color: Colors.white70),
                 title: const Text(
-                  'Subir Videos de la Galería',
+                  FormMultimediaString.uploadVideosTitle,
                   style: TextStyle(color: Colors.white),
                 ),
                 onTap: () {
@@ -505,7 +506,8 @@ class FormularioMultimediaState extends State<FormMultimedia>
                                 ),
                                 decoration: InputDecoration(
                                   hintText:
-                                      "Bríndanos más detalles de tu solicitud...",
+                                      FormMultimediaString
+                                          .hintRequestMoreDetails,
                                   hintStyle: TextStyle(
                                     color:
                                         descripcionErrorNotifier.value
@@ -558,7 +560,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Ingresa los detalles',
+                    FormMultimediaString.enterDetails,
                     style: TextStyle(color: Colors.red, fontSize: 13),
                   ),
                 ),
@@ -754,7 +756,7 @@ class FormularioMultimediaState extends State<FormMultimedia>
                       color: Color.fromRGBO(54, 69, 245, 1),
                     ),
                     label: const Text(
-                      "Tomar o subir",
+                      FormMultimediaString.takeOrUpload,
                       style: TextStyle(
                         color: Color.fromRGBO(54, 69, 245, 1),
                         fontSize: 13,

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/service/location_service.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/card_desing_string.dart';
 
 class CardDesing extends StatelessWidget {
   final ServiceComplete service;
@@ -29,9 +30,13 @@ class CardDesing extends StatelessWidget {
       ]),
       builder: (context, snapshot) {
         final direccion =
-            snapshot.hasData ? snapshot.data![0] : "Obteniendo dirección...";
+            snapshot.hasData
+                ? snapshot.data![0]
+                : CardDesingString.gettingAddress;
         final distancia =
-            snapshot.hasData ? snapshot.data![1] : "Calculando distancia...";
+            snapshot.hasData
+                ? snapshot.data![1]
+                : CardDesingString.calculatingDistance;
 
         return Container(
           padding: const EdgeInsets.all(12),
@@ -188,7 +193,7 @@ class CardDesing extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "Detalle del servicio",
+                  CardDesingString.serviceDetail,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 15,
@@ -226,7 +231,7 @@ class CardDesing extends StatelessWidget {
                           backgroundColor: AppColor.bgMsgUser,
                         ),
                         child: const Text(
-                          "Ver detalles",
+                          CardDesingString.serviceDetailDescription,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,

@@ -12,6 +12,7 @@ import 'package:serviexpress_app/core/utils/alerts.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/tell_us_string.dart';
 import 'package:serviexpress_app/presentation/widgets/antecedentes.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/show_super.dart';
@@ -102,7 +103,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           _experienciaController.text.isEmpty) {
         Alerts.instance.showErrorAlert(
           context,
-          "Por favor, completa todos los campos.",
+          TellUsString.alertCompleteFields,
         );
         return;
       }
@@ -138,7 +139,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       if (!_imagenesDniValidas.value) {
         Alerts.instance.showErrorAlert(
           context,
-          "Debes subir las fotos frontal y trasera de tu DNI",
+          TellUsString.alertUploadDniPhotos,
         );
         return;
       }
@@ -162,7 +163,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       if (antecedentesFileNameNotifier.value == null) {
         Alerts.instance.showErrorAlert(
           context,
-          "Debes subir un archivo PDF o DCX para continuar.",
+          TellUsString.alertUploadCriminalRecord,
         );
         return;
       }
@@ -175,21 +176,21 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
 
     if (_currentPage.value == 3) {
       if (!_aceptado.value) {
-        Alerts.instance.showErrorAlert(
-          context,
-          "Debes aceptar los términos y condiciones.",
-        );
+        Alerts.instance.showErrorAlert(context, TellUsString.alertAcceptTerms);
         return;
       }
 
       if (!_firmado.value) {
-        Alerts.instance.showErrorAlert(context, "Debes firmar para continuar.");
+        Alerts.instance.showErrorAlert(
+          context,
+          TellUsString.alertSignToContinue,
+        );
         return;
       }
 
       Alerts.instance.showSuccessAlert(
         context,
-        "¡Registro completado exitosamente!",
+        TellUsString.successMessage,
         onOk: () async {
           await UserRepository.instance.updateUserCuentanosById({
             "isCompleteProfile": true,
@@ -298,7 +299,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                                 );
                               },
                               child: const Text(
-                                "Atrás",
+                                TellUsString.back,
                                 style: TextStyle(
                                   color: AppColor.bgAll,
                                   fontSize: 17,
@@ -312,7 +313,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
                           child: ElevatedButton(
                             onPressed: _onNext,
                             child: const Text(
-                              "Siguiente",
+                              TellUsString.next,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
@@ -341,7 +342,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Cuéntanos mas de ti",
+            TellUsString.tellUsMore,
             style: TextStyle(
               fontSize: 30,
               color: Colors.white,
@@ -350,7 +351,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           ),
           const SizedBox(height: 10),
           const Text(
-            "Nos gustaría saber de ti por ello te pediremos alguna información adicional.",
+            TellUsString.moreInformationAboutYou,
             style: TextStyle(fontSize: 14, color: AppColor.textWelcome),
           ),
           const SizedBox(height: 30),
@@ -394,7 +395,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColor.textInput, width: 1),
         ),
-        hintText: "Ingresa tu DNI",
+        hintText: TellUsString.hintEnterYourDni,
         hintStyle: const TextStyle(color: AppColor.textInput),
       ),
     );
@@ -427,7 +428,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
         ),
       ),
       hint: const Text(
-        "Escoge tu categoria",
+        TellUsString.hintSelectCategory,
         style: TextStyle(color: AppColor.textInput, fontSize: 16),
       ),
       dropdownStyleData: DropdownStyleData(
@@ -455,7 +456,7 @@ class _CuentanosScreenState extends ConsumerState<CuentanosScreen> {
       cursorColor: AppColor.colorInput,
       style: const TextStyle(color: AppColor.textInput),
       decoration: InputDecoration(
-        hintText: "Descríbete brevemente, cuéntanos tu experiencia,..",
+        hintText: TellUsString.hintDescribeYourself,
         hintStyle: const TextStyle(color: AppColor.textInput),
         filled: true,
         fillColor: Colors.transparent,

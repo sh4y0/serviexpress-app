@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/calification_string.dart';
 
 class ShowCalificar extends StatelessWidget {
   const ShowCalificar({super.key});
@@ -25,7 +26,7 @@ class ShowCalificar extends StatelessWidget {
                       Image(image: AssetImage("assets/gifs/calification.gif")),
                       SizedBox(height: 10),
                       Text(
-                        "Gracias por tu comentario",
+                        CalificationString.thankYouForComment,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 21,
@@ -35,7 +36,7 @@ class ShowCalificar extends StatelessWidget {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Tus reseñas hacen de esta\n aplicación mejor",
+                        CalificationString.reviewsMakeAppBetter,
                         style: TextStyle(
                           color: AppColor.txtPropuesta,
                           fontSize: 17,

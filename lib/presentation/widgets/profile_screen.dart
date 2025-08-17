@@ -14,6 +14,10 @@ import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/resources/constants/profile/profile_alert_messages_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/profile/profile_dialog_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/profile/profile_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/show_super_navigation_keys.dart';
 import 'package:serviexpress_app/presentation/viewmodels/desactive_account_view_model.dart';
 import 'package:serviexpress_app/presentation/widgets/map_style_loader.dart';
 import 'package:serviexpress_app/presentation/widgets/skeleton_profile.dart';
@@ -98,17 +102,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   ListTile(
                     leading: const Icon(Icons.photo_camera),
-                    title: const Text("Tomar Foto"),
+                    title: const Text(ProfileScreenStrings.takePhoto),
                     onTap: () => _pickImage(ImageSource.camera),
                   ),
                   ListTile(
                     leading: const Icon(Icons.photo_library),
-                    title: const Text("Subir Foto"),
+                    title: const Text(ProfileScreenStrings.uploadPhoto),
                     onTap: () => _pickImage(ImageSource.gallery),
                   ),
                   ListTile(
                     leading: const Icon(Icons.close),
-                    title: const Text("Cancelar"),
+                    title: const Text(ProfileScreenStrings.cancel),
                     onTap: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -134,7 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     } catch (e) {
       Alerts.instance.showErrorAlert(
         context,
-        "No se pudo seleccionar la imagen.",
+        ProfileAlertMessagesString.imageSelectionError,
       );
     }
   }
@@ -148,7 +152,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             backgroundColor: AppColor.bgCard,
             title: const Center(
               child: Text(
-                "Confirmar imagen de perfil",
+                ProfileDialogString.confirmProfileImage,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -174,7 +178,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   });
                   Navigator.of(context).pop();
                 },
-                child: const Text("Cancelar"),
+                child: const Text(ProfileDialogString.cancel),
               ),
               TextButton(
                 style: TextButton.styleFrom(
@@ -185,7 +189,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 onPressed: () => _uploadAndRefreshUser(),
                 child: const Text(
-                  "Aceptar",
+                  ProfileDialogString.accept,
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -214,12 +218,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       Navigator.of(context).pop();
       Alerts.instance.showSuccessAlert(
         context,
-        "Imagen actualizada exitosamente",
+        ProfileAlertMessagesString.imageUpdated,
       );
     } catch (e) {
       Alerts.instance.showErrorAlert(
         context,
-        "Error al subir la imagen: ${e.toString()}",
+        "${ProfileAlertMessagesString.imageUpdateError}: ${e.toString()}",
+        // "Error al subir la imagen: ${e.toString()}",
       );
     } finally {
       LoadingScreen.hide();
@@ -254,35 +259,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (user == null) {
       return const SkeletonProfile();
     }
-    final options = [
-      {
-        "iconPath": "assets/icons/ic_privacidad.svg",
-        "title": "Privacidad",
-        "trailing": "",
-      },
-      {
-        "iconPath": "assets/icons/ic_notify.svg",
-        "title": "Notificaciones",
-        "trailing": "ON",
-      },
-      {
-        "iconPath": "assets/icons/ic_idioma.svg",
-        "title": "Idioma",
-        "trailing": "English",
-      },
-    ];
+    final options = ProfileScreenStrings.options;
+    final options2 = ProfileScreenStrings.secondaryOptions;
 
-    final options2 = [
-      {
-        "iconPath": "assets/icons/ic_verification_mov.svg",
-        "title": "Verificacion móvil",
-      },
-      {
-        "iconPath": "assets/icons/ic_historial.svg",
-        "title": "Historial de actividad",
-        //"route": AppRoutes.cambioRol,
-      },
-    ];
     return Scaffold(
       backgroundColor: AppColor.bgVerification,
       appBar: AppBar(backgroundColor: Colors.transparent),
@@ -440,7 +419,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   (0.18 * 255).toInt(),
                                 ),
                                 onTap: () async {
-                                  final route = option["route"];
+                                  final route =
+                                      option[ShowSuperNavigationKeys.route];
                                   if (route != null) {
                                     if (route == AppRoutes.home) {
                                       final mapStyle =
@@ -464,7 +444,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 },
                                 child: ListTile(
                                   leading: SvgPicture.asset(
-                                    option["iconPath"] as String,
+                                    option[ProfileScreenStrings.iconPath]
+                                        as String,
                                     width: 24,
                                     height: 24,
                                     colorFilter: const ColorFilter.mode(
@@ -473,14 +454,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   title: Text(
-                                    option["title"] as String,
+                                    option[ProfileScreenStrings.title]
+                                        as String,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
                                   ),
                                   trailing: Text(
-                                    option["trailing"] as String,
+                                    option[ProfileScreenStrings.trailing]
+                                        as String,
                                     style: const TextStyle(
                                       color: AppColor.txtTrailing,
                                       fontSize: 16,
@@ -522,14 +505,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   (0.18 * 255).toInt(),
                                 ),
                                 onTap: () async {
-                                  if (option["route"] != null) {
-                                    if (option["route"] == AppRoutes.home) {
+                                  if (option[ShowSuperNavigationKeys.route] !=
+                                      null) {
+                                    if (option[ShowSuperNavigationKeys.route] ==
+                                        AppRoutes.home) {
                                       final mapStyle =
                                           await MapStyleLoader.loadStyle();
                                       Navigator.of(
                                         context,
                                       ).pushNamedAndRemoveUntil(
-                                        option["route"] as String,
+                                        option[ShowSuperNavigationKeys.route]
+                                            as String,
                                         (route) => false,
                                         arguments: mapStyle,
                                       );
@@ -537,7 +523,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       Navigator.of(
                                         context,
                                       ).pushNamedAndRemoveUntil(
-                                        option["route"] as String,
+                                        option[ShowSuperNavigationKeys.route]
+                                            as String,
                                         (route) => false,
                                       );
                                     }
@@ -545,9 +532,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 },
                                 child: ListTile(
                                   leading:
-                                      option["iconPath"] != null
+                                      option[ProfileScreenStrings.iconPath] !=
+                                              null
                                           ? SvgPicture.asset(
-                                            option["iconPath"] as String,
+                                            option[ProfileScreenStrings
+                                                    .iconPath]
+                                                as String,
                                             width: 24,
                                             height: 24,
                                             colorFilter: const ColorFilter.mode(
@@ -556,12 +546,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                             ),
                                           )
                                           : Icon(
-                                            option["icon"] as IconData,
+                                            option[ProfileScreenStrings.icon]
+                                                as IconData,
                                             color: Colors.white,
                                             size: 24,
                                           ),
                                   title: Text(
-                                    option["title"] as String,
+                                    option[ProfileScreenStrings.title]
+                                        as String,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -602,9 +594,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 final confirmed = await Alerts.instance
                                     .showConfirmAlert(
                                       context,
-                                      "¿Estás seguro de que deseas desactivar tu cuenta?",
-                                      confirmText: "Sí, continuar",
-                                      cancelText: "Cancelar",
+                                      ProfileAlertMessagesString
+                                          .accountDeactivationConfirmation,
+                                      confirmText:
+                                          ProfileAlertMessagesString
+                                              .yesContinue,
+                                      cancelText:
+                                          ProfileAlertMessagesString.cancel,
                                     );
 
                                 if (confirmed) {
@@ -625,7 +621,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ),
                                 ),
                                 title: const Text(
-                                  "Desactivar cuenta",
+                                  ProfileScreenStrings.deactivateAccount,
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -652,7 +648,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ),
                                 ),
                                 title: const Text(
-                                  "Cerrar sesión",
+                                  ProfileScreenStrings.logout,
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),

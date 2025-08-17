@@ -14,6 +14,8 @@ import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/data/repositories/propuesta_repository.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
+import 'package:serviexpress_app/presentation/resources/constants/home/home_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/target_focus_id.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_home.dart';
 import 'package:serviexpress_app/presentation/widgets/ballon_tail_painter.dart';
 import 'package:serviexpress_app/presentation/widgets/category_button.dart';
@@ -338,7 +340,7 @@ class _HomePageContentState extends State<HomePageContent>
     _targets.clear();
     _targets.add(
       TargetFocus(
-        identify: "first-category-item-key",
+        identify: TargetFocusId.firstCategoryItemKey,
         keyTarget: _firstCategoryKey,
         alignSkip: Alignment.topRight,
         shape: ShapeLightFocus.RRect,
@@ -353,7 +355,7 @@ class _HomePageContentState extends State<HomePageContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Selecciona una Categoría",
+                    HomeGeneralString.newCategory,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -362,7 +364,7 @@ class _HomePageContentState extends State<HomePageContent>
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "¡Este es un pequeño recorrido!. 😊 Elijamos esta categoría para ver los proveedores en el mapa.",
+                    HomeGeneralString.tutoCategory,
                     style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
                 ],
@@ -518,7 +520,7 @@ class _HomePageContentState extends State<HomePageContent>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo actualizar la ubicación'),
+            content: Text(HomeGeneralString.locationUpdateError),
             duration: Duration(seconds: 2),
           ),
         );
@@ -672,15 +674,14 @@ class _HomePageContentState extends State<HomePageContent>
           return AlertDialog(
             backgroundColor: AppColor.bgCard,
             title: const Text(
-              "Cambiar Categoria",
+              HomeGeneralString.changeCategory,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             content: const Text(
-              "Ya hay una solicitud guardada con una categoría seleccionada. "
-              "¿Estás seguro de que deseas cambiar la categoría? Esto eliminará la solicitud actual.",
+              HomeGeneralString.confirmChangeCategory,
               style: TextStyle(color: AppColor.txtBooking),
             ),
             actions: [
@@ -690,7 +691,7 @@ class _HomePageContentState extends State<HomePageContent>
                   Navigator.of(context).pop(false);
                 },
                 child: const Text(
-                  "Cancelar",
+                  HomeGeneralString.cancel,
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -700,7 +701,7 @@ class _HomePageContentState extends State<HomePageContent>
                   Navigator.of(context).pop(true);
                 },
                 child: const Text(
-                  "Si, cambiar",
+                  HomeGeneralString.yesChange,
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -727,7 +728,7 @@ class _HomePageContentState extends State<HomePageContent>
         const SnackBar(
           backgroundColor: Colors.green,
           content: Text(
-            "Categoria cambiada exitosamente",
+            HomeGeneralString.categoryChangedSuccessfully,
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -932,7 +933,7 @@ class _HomePageContentState extends State<HomePageContent>
     );
 
     final target = TargetFocus(
-      identify: "marker-focus-tutorial",
+      identify: TargetFocusId.markerFocusTutorial,
       targetPosition: targetPosition,
       shape: ShapeLightFocus.Circle,
       radius: 15,
@@ -947,7 +948,7 @@ class _HomePageContentState extends State<HomePageContent>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Proveedores de Servicio",
+                  HomeGeneralString.serviceProviders,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -956,7 +957,7 @@ class _HomePageContentState extends State<HomePageContent>
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  "🔵  Los puntos azules en el mapa son proveedores de la categoría que elegiste.\n 🤝 Cuando ellos te envíen sus propuestas, podrás tocarlos para ver más detalles y decidir si aceptar o no",
+                  HomeGeneralString.tutoCategory2,
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
                 const SizedBox(height: 20),
@@ -969,7 +970,7 @@ class _HomePageContentState extends State<HomePageContent>
                     },
                     icon: const Icon(Icons.arrow_forward, color: Colors.white),
                     label: const Text(
-                      "Siguiente",
+                      HomeGeneralString.next,
                       style: TextStyle(color: Colors.white),
                     ),
                     style: TextButton.styleFrom(
@@ -998,7 +999,7 @@ class _HomePageContentState extends State<HomePageContent>
     _targets.clear();
     _targets.add(
       TargetFocus(
-        identify: "location-button-key",
+        identify: TargetFocusId.locationButtonKey,
         keyTarget: _locationButtonKey,
         shape: ShapeLightFocus.Circle,
         contents: [
@@ -1011,7 +1012,7 @@ class _HomePageContentState extends State<HomePageContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Encuentra tu ubicación",
+                    HomeGeneralString.tutoLocation,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -1020,7 +1021,7 @@ class _HomePageContentState extends State<HomePageContent>
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Pulsa este botón para centrar el mapa en tu ubicación actual y ver los proveedores más cercanos.",
+                    HomeGeneralString.tutoLocationDescription,
                     style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
                 ],
@@ -1050,7 +1051,7 @@ class _HomePageContentState extends State<HomePageContent>
     _targets.clear();
     _targets.add(
       TargetFocus(
-        identify: "describir-servicio-key",
+        identify: TargetFocusId.serviceDescriptionKey,
         keyTarget: _describirServicioKey,
         shape: ShapeLightFocus.RRect,
         radius: 10,
@@ -1064,7 +1065,7 @@ class _HomePageContentState extends State<HomePageContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Describe tu Servicio",
+                    HomeGeneralString.describeYourService,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -1073,7 +1074,7 @@ class _HomePageContentState extends State<HomePageContent>
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "¿Qué servicio necesitas? Escríbelo aquí?",
+                    HomeGeneralString.describeYourServiceQuestion,
                     style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
                 ],
@@ -1102,7 +1103,7 @@ class _HomePageContentState extends State<HomePageContent>
     _targets.clear();
     _targets.add(
       TargetFocus(
-        identify: "describir-servicio-detallado-photos-key",
+        identify: TargetFocusId.detailedServiceDescriptionPhotosKey,
         keyTarget: _describirServicioDetalladoPhotosKey,
         shape: ShapeLightFocus.RRect,
         enableTargetTab: false,
@@ -1117,7 +1118,7 @@ class _HomePageContentState extends State<HomePageContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Agrega mas detalles",
+                    HomeGeneralString.addMoreDetails,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -1126,7 +1127,7 @@ class _HomePageContentState extends State<HomePageContent>
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "Puedes agregar fotos o videos para que el proveedor tenga mas detalles",
+                    HomeGeneralString.addMoreDetailsDescription,
                     style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
 
@@ -1143,7 +1144,7 @@ class _HomePageContentState extends State<HomePageContent>
                         color: Colors.white,
                       ),
                       label: const Text(
-                        "Siguiente",
+                        HomeGeneralString.next,
                         style: TextStyle(color: Colors.white),
                       ),
                       style: TextButton.styleFrom(
@@ -1174,7 +1175,7 @@ class _HomePageContentState extends State<HomePageContent>
     _targets.clear();
     _targets.add(
       TargetFocus(
-        identify: "describir-servicio-detallado-voice-key",
+        identify: TargetFocusId.detailedServiceDescriptionVoiceKey,
         keyTarget: _describirServicioDetalladoVoiceKey,
         shape: ShapeLightFocus.Circle,
         radius: 10,
@@ -1189,7 +1190,7 @@ class _HomePageContentState extends State<HomePageContent>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "¿No quieres escribir? Usa el micrófono",
+                    HomeGeneralString.useMicrophone,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -1198,7 +1199,7 @@ class _HomePageContentState extends State<HomePageContent>
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "Mantén presionado este ícono para grabar",
+                    HomeGeneralString.holdToRecord,
                     style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
                 ],
@@ -1210,7 +1211,7 @@ class _HomePageContentState extends State<HomePageContent>
     );
     _tutorialCoachMark = TutorialCoachMark(
       targets: _targets,
-      textSkip: "FINALIZAR",
+      textSkip: HomeGeneralString.finalize,
       paddingFocus: 10,
       opacityShadow: 0.8,
       onFinish: () => _marcarTutorialComoMostrado(),
@@ -1239,7 +1240,7 @@ class _HomePageContentState extends State<HomePageContent>
       ),
     );
     final target = TargetFocus(
-      identify: "fallback-tutorial",
+      identify: TargetFocusId.fallbackTutorial,
       targetPosition: targetPosition,
       shape: ShapeLightFocus.Circle,
       radius: 15,
@@ -1253,7 +1254,7 @@ class _HomePageContentState extends State<HomePageContent>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Proveedores en el Mapa",
+                  HomeGeneralString.fallbackTuto,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -1262,7 +1263,7 @@ class _HomePageContentState extends State<HomePageContent>
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Aun no hay proveedores disponibles en el mapa para esta categoría",
+                  HomeGeneralString.noProvidersAvailable,
                   style: TextStyle(color: Colors.white, fontSize: 14.0),
                 ),
                 SizedBox(height: 20),
@@ -1293,7 +1294,7 @@ class _HomePageContentState extends State<HomePageContent>
     );
     _tutorialCoachMark = TutorialCoachMark(
       targets: [target],
-      textSkip: "FINALIZAR",
+      textSkip: HomeGeneralString.finalize,
       paddingFocus: 10,
       opacityShadow: 0.8,
     )..show(context: context);
@@ -1319,7 +1320,7 @@ class _HomePageContentState extends State<HomePageContent>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Solicitud Guardada Exitosamente',
+            HomeGeneralString.requestSavedSuccessfully,
             style: TextStyle(color: Colors.white),
             textAlign: TextAlign.center,
           ),
@@ -1492,7 +1493,7 @@ class _HomePageContentState extends State<HomePageContent>
                                     const Padding(
                                       padding: EdgeInsets.only(left: 10),
                                       child: Text(
-                                        "Selecciona una categoria",
+                                        HomeGeneralString.selectCategory,
                                         style: TextStyle(
                                           color: Colors.redAccent,
                                         ),
@@ -1821,7 +1822,7 @@ class _HomePageContentState extends State<HomePageContent>
                         ),
                         onPressed: () {},
                         child: const Text(
-                          "Cancelar Solicitud",
+                          HomeGeneralString.cancelRequest,
                           style: TextStyle(color: Colors.white, fontSize: 17),
                         ),
                       ),

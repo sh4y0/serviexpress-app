@@ -15,6 +15,7 @@ import 'package:serviexpress_app/data/repositories/user_repository.dart';
 import 'package:serviexpress_app/data/service/location_maps_service.dart';
 import 'package:serviexpress_app/presentation/messaging/notifiaction/notification_manager.dart';
 import 'package:serviexpress_app/presentation/messaging/service/location_provider.dart';
+import 'package:serviexpress_app/presentation/resources/constants/home/home_provider_string.dart';
 import 'package:serviexpress_app/presentation/widgets/animation_provider.dart';
 import 'package:serviexpress_app/presentation/widgets/app_drawer.dart';
 import 'package:serviexpress_app/presentation/widgets/card_desing.dart';
@@ -61,7 +62,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
     _screens = [
       () => _buildHomeProvider(),
       () => const Center(
-        child: Text("Conversar", style: TextStyle(fontSize: 25)),
+        child: Text(HomeProviderString.chat, style: TextStyle(fontSize: 25)),
       ),
       () => const ProfileScreen(),
     ];
@@ -200,7 +201,7 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                                 SnackBar(
                                   backgroundColor: AppColor.bgMsgUser,
                                   content: Text(
-                                    "La solicitud de $userName fue eliminada",
+                                    HomeProviderString.requestDeleted(userName),
                                     style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
@@ -333,13 +334,13 @@ class _HomeProviderState extends ConsumerState<HomeProvider>
                   Color statusColor;
 
                   if (!isLocationAvailable) {
-                    statusText = "Sin Ubicación";
+                    statusText = HomeProviderString.noLocation;
                     statusColor = Colors.grey[400]!;
                   } else if (stateValue) {
-                    statusText = "Disponible";
+                    statusText = HomeProviderString.available;
                     statusColor = Colors.white;
                   } else {
-                    statusText = "No Disponible";
+                    statusText = HomeProviderString.unavailable;
                     statusColor = Colors.grey[300]!;
                   }
 

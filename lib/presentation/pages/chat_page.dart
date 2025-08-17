@@ -8,6 +8,9 @@ import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/core/utils/result_state.dart';
 import 'package:serviexpress_app/core/utils/user_preferences.dart';
 import 'package:serviexpress_app/data/models/message_model.dart';
+import 'package:serviexpress_app/presentation/resources/constants/chat/chat_alert_messages_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/chat/chat_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/firestore_id.dart';
 import 'package:serviexpress_app/presentation/viewmodels/chat_view_model.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -20,7 +23,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ValueNotifier<String?> _userId = ValueNotifier<String?>(null);
 
-  final clienteId = "0eGwG6nvcTfneiTvVSSBI3G9HV53";
+  final clienteId = FirestoreId.clienteId;
   final ValueNotifier<bool> _errorShown = ValueNotifier<bool>(false);
 
   late final String chatUid;
@@ -67,7 +70,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             _errorShown.value = true;
             Alerts.instance.showErrorAlert(
               context,
-              "No se pudo obtener el ID del usuario.",
+              ChatAlertMessagesString.userIdNotFound,
             );
           }
         });
@@ -78,7 +81,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         _errorShown.value = true;
         Alerts.instance.showErrorAlert(
           context,
-          "Ocurrió un error al obtener el ID: $e",
+          "${ChatAlertMessagesString.errorFetchingUserId}: $e",
         );
       }
     }
@@ -126,7 +129,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
             ),
             title: const Text(
-              "Fedor Kiryakov",
+              ChatString.title,
               style: TextStyle(color: Colors.white, fontSize: 17),
             ),
             centerTitle: true,
@@ -175,7 +178,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     error: (error, stack) {
                       return const Center(
                         child: Text(
-                          "Error al cargar los mensajes",
+                          ChatAlertMessagesString.errorLoadingMessages,
                           style: TextStyle(color: Colors.white),
                         ),
                       );
@@ -269,7 +272,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           minLines: 1,
                           style: const TextStyle(color: AppColor.txtMsg),
                           decoration: InputDecoration(
-                            hintText: "Tu mensaje aquí",
+                            hintText: ChatString.hintMessageYou,
                             hintStyle: const TextStyle(
                               color: AppColor.txtMsg,
                               fontSize: 17,
@@ -301,7 +304,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     if (message.isEmpty) {
                                       Alerts.instance.showErrorAlert(
                                         context,
-                                        "Escribe un mensaje.",
+                                        ChatString.hintMessage,
                                       );
                                       return;
                                     }

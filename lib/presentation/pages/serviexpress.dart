@@ -7,6 +7,8 @@ import 'package:serviexpress_app/data/models/service.dart';
 import 'package:serviexpress_app/data/models/user_model.dart';
 import 'package:serviexpress_app/presentation/login/auth_page.dart';
 import 'package:serviexpress_app/presentation/login/auth_page_recovery_password.dart';
+import 'package:serviexpress_app/presentation/resources/constants/servi_express_string.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/show_super_navigation_keys.dart';
 import 'package:serviexpress_app/presentation/widgets/common/chat_page.dart';
 import 'package:serviexpress_app/presentation/home/home_cliente/home_page.dart';
 import 'package:serviexpress_app/presentation/home/home_proveedor/home_provider.dart';
@@ -30,14 +32,15 @@ class Serviexpress extends StatelessWidget {
         return MaterialApp(
           navigatorKey: NavigationConfig.navigatorKey,
           debugShowCheckedModeBanner: false,
-          title: 'ServiExpress',
+          title: ServiExpressString.appName,
           theme: AppTheme.themeData,
 
           onGenerateRoute: (settings) {
             switch (settings.name) {
               case AppRoutes.login:
                 final args = settings.arguments as Map<String, dynamic>?;
-                final startWithLogin = args?['login'] ?? true;
+                final startWithLogin =
+                    args?[ShowSuperNavigationKeys.login] ?? true;
                 return MaterialPageRoute(
                   builder:
                       (context) => AuthPage(startWithLogin: startWithLogin),
@@ -66,8 +69,10 @@ class Serviexpress extends StatelessWidget {
                 );
               case AppRoutes.showSuper:
                 final args = settings.arguments as Map<String, dynamic>;
-                final provider = args['selectedProvider'] as UserModel;
-                final clientPosition = args['clientPosition'] as LatLng?;
+                final provider =
+                    args[ShowSuperNavigationKeys.selectedProvider] as UserModel;
+                final clientPosition =
+                    args[ShowSuperNavigationKeys.clientPosition] as LatLng?;
                 return MaterialPageRoute(
                   builder:
                       (context) => ShowSuper(
@@ -86,9 +91,12 @@ class Serviexpress extends StatelessWidget {
                 );
               case AppRoutes.providerDetails:
                 final args = settings.arguments as Map<String, dynamic>;
-                final mapStyle = args['mapStyle'] as String;
-                final service = args['service'] as ServiceComplete;
-                final position = args['position'] as LatLng?;
+                final mapStyle =
+                    args[ShowSuperNavigationKeys.mapStyle] as String;
+                final service =
+                    args[ShowSuperNavigationKeys.service] as ServiceComplete;
+                final position =
+                    args[ShowSuperNavigationKeys.position] as LatLng?;
                 return MaterialPageRoute(
                   builder:
                       (context) => ProviderDetails(
@@ -99,9 +107,12 @@ class Serviexpress extends StatelessWidget {
                 );
               case AppRoutes.clientDetails:
                 final args = settings.arguments as Map<String, dynamic>;
-                final mapStyle = args['mapStyle'] as String;
-                final provider = args['selectedProvider'] as UserModel;
-                final clientPosition = args['clientPosition'] as LatLng?;
+                final mapStyle =
+                    args[ShowSuperNavigationKeys.mapStyle] as String;
+                final provider =
+                    args[ShowSuperNavigationKeys.selectedProvider] as UserModel;
+                final clientPosition =
+                    args[ShowSuperNavigationKeys.clientPosition] as LatLng?;
                 return MaterialPageRoute(
                   builder:
                       (context) => ClientDetails(

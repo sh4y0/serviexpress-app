@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:serviexpress_app/core/theme/app_color.dart';
 import 'package:serviexpress_app/core/utils/loading_screen.dart';
 import 'package:serviexpress_app/data/repositories/user_repository.dart';
+import 'package:serviexpress_app/presentation/resources/constants/widgets/terms_conditions_string.dart';
 import 'package:signature/signature.dart';
 
 class TerminosCondiciones extends StatefulWidget {
@@ -66,7 +67,8 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                               ),
                               const Expanded(
                                 child: Text(
-                                  "Aceptar términos y condiciones",
+                                  TermsConditionsString
+                                      .acceptTermsAndConditions,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -116,7 +118,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                                         )
                                         : const Center(
                                           child: Text(
-                                            "Toca para firmar",
+                                            TermsConditionsString.touchToSign,
                                             style: TextStyle(
                                               color: Colors.white,
                                             ),
@@ -137,7 +139,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                                   backgroundColor: Colors.green,
                                   duration: Duration(seconds: 1),
                                   content: Text(
-                                    "Firma eliminada",
+                                    TermsConditionsString.signatureDeleted,
                                     style: TextStyle(color: Colors.white),
                                     textAlign: TextAlign.center,
                                   ),
@@ -200,7 +202,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                               backgroundColor: Colors.red,
                               duration: Duration(seconds: 1),
                               content: Text(
-                                "Debes aceptar los términos para continuar.",
+                                TermsConditionsString.mustAcceptTerms,
                                 style: TextStyle(color: Colors.white),
                                 textAlign: TextAlign.center,
                               ),
@@ -209,7 +211,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                         }
                       },
                       child: const Text(
-                        "Aceptar",
+                        TermsConditionsString.accept,
                         style: TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
@@ -239,7 +241,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
           child: Column(
             children: [
               const Text(
-                "Términos y Condiciones",
+                TermsConditionsString.termsAndConditions,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 30,
@@ -250,7 +252,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
               const Expanded(
                 child: SingleChildScrollView(
                   child: Text(
-                    "Lorem ipsum dolor sit amet consectetur. Egestas rhoncus pellentesque tristique tellus et sodales turpis eget sit. Vitae ut id varius ultricies feugiat venenatis. Quam dui tortor vitae et in ac consequat. Malesuada tincidunt in scelerisque in id laoreet ligula integer. Sed diam mattis maecenas enim habitant. Ullamcorper tortor vel eleifend sagittis. Fames blandit ultricies sed et. Lorem ipsum dolor sit amet consectetur. Egestas rhoncus pellentesque tristique tellus et sodales turpis eget sit. Vitae ut id varius ultricies feugiat venenatis. Quam dui tortor vitae et in ac consequat. Malesuada tincidunt in scelerisque in id laoreet ligula integer. Sed diam mattis maecenas enim habitant. Ullamcorper tortor vel eleifend sagittis. Fames blandit ultricies sed et. Lorem ipsum dolor sit amet consectetur. Egestas rhoncus pellentesque tristique tellus et sodales turpis eget sit. Vitae ut id varius ultricies feugiat venenatis. Quam dui tortor vitae et in ac consequat. Malesuada tincidunt in scelerisque in id laoreet ligula integer. Sed diam mattis maecenas enim habitant. Ullamcorper tortor vel eleifend sagittis. Fames blandit ultricies sed et.",
+                    TermsConditionsString.termsAndConditionsDescription,
                     style: TextStyle(color: AppColor.textWelcome, fontSize: 14),
                     textAlign: TextAlign.justify,
                   ),
@@ -262,7 +264,7 @@ class _TerminosCondicionesState extends State<TerminosCondiciones> {
                 ),
                 onPressed: _mostrarOpciones,
                 child: const Text(
-                  "Presiona aquí para firmar",
+                  TermsConditionsString.pressHereToSign,
                   style: TextStyle(color: AppColor.btnColor, fontSize: 15),
                 ),
               ),
@@ -309,7 +311,7 @@ class _FirmarState extends State<Firmar> {
         backgroundColor: Colors.red,
         duration: Duration(seconds: 1),
         content: Text(
-          "Por favor, firma antes de continuar.",
+          TermsConditionsString.pleaseSignBeforeContinue,
           style: TextStyle(color: Colors.white),
           textAlign: TextAlign.center,
         ),
@@ -338,7 +340,7 @@ class _FirmarState extends State<Firmar> {
           style: IconButton.styleFrom(backgroundColor: AppColor.bgBack),
         ),
         title: const Text(
-          "Firma aquí",
+          TermsConditionsString.signHere,
           style: TextStyle(color: Colors.white, fontSize: 17),
         ),
         centerTitle: true,
@@ -375,7 +377,7 @@ class _FirmarState extends State<Firmar> {
               ElevatedButton(
                 onPressed: _guardarFirma,
                 child: const Text(
-                  "Aceptar",
+                  TermsConditionsString.accept,
                   style: TextStyle(color: Colors.white, fontSize: 15),
                 ),
               ),
